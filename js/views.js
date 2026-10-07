@@ -26,8 +26,10 @@ function evRow(e, { showDate = true, showCountdown = false } = {}) {
   </div>`;
 }
 
+// 行事曆裡混有待辦（kind: 'todo'），用待辦的樣式畫
+const row = (e, opts) => (e.kind === 'todo' ? todoRow(e.src, opts) : evRow(e, opts));
 const list = (items, opts, emptyText) =>
-  items.length ? items.map(e => evRow(e, opts)).join('') : `<div class="empty">${emptyText}</div>`;
+  items.length ? items.map(e => row(e, opts)).join('') : `<div class="empty">${emptyText}</div>`;
 
 function topicPct(t) {
   const g = t.goals || [];
@@ -76,15 +78,16 @@ export function renderHome(s) {
 }
 
 // ---------- 行事曆 ----------
-function byDate(events) {
+function byDate(events, todos = []) {
   const m = {};
-  for (const e of events) (m[e.date] ||= []).push(e);
+  const items = [...events, ...todos.filter(x => x.due).map(x => ({ kind: 'todo', id: x.id, title: x.title, date: x.due, time: '', done: x.done, type: x.type, src: x }))];
+  for (const e of items) (m[e.date] ||= []).push(e);
   for (const k in m) m[k].sort(byDateTime);
   return m;
 }
 
 export function renderCalendar(s) {
-  const map = byDate(s.state.events);
+  const map = byDate(s.state.events, s.state.todos);
   const head = `<div class="page-head"><h1>行事曆</h1>
     <div class="seg"><button data-action="cal-mode" data-mode="month" class="${ui.calMode === 'month' ? 'on' : ''}">月</button><button data-action="cal-mode" data-mode="week" class="${ui.calMode === 'week' ? 'on' : ''}">週</button></div></div>`;
   return head + (ui.calMode === 'month' ? monthView(map) : weekView(map));
@@ -105,7 +108,7 @@ function monthView(map) {
     const evs = map[ds] || [];
     const other = parseYmd(ds).getMonth() !== m;
     const chips = evs.slice(0, maxChips).map(e =>
-      `<div class="chip ${e.done ? 'done' : ''}" style="background:${(TYPES[e.type] || TYPES.other).color}">${esc(e.title)}</div>`).join('');
+      `<div class="chip ${e.done ? 'done' : ''} ${e.kind === 'todo' ? 'todo' : ''}" style="background:${(TYPES[e.type] || TYPES.other).color}">${esc(e.title)}</div>`).join('');
     const more = evs.length > maxChips ? `<div class="more">+${evs.length - maxChips}</div>` : '';
     cells += `<div class="day ${other ? 'other' : ''} ${ds === t ? 'today' : ''} ${ds === ui.selDay ? 'sel' : ''}" data-action="pick-day" data-date="${ds}">
       <div class="num">${parseYmd(ds).getDate()}</div>${chips}${more}</div>`;
@@ -122,7 +125,8 @@ function monthView(map) {
     <div class="month">${cells}</div>
     <section class="card" style="margin-top:14px">
       <div class="row" style="margin-bottom:6px"><h2 style="margin:0">${fmtDate(ui.selDay)}</h2><span class="spacer"></span>
-        <button class="btn small" data-action="new-event" data-date="${ui.selDay}">＋ 新增</button></div>
+        <button class="btn small" data-action="new-todo" data-date="${ui.selDay}">＋ 待辦</button>
+        <button class="btn small" data-action="new-event" data-date="${ui.selDay}">＋ 行程</button></div>
       ${list(sel, { showDate: false, showCountdown: true }, '這天沒有安排')}
     </section>`;
 }
@@ -138,7 +142,7 @@ function weekView(map) {
     const evs = map[ds] || [];
     days += `<div class="wday ${ds === t ? 'today' : ''}">
       <div class="whead"><span>${fmtDate(ds)}</span><button class="add" data-action="new-event" data-date="${ds}" aria-label="新增">＋</button></div>
-      ${evs.map(e => evRow(e, { showDate: false })).join('')}
+      ${evs.map(e => row(e, { showDate: false })).join('')}
     </div>`;
   }
   return `<div class="cal-head">
@@ -164,10 +168,10 @@ export function shiftMonth(dir) {
 const byDue = (a, b) =>
   (a.due ? 0 : 1) - (b.due ? 0 : 1) || (a.due || '').localeCompare(b.due || '') || (a.createdAt || 0) - (b.createdAt || 0);
 
-function todoRow(x) {
+function todoRow(x, { showDate = true } = {}) {
   const ty = TYPES[x.type] || TYPES.other;
   const cd = x.due && !x.done ? countdown(x.due) : null;
-  const meta = [ty.label, x.due ? fmtDate(x.due) : '', x.note ? '📝' : ''].filter(Boolean).join(' · ');
+  const meta = ['待辦', ty.label, x.due && showDate ? fmtDate(x.due) : '', x.note ? '📝' : ''].filter(Boolean).join(' · ');
   return `<div class="ev ${x.done ? 'done' : ''}" data-action="edit-todo" data-id="${x.id}">
     <button class="check ${x.done ? 'on' : ''}" data-action="toggle-todo" data-id="${x.id}" aria-label="完成">${x.done ? '✓' : ''}</button>
     <span class="bar" style="background:${ty.color}"></span>

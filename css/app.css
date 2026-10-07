@@ -260,3 +260,6 @@ textarea { resize: vertical; min-height: 70px; }
 
 .bg-colors button { box-shadow: 0 0 0 1px var(--line); }
 input[type=color] { width: 40px; height: 30px; padding: 0; border: 1px solid var(--line); border-radius: 8px; background: none; cursor: pointer; }
+/* 行事曆上的待辦：前面加勾勾框，和行程區分 */
+.chip.todo::before { content: '☐ '; }
+.chip.todo.done::before { content: '☑ '; }

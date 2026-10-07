@@ -162,6 +162,7 @@ const actions = {
 
   'edit-todo': el => { const x = findTodo(el.dataset.id); if (x) openTodoSheet(x); },
   'toggle-todo': el => { const x = findTodo(el.dataset.id); if (x) saveTodo({ ...x, done: !x.done }); },
+  'new-todo': el => openTodoSheet({ due: el.dataset.date || '' }),
   'todo-filter': el => { ui.todoFilter = el.dataset.type; render(); },
   'todo-show-done': () => { ui.showDoneTodos = !ui.showDoneTodos; render(); },
   'delete-todo': () => {
