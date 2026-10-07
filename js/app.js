@@ -509,7 +509,9 @@ document.addEventListener('change', async ev => {
   if (!['import', 'merge'].includes(el.dataset.action) || !el.files?.[0]) return;
   try {
     const obj = JSON.parse(await el.files[0].text());
-    if (el.dataset.action === 'merge') {
+    // 不是完整備份（例如課表檔）時，按「匯入備份」也當成「加入檔案」，不會覆蓋
+    const partial = !Array.isArray(obj.events) || !Array.isArray(obj.topics);
+    if (el.dataset.action === 'merge' || partial) {
       const parts = [['events', '個行程'], ['todos', '個待辦'], ['courses', '門課'], ['topics', '個主題'], ['sessions', '筆讀書紀錄']]
         .filter(([k]) => obj[k]?.length).map(([k, l]) => `${obj[k].length} ${l}`);
       if (!parts.length) { toast('檔案裡沒有可以加入的資料'); return; }
@@ -518,7 +520,6 @@ document.addEventListener('change', async ev => {
       toast('已加入');
       return;
     }
-    if (!Array.isArray(obj.events) || !Array.isArray(obj.topics)) { toast('這不是完整備份，請改按「加入檔案」'); return; }
     if (!confirm(`匯入 ${obj.events.length} 個行程、${obj.topics.length} 個主題？目前的資料會被覆蓋。`)) return;
     await importData(obj);
     toast('匯入完成');
