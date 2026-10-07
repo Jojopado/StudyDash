@@ -2,16 +2,17 @@
 import { firebaseConfig } from './firebase-config.js';
 
 const LS_KEY = 'studydash.v1';
-const COLS = ['events', 'topics', 'todos'];
+const COLS = ['events', 'topics', 'todos', 'courses', 'sessions'];
 const PREFS_KEY = 'studydash.prefs';
-const EMPTY = () => ({ events: [], topics: [], todos: [] });
+const EMPTY = () => Object.fromEntries(COLS.map(c => [c, []]));
+const pick = data => Object.fromEntries(COLS.map(c => [c, data[c] || []]));
 const FB_VER = '10.12.2';
 
 const listeners = new Set();
 let backend = null;
 
 export const store = {
-  state: { events: [], topics: [], todos: [] },
+  state: EMPTY(),
   prefs: readPrefs(),     // { bg } 外觀設定，登入後跟著帳號同步
   mode: 'local',          // 'local' | 'cloud'
   user: null,             // { email, uid } when signed in
@@ -22,7 +23,7 @@ export const store = {
 export function subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); }
 function emit() { for (const fn of listeners) fn(store); }
 function setData(data) {
-  store.state = { events: data.events || [], topics: data.topics || [], todos: data.todos || [] };
+  store.state = pick(data);
   store.ready = true;
   emit();
 }
@@ -34,7 +35,7 @@ export function newId() {
 
 // ---------- 本機 ----------
 function readLocal() {
-  try { return JSON.parse(localStorage.getItem(LS_KEY)) || EMPTY(); }
+  try { return pick(JSON.parse(localStorage.getItem(LS_KEY)) || {}); }
   catch { return EMPTY(); }
 }
 function writeLocal(data) {
@@ -56,7 +57,7 @@ function localBackend() {
       commit();
     },
     remove(col, id) { data[col] = (data[col] || []).filter(d => d.id !== id); commit(); },
-    async replaceAll(next) { data = { events: next.events || [], topics: next.topics || [], todos: next.todos || [] }; commit(); },
+    async replaceAll(next) { data = pick(next); commit(); },
     putPrefs() { /* 本機模式只存 localStorage */ },
   };
 }
@@ -185,6 +186,10 @@ export function saveTopic(t) { backend.put('topics', { ...t, updatedAt: Date.now
 export function deleteTopic(id) { backend.remove('topics', id); }
 export function saveTodo(t) { backend.put('todos', { ...t, updatedAt: Date.now() }); }
 export function deleteTodo(id) { backend.remove('todos', id); }
+export function saveCourse(c) { backend.put('courses', { ...c, updatedAt: Date.now() }); }
+export function deleteCourse(id) { backend.remove('courses', id); }
+export function saveSession(x) { backend.put('sessions', { ...x, updatedAt: Date.now() }); }
+export function deleteSession(id) { backend.remove('sessions', id); }
 
 // ---------- 外觀設定 ----------
 function readPrefs() {
@@ -211,4 +216,6 @@ export function mergeData(obj) {
   for (const e of obj.events || []) saveEvent(e);
   for (const t of obj.topics || []) saveTopic(t);
   for (const t of obj.todos || []) saveTodo(t);
+  for (const c of obj.courses || []) saveCourse(c);
+  for (const x of obj.sessions || []) saveSession(x);
 }
