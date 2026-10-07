@@ -1,9 +1,9 @@
 import {
-  store, subscribe, initStore, newId, saveEvent, deleteEvent, saveTopic, deleteTopic,
+  store, subscribe, initStore, newId, saveEvent, deleteEvent, saveTopic, deleteTopic, saveTodo, deleteTodo, savePrefs,
   exportData, importData, mergeData, login, signup, logout,
 } from './store.js';
-import { TYPES, TOPIC_COLORS, today, addDays, esc } from './util.js';
-import { ui, renderHome, renderCalendar, renderStudy, renderSettings, shiftMonth } from './views.js';
+import { TYPES, TOPIC_COLORS, BG_PRESETS, isLight, today, addDays, esc } from './util.js';
+import { ui, renderHome, renderCalendar, renderTodo, renderStudy, renderSettings, shiftMonth } from './views.js';
 
 const $ = sel => document.querySelector(sel);
 const view = $('#view');
@@ -11,11 +11,20 @@ const fab = $('#fab');
 const backdrop = $('#sheet-backdrop');
 const sheet = $('#sheet');
 
-const ROUTES = { home: renderHome, calendar: renderCalendar, study: renderStudy, settings: renderSettings };
+const ROUTES = { home: renderHome, calendar: renderCalendar, todo: renderTodo, study: renderStudy, settings: renderSettings };
 const route = () => (location.hash.slice(1) in ROUTES ? location.hash.slice(1) : 'home');
 
 // ---------- 畫面 ----------
+function applyBg() {
+  const bg = store.prefs.bg || BG_PRESETS[0];
+  const root = document.documentElement;
+  root.style.setProperty('--bg', bg);
+  root.classList.toggle('light', isLight(bg));
+  document.querySelector('meta[name=theme-color]')?.setAttribute('content', bg);
+}
+
 function render() {
+  applyBg();
   const r = route();
   // 重畫時保留正在輸入的欄位（例如另一台裝置同步進來時）
   const active = document.activeElement;
@@ -85,6 +94,26 @@ function openEventSheet(ev) {
   if (isNew) sheet.querySelector('[name=title]').focus();
 }
 
+function openTodoSheet(td) {
+  const isNew = !td.id;
+  const x = { id: newId(), title: '', type: 'homework', due: '', note: '', done: false, createdAt: Date.now(), ...td };
+  openSheet(`<h2>${isNew ? '新增待辦' : '編輯待辦'}</h2>
+    <form data-form="todo">
+      <label class="field"><span>要做什麼</span><input type="text" name="title" value="${esc(x.title)}" placeholder="例如：DSP 第 3 章習題" required autocomplete="off"></label>
+      <div class="field"><span>類型</span><div class="chips" id="type-chips">${typeChips(x.type)}</div></div>
+      <label class="field"><span>期限（可不填）</span><input type="date" name="due" value="${x.due || ''}"></label>
+      <label class="field"><span>備註</span><textarea name="note" placeholder="繳交方式、頁數、連結…">${esc(x.note)}</textarea></label>
+      <label class="row"><input type="checkbox" name="done" ${x.done ? 'checked' : ''}> 已完成</label>
+      <div class="actions">
+        ${isNew ? '' : '<button type="button" class="btn danger" data-action="delete-todo">刪除</button>'}
+        <span class="spacer"></span>
+        <button type="button" class="btn" data-action="close-sheet">取消</button>
+        <button type="submit" class="btn primary">儲存</button>
+      </div>
+    </form>`, { kind: 'todo', data: x });
+  if (isNew) sheet.querySelector('[name=title]').focus();
+}
+
 function colorChips(cur) {
   return TOPIC_COLORS.map(c => `<button type="button" data-action="pick-color" data-color="${c}" class="${c === cur ? 'on' : ''}" style="background:${c}" aria-label="${c}"></button>`).join('');
 }
@@ -111,6 +140,7 @@ function openTopicSheet(tp) {
 // ---------- 點擊 ----------
 const findEvent = id => store.state.events.find(e => e.id === id);
 const findTopic = id => store.state.topics.find(t => t.id === id);
+const findTodo = id => store.state.todos.find(t => t.id === id);
 
 const actions = {
   'edit-event': el => { const e = findEvent(el.dataset.id); if (e) openEventSheet(e); },
@@ -129,6 +159,15 @@ const actions = {
     render();
   },
   'cal-today': () => { ui.selDay = today(); ui.month = today().slice(0, 8) + '01'; render(); },
+
+  'edit-todo': el => { const x = findTodo(el.dataset.id); if (x) openTodoSheet(x); },
+  'toggle-todo': el => { const x = findTodo(el.dataset.id); if (x) saveTodo({ ...x, done: !x.done }); },
+  'todo-filter': el => { ui.todoFilter = el.dataset.type; render(); },
+  'todo-show-done': () => { ui.showDoneTodos = !ui.showDoneTodos; render(); },
+  'delete-todo': () => {
+    if (confirm(`刪除「${sheetCtx.data.title}」？`)) { deleteTodo(sheetCtx.data.id); closeSheet(); toast('已刪除'); }
+  },
+  'pick-bg': el => savePrefs({ bg: el.dataset.color }),
 
   'new-topic': () => openTopicSheet({}),
   'edit-topic': el => { const t = findTopic(el.dataset.id); if (t) openTopicSheet(t); },
@@ -189,6 +228,7 @@ document.addEventListener('click', ev => {
 
 fab.addEventListener('click', () => {
   if (route() === 'study') openTopicSheet({});
+  else if (route() === 'todo') openTodoSheet({ type: ui.todoFilter === 'all' ? 'homework' : ui.todoFilter });
   else openEventSheet({ date: route() === 'calendar' ? ui.selDay : today() });
 });
 
@@ -219,6 +259,18 @@ document.addEventListener('submit', async ev => {
     saveEvent(e);
     closeSheet();
     toast('已儲存');
+  } else if (kind === 'todo') {
+    const title = (f.title || '').trim();
+    if (!title) return;
+    saveTodo({ ...sheetCtx.data, title, due: f.due || '', note: (f.note || '').trim(), done: !!f.done });
+    closeSheet();
+    toast('已儲存');
+  } else if (kind === 'add-todo') {
+    const title = (f.title || '').trim();
+    if (!title) return;
+    saveTodo({ id: newId(), title, type: ui.todoFilter === 'all' ? 'homework' : ui.todoFilter, due: '', note: '', done: false, createdAt: Date.now() });
+    const input = view.querySelector('form[data-form="add-todo"] [name=title]');
+    if (input) { input.value = ''; input.focus(); }
   } else if (kind === 'topic') {
     const name = (f.name || '').trim();
     if (!name) return;
@@ -246,12 +298,13 @@ document.addEventListener('submit', async ev => {
 
 document.addEventListener('change', async ev => {
   const el = ev.target;
+  if (el.dataset.action === 'custom-bg') { savePrefs({ bg: el.value }); return; }
   if (!['import', 'merge'].includes(el.dataset.action) || !el.files?.[0]) return;
   try {
     const obj = JSON.parse(await el.files[0].text());
     if (el.dataset.action === 'merge') {
-      const n = (obj.events?.length || 0) + (obj.topics?.length || 0);
-      if (!confirm(`加入 ${obj.events?.length ?? 0} 個行程、${obj.topics?.length ?? 0} 個主題？原本的資料不會被刪。`)) return;
+      const n = (obj.events?.length || 0) + (obj.topics?.length || 0) + (obj.todos?.length || 0);
+      if (!confirm(`加入 ${obj.events?.length ?? 0} 個行程、${obj.todos?.length ?? 0} 個待辦、${obj.topics?.length ?? 0} 個主題？原本的資料不會被刪。`)) return;
       mergeData(obj);
       toast(`已加入 ${n} 筆`);
       return;

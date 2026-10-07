@@ -2,14 +2,17 @@
 import { firebaseConfig } from './firebase-config.js';
 
 const LS_KEY = 'studydash.v1';
-const COLS = ['events', 'topics'];
+const COLS = ['events', 'topics', 'todos'];
+const PREFS_KEY = 'studydash.prefs';
+const EMPTY = () => ({ events: [], topics: [], todos: [] });
 const FB_VER = '10.12.2';
 
 const listeners = new Set();
 let backend = null;
 
 export const store = {
-  state: { events: [], topics: [] },
+  state: { events: [], topics: [], todos: [] },
+  prefs: readPrefs(),     // { bg } 外觀設定，登入後跟著帳號同步
   mode: 'local',          // 'local' | 'cloud'
   user: null,             // { email, uid } when signed in
   cloudAvailable: !!firebaseConfig,
@@ -19,7 +22,7 @@ export const store = {
 export function subscribe(fn) { listeners.add(fn); return () => listeners.delete(fn); }
 function emit() { for (const fn of listeners) fn(store); }
 function setData(data) {
-  store.state = { events: data.events || [], topics: data.topics || [] };
+  store.state = { events: data.events || [], topics: data.topics || [], todos: data.todos || [] };
   store.ready = true;
   emit();
 }
@@ -31,8 +34,8 @@ export function newId() {
 
 // ---------- 本機 ----------
 function readLocal() {
-  try { return JSON.parse(localStorage.getItem(LS_KEY)) || { events: [], topics: [] }; }
-  catch { return { events: [], topics: [] }; }
+  try { return JSON.parse(localStorage.getItem(LS_KEY)) || EMPTY(); }
+  catch { return EMPTY(); }
 }
 function writeLocal(data) {
   try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch { /* 空間不足或隱私模式 */ }
@@ -53,7 +56,8 @@ function localBackend() {
       commit();
     },
     remove(col, id) { data[col] = (data[col] || []).filter(d => d.id !== id); commit(); },
-    async replaceAll(next) { data = { events: next.events || [], topics: next.topics || [] }; commit(); },
+    async replaceAll(next) { data = { events: next.events || [], topics: next.topics || [], todos: next.todos || [] }; commit(); },
+    putPrefs() { /* 本機模式只存 localStorage */ },
   };
 }
 
@@ -80,7 +84,7 @@ async function loadFirebase() {
 function cloudBackend(uid) {
   const { db, fsMod } = fb;
   const { collection, doc, setDoc, deleteDoc, onSnapshot, writeBatch, getDocs } = fsMod;
-  const cur = { events: [], topics: [] };
+  const cur = EMPTY();
   const unsubs = [];
   const colRef = col => collection(db, 'users', uid, col);
   return {
@@ -91,10 +95,14 @@ function cloudBackend(uid) {
           setData(cur);
         }, err => console.error('snapshot', col, err)));
       }
+      unsubs.push(onSnapshot(doc(db, 'users', uid, 'prefs', 'ui'), snap => {
+        if (snap.exists()) setPrefs(snap.data(), false);
+      }, err => console.error('snapshot prefs', err)));
     },
     stop() { unsubs.forEach(u => u()); },
     put(col, d) { setDoc(doc(db, 'users', uid, col, d.id), d).catch(e => console.error(e)); },
     remove(col, id) { deleteDoc(doc(db, 'users', uid, col, id)).catch(e => console.error(e)); },
+    putPrefs(p) { setDoc(doc(db, 'users', uid, 'prefs', 'ui'), p).catch(e => console.error(e)); },
     async replaceAll(next) {
       // Firestore 一個 batch 上限 500 筆，分批寫
       const ops = [];
@@ -140,9 +148,9 @@ export async function initStore() {
         const cloud = cloudBackend(user.uid);
         // 登入前在本機新增的資料一併搬上雲端，然後清掉本機那份
         const local = readLocal();
-        if ((local.events?.length || 0) + (local.topics?.length || 0) > 0) {
+        if (COLS.some(c => local[c]?.length)) {
           await cloud.mergeIn(local);
-          writeLocal({ events: [], topics: [] });
+          writeLocal(EMPTY());
         }
         useBackend(cloud, 'cloud');
       } else {
@@ -175,6 +183,20 @@ export function saveEvent(ev) { backend.put('events', { ...ev, updatedAt: Date.n
 export function deleteEvent(id) { backend.remove('events', id); }
 export function saveTopic(t) { backend.put('topics', { ...t, updatedAt: Date.now() }); }
 export function deleteTopic(id) { backend.remove('topics', id); }
+export function saveTodo(t) { backend.put('todos', { ...t, updatedAt: Date.now() }); }
+export function deleteTodo(id) { backend.remove('todos', id); }
+
+// ---------- 外觀設定 ----------
+function readPrefs() {
+  try { return JSON.parse(localStorage.getItem(PREFS_KEY)) || {}; } catch { return {}; }
+}
+function setPrefs(p, upload) {
+  store.prefs = { ...p };
+  try { localStorage.setItem(PREFS_KEY, JSON.stringify(store.prefs)); } catch { /* ignore */ }
+  if (upload) backend.putPrefs(store.prefs);
+  emit();
+}
+export function savePrefs(patch) { setPrefs({ ...store.prefs, ...patch, updatedAt: Date.now() }, true); }
 
 export function exportData() {
   return { app: 'studydash', version: 1, exportedAt: new Date().toISOString(), ...store.state };
@@ -185,7 +207,8 @@ export async function importData(obj) {
 }
 // 只新增／覆寫同 id 的項目，不刪其他資料
 export function mergeData(obj) {
-  if (!obj || (!Array.isArray(obj.events) && !Array.isArray(obj.topics))) throw new Error('檔案格式不對');
+  if (!obj || !COLS.some(c => Array.isArray(obj[c]))) throw new Error('檔案格式不對');
   for (const e of obj.events || []) saveEvent(e);
   for (const t of obj.topics || []) saveTopic(t);
+  for (const t of obj.todos || []) saveTodo(t);
 }

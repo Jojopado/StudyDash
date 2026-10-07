@@ -11,6 +11,17 @@ export const DEADLINE_TYPES = ['exam', 'report', 'homework'];
 
 export const TOPIC_COLORS = ['#4ade80', '#60a5fa', '#c084fc', '#fbbf24', '#f87171', '#2dd4bf', '#f472b6', '#94a3b8'];
 
+// 設定頁的背景色預設（第一個是原本的深色）
+export const BG_PRESETS = ['#0f1115', '#0b1a2e', '#102018', '#1f1029', '#2a1414', '#1c1917', '#334155', '#f5f5f4', '#fdf2f8', '#ecfeff'];
+
+// 背景太亮時要把文字和卡片換成淺色主題
+export function isLight(hex) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex || '');
+  if (!m) return false;
+  const n = parseInt(m[1], 16);
+  return (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) > 150;
+}
+
 export const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
 
 const pad = n => String(n).padStart(2, '0');

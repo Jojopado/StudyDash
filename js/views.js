@@ -1,6 +1,6 @@
 import {
   TYPES, DEADLINE_TYPES, WEEKDAYS, today, addDays, parseYmd, ymd, daysUntil,
-  fmtDate, countdown, byDateTime, esc, mdLite,
+  fmtDate, countdown, byDateTime, esc, mdLite, BG_PRESETS,
 } from './util.js';
 
 // 畫面狀態（不存檔）
@@ -8,6 +8,8 @@ export const ui = {
   calMode: 'month',   // 'month' | 'week'
   month: today().slice(0, 8) + '01',
   selDay: today(),
+  todoFilter: 'all',  // 'all' | TYPES 的 key
+  showDoneTodos: false,
 };
 
 const isWide = () => matchMedia('(min-width: 900px)').matches;
@@ -48,6 +50,7 @@ export function renderHome(s) {
     .sort(byDateTime).slice(0, 10);
   const week = evs.filter(e => { const n = daysUntil(e.date); return n >= 1 && n <= 7; }).sort(byDateTime);
   const topics = [...s.state.topics].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+  const todos = s.state.todos.filter(x => !x.done).sort(byDue);
 
   return `${syncBanner(s)}
   <div class="page-head"><div>
@@ -57,6 +60,8 @@ export function renderHome(s) {
   <div class="grid two">
     <section class="card"><h2>⏳ 倒數</h2>${list(deadlines, { showCountdown: true }, '沒有待完成的考試／報告／作業 🎉')}</section>
     <section class="card"><h2>☀️ 今天</h2>${list(todays, { showDate: false }, '今天沒有安排')}</section>
+    <section class="card"><h2>✅ 待辦 <a href="#todo" class="sub" style="font-weight:400">（${todos.length} 件）全部 ›</a></h2>${
+      todos.length ? todos.slice(0, 6).map(todoRow).join('') : '<div class="empty">沒有待辦事項</div>'}</section>
     <section class="card"><h2>🗓️ 接下來 7 天</h2>${list(week, {}, '這週沒有其他事')}</section>
     <section class="card"><h2>📚 自學進度</h2>${
       topics.length ? topics.map(tp => {
@@ -154,6 +159,48 @@ export function shiftMonth(dir) {
   ui.selDay = ui.month.slice(0, 7) === today().slice(0, 7) ? today() : ui.month;
 }
 
+// ---------- 待辦 ----------
+// 有期限的排前面（越早越前），沒期限的照新增順序排後面
+const byDue = (a, b) =>
+  (a.due ? 0 : 1) - (b.due ? 0 : 1) || (a.due || '').localeCompare(b.due || '') || (a.createdAt || 0) - (b.createdAt || 0);
+
+function todoRow(x) {
+  const ty = TYPES[x.type] || TYPES.other;
+  const cd = x.due && !x.done ? countdown(x.due) : null;
+  const meta = [ty.label, x.due ? fmtDate(x.due) : '', x.note ? '📝' : ''].filter(Boolean).join(' · ');
+  return `<div class="ev ${x.done ? 'done' : ''}" data-action="edit-todo" data-id="${x.id}">
+    <button class="check ${x.done ? 'on' : ''}" data-action="toggle-todo" data-id="${x.id}" aria-label="完成">${x.done ? '✓' : ''}</button>
+    <span class="bar" style="background:${ty.color}"></span>
+    <div class="main"><div class="title">${esc(x.title)}</div><div class="meta">${meta}</div></div>
+    ${cd ? `<span class="badge ${cd.cls}">${cd.text}</span>` : ''}
+  </div>`;
+}
+
+export function renderTodo(s) {
+  const f = ui.todoFilter;
+  const all = s.state.todos.filter(x => f === 'all' || x.type === f);
+  const open = all.filter(x => !x.done).sort(byDue);
+  const done = all.filter(x => x.done).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+  const count = k => s.state.todos.filter(x => !x.done && (k === 'all' || x.type === k)).length;
+  const chip = (k, label, color) => {
+    const n = count(k);
+    return `<button type="button" data-action="todo-filter" data-type="${k}" class="${k === f ? 'on' : ''}" style="${k === f && color ? `background:${color};border-color:${color}` : ''}">${label}${n ? ` ${n}` : ''}</button>`;
+  };
+  const addType = f === 'all' ? 'homework' : f;
+
+  return `<div class="page-head"><h1>待辦</h1></div>
+    <div class="chips" style="margin-bottom:12px">${chip('all', '全部')}${Object.entries(TYPES).map(([k, t]) => chip(k, t.label, t.color)).join('')}</div>
+    <section class="card">
+      <form class="add-goal" data-form="add-todo" style="margin:0 0 8px">
+        <input type="text" name="title" placeholder="新增${(TYPES[addType] || TYPES.other).label}待辦，例如：DSP 第 3 章習題" autocomplete="off">
+        <button class="btn" type="submit">加入</button>
+      </form>
+      ${open.length ? open.map(todoRow).join('') : '<div class="empty">沒有未完成的待辦 🎉</div>'}
+      ${done.length ? `<button class="btn small ghost" data-action="todo-show-done" style="margin-top:8px">${ui.showDoneTodos ? '隱藏' : '顯示'}已完成（${done.length}）</button>
+        ${ui.showDoneTodos ? done.map(todoRow).join('') : ''}` : ''}
+    </section>`;
+}
+
 // ---------- 自學 ----------
 export function renderStudy(s) {
   const topics = [...s.state.topics].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
@@ -217,9 +264,17 @@ export function renderSettings(s) {
       <label class="btn">匯入備份<input type="file" accept="application/json,.json" data-action="import" hidden></label>
       <label class="btn">加入檔案<input type="file" accept="application/json,.json" data-action="merge" hidden></label></div>
     </section>
+    <section class="card"><h2>🎨 背景顏色</h2>
+      <div class="colors bg-colors">${BG_PRESETS.map(c => `<button type="button" data-action="pick-bg" data-color="${c}" class="${c === (s.prefs.bg || BG_PRESETS[0]) ? 'on' : ''}" style="background:${c}" aria-label="${c}"></button>`).join('')}</div>
+      <div class="row" style="margin-top:10px">
+        <label class="row sub">自訂顏色 <input type="color" data-action="custom-bg" value="${esc(s.prefs.bg || BG_PRESETS[0])}"></label>
+        <span class="spacer"></span><button class="btn small" data-action="pick-bg" data-color="">恢復預設</button>
+      </div>
+      <div class="sub" style="margin-top:6px">登入後手機和電腦會用同一個背景。</div>
+    </section>
     <section class="card"><h2>📱 裝到 iPhone</h2>
       <div class="sub">用 <b>Safari</b> 打開這個網址 → 點下方「分享」⬆️ → 「加入主畫面」。之後從主畫面打開就是全螢幕 App。</div>
     </section>
-    <section class="card"><h2>ℹ️ 關於</h2><div class="sub">學習儀表板 v0.2 · ${s.mode === 'cloud' ? '雲端模式' : '本機模式'} · ${s.state.events.length} 個行程、${s.state.topics.length} 個自學主題</div></section>
+    <section class="card"><h2>ℹ️ 關於</h2><div class="sub">學習儀表板 v0.3 · ${s.mode === 'cloud' ? '雲端模式' : '本機模式'} · ${s.state.events.length} 個行程、${s.state.todos.length} 個待辦、${s.state.topics.length} 個自學主題</div></section>
   </div>`;
 }
