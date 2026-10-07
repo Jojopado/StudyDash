@@ -207,6 +207,9 @@ export function exportData() {
   return { app: 'studydash', version: 1, exportedAt: new Date().toISOString(), ...store.state };
 }
 export async function importData(obj) {
+  if (obj && COLS.some(c => Array.isArray(obj[c])) && (!Array.isArray(obj.events) || !Array.isArray(obj.topics))) {
+    throw new Error('這不是完整備份，請改按「加入檔案」');
+  }
   if (!obj || !Array.isArray(obj.events) || !Array.isArray(obj.topics)) throw new Error('檔案格式不對');
   await backend.replaceAll(obj);
 }

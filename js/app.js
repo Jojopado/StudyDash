@@ -518,7 +518,8 @@ document.addEventListener('change', async ev => {
       toast('已加入');
       return;
     }
-    if (!confirm(`匯入 ${obj.events?.length ?? 0} 個行程、${obj.topics?.length ?? 0} 個主題？目前的資料會被覆蓋。`)) return;
+    if (!Array.isArray(obj.events) || !Array.isArray(obj.topics)) { toast('這不是完整備份，請改按「加入檔案」'); return; }
+    if (!confirm(`匯入 ${obj.events.length} 個行程、${obj.topics.length} 個主題？目前的資料會被覆蓋。`)) return;
     await importData(obj);
     toast('匯入完成');
   } catch (e) {
