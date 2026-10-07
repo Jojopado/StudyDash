@@ -183,3 +183,9 @@ export async function importData(obj) {
   if (!obj || !Array.isArray(obj.events) || !Array.isArray(obj.topics)) throw new Error('檔案格式不對');
   await backend.replaceAll(obj);
 }
+// 只新增／覆寫同 id 的項目，不刪其他資料
+export function mergeData(obj) {
+  if (!obj || (!Array.isArray(obj.events) && !Array.isArray(obj.topics))) throw new Error('檔案格式不對');
+  for (const e of obj.events || []) saveEvent(e);
+  for (const t of obj.topics || []) saveTopic(t);
+}

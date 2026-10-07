@@ -1,6 +1,6 @@
 import {
   store, subscribe, initStore, newId, saveEvent, deleteEvent, saveTopic, deleteTopic,
-  exportData, importData, login, signup, logout,
+  exportData, importData, mergeData, login, signup, logout,
 } from './store.js';
 import { TYPES, TOPIC_COLORS, today, addDays, esc } from './util.js';
 import { ui, renderHome, renderCalendar, renderStudy, renderSettings, shiftMonth } from './views.js';
@@ -246,9 +246,16 @@ document.addEventListener('submit', async ev => {
 
 document.addEventListener('change', async ev => {
   const el = ev.target;
-  if (el.dataset.action !== 'import' || !el.files?.[0]) return;
+  if (!['import', 'merge'].includes(el.dataset.action) || !el.files?.[0]) return;
   try {
     const obj = JSON.parse(await el.files[0].text());
+    if (el.dataset.action === 'merge') {
+      const n = (obj.events?.length || 0) + (obj.topics?.length || 0);
+      if (!confirm(`加入 ${obj.events?.length ?? 0} 個行程、${obj.topics?.length ?? 0} 個主題？原本的資料不會被刪。`)) return;
+      mergeData(obj);
+      toast(`已加入 ${n} 筆`);
+      return;
+    }
     if (!confirm(`匯入 ${obj.events?.length ?? 0} 個行程、${obj.topics?.length ?? 0} 個主題？目前的資料會被覆蓋。`)) return;
     await importData(obj);
     toast('匯入完成');

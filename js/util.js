@@ -41,3 +41,30 @@ export const byDateTime = (a, b) =>
 export function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
+
+// 備註用的迷你 Markdown：| 表格 |、**粗體**、## 標題、- 清單；其他照原樣換行
+export function mdLite(src) {
+  const inline = s => esc(s).replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
+  const cells = l => l.trim().replace(/^\||\|$/g, '').split('|').map(c => c.trim());
+  const lines = String(src ?? '').split('\n');
+  const out = [];
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i];
+    if (/^\s*\|/.test(l) && /^\s*\|[\s:|-]+\|\s*$/.test(lines[i + 1] || '')) {
+      const head = cells(l);
+      const rows = [];
+      i += 2;
+      while (i < lines.length && /^\s*\|/.test(lines[i])) rows.push(cells(lines[i++]));
+      i--;
+      out.push(`<div class="md-table"><table><thead><tr>${head.map(h => `<th>${inline(h)}</th>`).join('')}</tr></thead><tbody>${
+        rows.map(r => `<tr>${r.map(c => `<td>${inline(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`);
+    } else if (/^#{1,3}\s/.test(l)) {
+      out.push(`<div class="md-h">${inline(l.replace(/^#+\s/, ''))}</div>`);
+    } else if (/^\s*-\s/.test(l)) {
+      out.push(`<div class="md-li">• ${inline(l.replace(/^\s*-\s/, ''))}</div>`);
+    } else {
+      out.push(l.trim() ? `<div>${inline(l)}</div>` : '<div class="md-gap"></div>');
+    }
+  }
+  return out.join('');
+}

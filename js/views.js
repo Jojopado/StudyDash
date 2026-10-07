@@ -1,6 +1,6 @@
 import {
   TYPES, DEADLINE_TYPES, WEEKDAYS, today, addDays, parseYmd, ymd, daysUntil,
-  fmtDate, countdown, byDateTime, esc,
+  fmtDate, countdown, byDateTime, esc, mdLite,
 } from './util.js';
 
 // 畫面狀態（不存檔）
@@ -172,7 +172,9 @@ export function renderStudy(s) {
         <div class="progress" style="flex:1"><div style="width:${p}%;background:${esc(t.color)}"></div></div>
         <span class="sub">${goals.filter(g => g.done).length}/${goals.length} · ${p}%</span>
       </div>
-      ${t.note ? `<div class="sub" style="margin-bottom:6px">${esc(t.note)}</div>` : ''}
+      ${!t.note ? '' : t.note.length > 160 || t.note.includes('|')
+        ? `<details class="note-box"><summary>📝 筆記</summary><div class="md">${mdLite(t.note)}</div></details>`
+        : `<div class="sub" style="margin-bottom:6px">${esc(t.note)}</div>`}
       ${goals.map(g => `<div class="goal ${g.done ? 'done' : ''}">
         <button class="check ${g.done ? 'on' : ''}" data-action="toggle-goal" data-id="${t.id}" data-goal="${g.id}" aria-label="完成">${g.done ? '✓' : ''}</button>
         <div class="text">${esc(g.text)}</div>
@@ -210,13 +212,14 @@ export function renderSettings(s) {
   <div class="grid two">
     <section class="card"><h2>☁️ 同步</h2>${sync}</section>
     <section class="card"><h2>💾 備份</h2>
-      <div class="sub" style="margin-bottom:10px">匯出成 JSON 檔，可以存到 iCloud 雲碟。匯入會<b>覆蓋</b>目前所有資料。</div>
+      <div class="sub" style="margin-bottom:10px">匯出成 JSON 檔，可以存到 iCloud 雲碟。「匯入備份」會<b>覆蓋</b>目前所有資料；「加入檔案」只新增，不動原本的資料。</div>
       <div class="row wrap"><button class="btn" data-action="export">匯出備份</button>
-      <label class="btn">匯入備份<input type="file" accept="application/json,.json" data-action="import" hidden></label></div>
+      <label class="btn">匯入備份<input type="file" accept="application/json,.json" data-action="import" hidden></label>
+      <label class="btn">加入檔案<input type="file" accept="application/json,.json" data-action="merge" hidden></label></div>
     </section>
     <section class="card"><h2>📱 裝到 iPhone</h2>
       <div class="sub">用 <b>Safari</b> 打開這個網址 → 點下方「分享」⬆️ → 「加入主畫面」。之後從主畫面打開就是全螢幕 App。</div>
     </section>
-    <section class="card"><h2>ℹ️ 關於</h2><div class="sub">學習儀表板 v0.1 · ${s.mode === 'cloud' ? '雲端模式' : '本機模式'} · ${s.state.events.length} 個行程、${s.state.topics.length} 個自學主題</div></section>
+    <section class="card"><h2>ℹ️ 關於</h2><div class="sub">學習儀表板 v0.2 · ${s.mode === 'cloud' ? '雲端模式' : '本機模式'} · ${s.state.events.length} 個行程、${s.state.topics.length} 個自學主題</div></section>
   </div>`;
 }
