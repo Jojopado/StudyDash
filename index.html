@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>學習儀表板</title>
+  <meta name="theme-color" content="#0f1115">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="學習儀表板">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-180.png">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <div class="layout">
+    <nav class="nav" id="nav">
+      <div class="brand">學習儀表板</div>
+      <a href="#home" data-tab="home"><span class="ico">🏠</span><span>首頁</span></a>
+      <a href="#calendar" data-tab="calendar"><span class="ico">📅</span><span>行事曆</span></a>
+      <a href="#study" data-tab="study"><span class="ico">📚</span><span>自學</span></a>
+      <a href="#settings" data-tab="settings"><span class="ico">⚙️</span><span>設定</span></a>
+    </nav>
+    <main id="view" class="view"></main>
+  </div>
+  <button class="fab" id="fab" aria-label="新增">＋</button>
+  <div class="sheet-backdrop" id="sheet-backdrop" hidden>
+    <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
+  </div>
+  <div class="toast" id="toast" hidden></div>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
