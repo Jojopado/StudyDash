@@ -5,7 +5,7 @@ import {
 } from './store.js';
 import { TYPES, TOPIC_COLORS, BG_PRESETS, isLight, today, addDays, ymd, esc } from './util.js';
 import {
-  ui, renderHome, renderCalendar, renderTodo, renderStudy, renderQuotes, renderSettings, shiftMonth, tickTimerView, subjectInfo,
+  ui, renderHome, renderCalendar, renderTodo, renderStudy, renderQuotes, renderSettings, shiftMonth, tickTimerView, tickWorkView, subjectInfo,
 } from './views.js';
 import { parseSlots, fmtSlots } from './courses.js';
 import * as T from './timer.js';
@@ -134,6 +134,7 @@ function openTodoSheet(td) {
         <div class="add-goal"><input type="text" id="step-input" placeholder="新增一個步驟，按 Enter 加入" autocomplete="off">
           <button type="button" class="btn" data-action="sheet-step-add">加入</button></div>
       </div>
+      <label class="field"><span>已花費（分鐘${x.workingSince ? '，不含正在計時的這段' : ''}）</span><input type="text" inputmode="numeric" name="spentMin" value="${Math.round((x.spentMs || 0) / 60000)}" autocomplete="off"></label>
       <label class="field"><span>備註</span><textarea name="note" placeholder="繳交方式、頁數、連結…">${esc(x.note)}</textarea></label>
       <label class="row"><input type="checkbox" name="done" ${x.done ? 'checked' : ''}> 已完成</label>
       <div class="actions">
@@ -220,6 +221,28 @@ function openSessionSheet() {
     </form>`, { kind: 'session' });
 }
 
+// ---------- 待辦計時 ----------
+// 作業／報告／考試／自學做的時間也算進讀書時數（課程有標就算那門課）
+const STUDY_TYPES = ['exam', 'report', 'homework', 'study'];
+
+// 停止計時：把這段時間加進 spentMs，patch 可以順便改其他欄位（例如 done）
+function stopWork(x, patch = {}) {
+  const ms = x.workingSince ? Math.max(0, Date.now() - x.workingSince) : 0;
+  const minutes = Math.floor(ms / 60000);
+  if (minutes >= 1 && STUDY_TYPES.includes(x.type)) {
+    saveSession({ id: newId(), date: today(), minutes, subject: x.courseId ? `c:${x.courseId}` : '', todoId: x.id, createdAt: Date.now() });
+  }
+  saveTodo({ ...x, spentMs: (x.spentMs || 0) + ms, workingSince: 0, ...patch });
+  return minutes;
+}
+
+// 一次只做一件：開始新的會先暫停其他正在計時的
+function startWork(x) {
+  for (const o of store.state.todos) if (o.workingSince && o.id !== x.id) stopWork(o);
+  saveTodo({ ...x, workingSince: Date.now() });
+  toast(`開始做：${x.title}`);
+}
+
 // ---------- 番茄鐘 ----------
 function recordFocus(minutes, endedAt = Date.now()) {
   if (minutes < 1) return;
@@ -239,8 +262,11 @@ function timerTick() {
   } else if (route() === 'study') {
     tickTimerView();
   }
+  tickWorkView();
 }
 setInterval(timerTick, 1000);
+
+const fmtSpent = ms => { const m = Math.floor(ms / 60000); return m >= 60 ? `${Math.floor(m / 60)} 小時 ${m % 60} 分` : `${m} 分`; };
 
 // ---------- 點擊 ----------
 const findEvent = id => store.state.events.find(e => e.id === id);
@@ -267,7 +293,19 @@ const actions = {
   'cal-today': () => { ui.selDay = today(); ui.month = today().slice(0, 8) + '01'; render(); },
 
   'edit-todo': el => { const x = findTodo(el.dataset.id); if (x) openTodoSheet(x); },
-  'toggle-todo': el => { const x = findTodo(el.dataset.id); if (x) saveTodo({ ...x, done: !x.done }); },
+  'toggle-todo': el => {
+    const x = findTodo(el.dataset.id); if (!x) return;
+    if (x.workingSince && !x.done) {
+      const m = stopWork(x, { done: true });
+      toast(`完成！這件總共花了 ${fmtSpent((x.spentMs || 0) + m * 60000)}`);
+    } else saveTodo({ ...x, done: !x.done, workingSince: 0 });
+  },
+  'todo-start': el => { const x = findTodo(el.dataset.id); if (x) startWork(x); },
+  'todo-pause': el => {
+    const x = findTodo(el.dataset.id); if (!x?.workingSince) return;
+    const m = stopWork(x);
+    toast(`暫停，這次做了 ${m} 分鐘`);
+  },
   'toggle-step': el => {
     const x = findTodo(el.dataset.id); if (!x) return;
     const steps = (x.steps || []).map(z => z.id === el.dataset.step ? { ...z, done: !z.done } : z);
@@ -451,7 +489,12 @@ document.addEventListener('submit', async ev => {
   } else if (kind === 'todo') {
     const title = (f.title || '').trim();
     if (!title) return;
-    saveTodo({ ...sheetCtx.data, title, due: f.due || '', note: (f.note || '').trim(), done: !!f.done });
+    // 已花費：有改才覆寫；同步進來的最新計時狀態以 store 為準
+    const cur = findTodo(sheetCtx.data.id) || sheetCtx.data;
+    const min = parseInt(f.spentMin, 10);
+    const spent = Number.isFinite(min) && min >= 0 && min !== Math.round((sheetCtx.data.spentMs || 0) / 60000) ? min * 60000 : (cur.spentMs || 0);
+    const next = { ...sheetCtx.data, workingSince: cur.workingSince || 0, spentMs: spent, title, due: f.due || '', note: (f.note || '').trim(), done: !!f.done };
+    if (next.done && next.workingSince) stopWork(next, { done: true }); else saveTodo(next);
     closeSheet();
     toast('已儲存');
   } else if (kind === 'add-todo') {

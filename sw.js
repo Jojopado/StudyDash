@@ -1,6 +1,6 @@
 // 自己的檔案：先抓網路（有更新馬上生效），離線時用快取。
 // Firebase SDK（網址含版本號，不會變）：快取優先。
-const CACHE = 'studydash-v7';
+const CACHE = 'studydash-v8';
 const SHELL = [
   './', './index.html', './css/app.css', './manifest.webmanifest',
   './js/app.js', './js/store.js', './js/views.js', './js/util.js', './js/courses.js', './js/timer.js', './js/quotes.js', './js/firebase-config.js',

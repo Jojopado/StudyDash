@@ -69,6 +69,16 @@ const weekMinutes = (filter = () => true) => {
 };
 const fmtMin = m => (m >= 60 ? `${Math.floor(m / 60)} 小時${m % 60 ? ` ${m % 60} 分` : ''}` : `${m} 分`);
 
+// 待辦花費時間：累計的 spentMs ＋ 正在計時的這段（workingSince 存在雲端，手機電腦看到同一個）
+export const spentMs = x => (x.spentMs || 0) + (x.workingSince ? Math.max(0, Date.now() - x.workingSince) : 0);
+const pad2 = n => String(n).padStart(2, '0');
+export function fmtElapsed(ms) {
+  const s = Math.floor(ms / 1000);
+  return `${Math.floor(s / 3600)}:${pad2(Math.floor(s / 60) % 60)}:${pad2(s % 60)}`;
+}
+// 計時中的數字：每秒由 tickWorkView 更新
+const liveClock = x => `<span class="live" data-since="${x.workingSince}" data-base="${x.spentMs || 0}">${fmtElapsed(spentMs(x))}</span>`;
+
 // ---------- 首頁 ----------
 export function renderHome(s) {
   S = s;
@@ -82,7 +92,7 @@ export function renderHome(s) {
     .sort(byDateTime).slice(0, 10);
   const week = evs.filter(e => { const n = daysUntil(e.date); return n >= 1 && n <= 7; }).sort(byDateTime);
   const topics = [...s.state.topics].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-  const todos = s.state.todos.filter(x => !x.done).sort(byDue);
+  const todos = s.state.todos.filter(x => !x.done).sort(workFirst);
   const q = QUOTES[quoteOfDay(t)];
 
   return `${syncBanner(s)}
@@ -210,26 +220,49 @@ function todoRow(x, { showDate = true, steps = false } = {}) {
   const cd = x.due && !x.done ? countdown(x.due) : null;
   const st = x.steps || [];
   const stDone = st.filter(z => z.done).length;
-  const meta = ['待辦', courseTag(x.courseId), ty.label, x.due && showDate ? fmtDate(x.due) : '',
-    st.length ? `☑ ${stDone}/${st.length}` : '', x.note ? '📝' : ''].filter(Boolean).join(' · ');
+  const working = !!x.workingSince && !x.done;
+  const spentMin = Math.floor((x.spentMs || 0) / 60000);
+  const meta = [working ? '<b class="run-tag">⏱ 執行中</b>' : '待辦', courseTag(x.courseId), ty.label, x.due && showDate ? fmtDate(x.due) : '',
+    st.length ? `☑ ${stDone}/${st.length}` : '', !working && spentMin ? `⏱ ${fmtMin(spentMin)}` : '', x.note ? '📝' : ''].filter(Boolean).join(' · ');
   const stepRows = steps && !x.done ? st.map(z => `<div class="step ${z.done ? 'done' : ''}">
       <button class="check small ${z.done ? 'on' : ''}" data-action="toggle-step" data-id="${x.id}" data-step="${z.id}" aria-label="完成">${z.done ? '✓' : ''}</button>
       <span>${esc(z.text)}</span></div>`).join('') : '';
-  return `<div class="ev ${x.done ? 'done' : ''}" data-action="edit-todo" data-id="${x.id}">
+  const workBtn = x.done ? ''
+    : working ? `<button class="work-btn on" data-action="todo-pause" data-id="${x.id}" aria-label="暫停">⏸</button>`
+    : `<button class="work-btn" data-action="todo-start" data-id="${x.id}" aria-label="開始做" title="開始做這件（計時）">▶</button>`;
+  return `<div class="ev ${x.done ? 'done' : ''} ${working ? 'working' : ''}" data-action="edit-todo" data-id="${x.id}">
     <button class="check ${x.done ? 'on' : ''}" data-action="toggle-todo" data-id="${x.id}" aria-label="完成">${x.done ? '✓' : ''}</button>
     <span class="bar" style="background:${ty.color}"></span>
     <div class="main"><div class="title">${esc(x.title)}</div><div class="meta">${meta}</div>
       ${st.length && !x.done ? `<div class="progress thin"><div style="width:${Math.round(stDone / st.length * 100)}%;background:${ty.color}"></div></div>` : ''}</div>
-    ${cd ? `<span class="badge ${cd.cls}">${cd.text}</span>` : ''}
+    ${working ? `<span class="badge run">${liveClock(x)}</span>` : cd ? `<span class="badge ${cd.cls}">${cd.text}</span>` : ''}
+    ${workBtn}
   </div>${stepRows}`;
 }
+
+// 正在做的那件：大字計時＋暫停／完成
+function workingCard(x) {
+  const ty = TYPES[x.type] || TYPES.other;
+  return `<section class="card work-card" style="border-color:${ty.color}">
+    <div class="sub">⏱ 執行中 ${courseTag(x.courseId)}</div>
+    <div class="work-title" data-action="edit-todo" data-id="${x.id}">${esc(x.title)}</div>
+    <div class="clock">${liveClock(x)}</div>
+    <div class="row wrap" style="justify-content:center">
+      <button class="btn" data-action="todo-pause" data-id="${x.id}">⏸ 暫停</button>
+      <button class="btn primary" data-action="toggle-todo" data-id="${x.id}">✓ 完成</button>
+    </div>
+  </section>`;
+}
+// 執行中的排最前面
+const workFirst = (a, b) => (b.workingSince ? 1 : 0) - (a.workingSince ? 1 : 0) || byDue(a, b);
 
 export function renderTodo(s) {
   S = s;
   const f = ui.todoFilter, fc = ui.todoCourse;
   const match = x => (f === 'all' || x.type === f) && (fc === 'all' || x.courseId === fc);
   const all = s.state.todos.filter(match);
-  const open = all.filter(x => !x.done).sort(byDue);
+  const open = all.filter(x => !x.done).sort(workFirst);
+  const working = s.state.todos.filter(x => x.workingSince && !x.done);
   const done = all.filter(x => x.done).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
   const count = (k, kc) => s.state.todos.filter(x => !x.done && (k === 'all' || x.type === k) && (kc === 'all' || x.courseId === kc)).length;
   const chip = (action, key, cur, label, color, n) =>
@@ -237,7 +270,8 @@ export function renderTodo(s) {
   const addType = f === 'all' ? 'homework' : f;
   const courses = s.state.courses;
 
-  return `<div class="page-head"><h1>待辦</h1></div>
+  return `<div class="page-head"><h1>待辦</h1><span class="sub">按 ▶ 開始做、會自動計時</span></div>
+    ${working.map(workingCard).join('')}
     <div class="chips" style="margin-bottom:8px">${chip('todo-filter', 'all', f, '全部', '', count('all', fc))}${
       Object.entries(TYPES).map(([k, t]) => chip('todo-filter', k, f, t.label, t.color, count(k, fc))).join('')}</div>
     ${courses.length ? `<div class="chips" style="margin-bottom:12px">${chip('todo-course', 'all', fc, '所有課程', '', 0)}${
@@ -369,6 +403,13 @@ export function tickTimerView() {
   if (bar) bar.style.width = `${Math.round((1 - leftMs() / total) * 100)}%`;
 }
 
+// 待辦計時每秒更新
+export function tickWorkView() {
+  for (const el of document.querySelectorAll('.live[data-since]')) {
+    el.textContent = fmtElapsed(+el.dataset.base + Math.max(0, Date.now() - +el.dataset.since));
+  }
+}
+
 // ---------- 心靈雞湯 ----------
 export function renderQuotes(s) {
   S = s;
@@ -443,6 +484,6 @@ export function renderSettings(s) {
     <section class="card"><h2>📱 裝到 iPhone</h2>
       <div class="sub">用 <b>Safari</b> 打開這個網址 → 點下方「分享」⬆️ → 「加入主畫面」。之後從主畫面打開就是全螢幕 App。</div>
     </section>
-    <section class="card"><h2>ℹ️ 關於</h2><div class="sub">學習儀表板 v0.4 · ${s.mode === 'cloud' ? '雲端模式' : '本機模式'} · ${s.state.events.length} 個行程、${s.state.todos.length} 個待辦、${courses.length} 門課、${s.state.topics.length} 個自學主題</div></section>
+    <section class="card"><h2>ℹ️ 關於</h2><div class="sub">學習儀表板 v0.5 · ${s.mode === 'cloud' ? '雲端模式' : '本機模式'} · ${s.state.events.length} 個行程、${s.state.todos.length} 個待辦、${courses.length} 門課、${s.state.topics.length} 個自學主題</div></section>
   </div>`;
 }
