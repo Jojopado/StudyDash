@@ -2,7 +2,7 @@
 import { firebaseConfig } from './firebase-config.js';
 
 const LS_KEY = 'studydash.v1';
-const COLS = ['events', 'topics', 'todos', 'courses', 'sessions', 'inv_meta', 'inv_orders', 'inv_divs', 'inv_snaps'];
+const COLS = ['events', 'topics', 'todos', 'courses', 'sessions', 'inv_meta', 'inv_orders', 'inv_divs', 'inv_snaps', 'rw_redeems'];
 const PREFS_KEY = 'studydash.prefs';
 const EMPTY = () => Object.fromEntries(COLS.map(c => [c, []]));
 const pick = data => Object.fromEntries(COLS.map(c => [c, data[c] || []]));

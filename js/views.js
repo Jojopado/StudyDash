@@ -5,6 +5,7 @@ import {
 import { classesOn, classRow, courseById, fmtSlots } from './courses.js';
 import { timer, leftMs, fmtClock } from './timer.js';
 import { QUOTES, QUOTE_CATS, quoteOfDay } from './quotes.js';
+import { rewardMini } from './reward-view.js';
 
 // 畫面狀態（不存檔）
 export const ui = {
@@ -387,6 +388,7 @@ export function renderStudy(s) {
   S = s;
   const topics = [...s.state.topics].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
   return `<div class="page-head"><h1>讀書</h1></div>
+    ${rewardMini()}
     <div class="grid two">${timerCard()}${statsCard()}</div>
     <div class="page-head" style="margin-top:22px"><h2 style="margin:0;font-size:20px">🌱 自學主題</h2>
       <button class="btn primary" data-action="new-topic">＋ 新增主題</button></div>

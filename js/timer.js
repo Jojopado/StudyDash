@@ -26,7 +26,7 @@ let audio;
 function unlockAudio() {
   try { audio ||= new (window.AudioContext || window.webkitAudioContext)(); audio.resume(); } catch { /* ignore */ }
 }
-function beep() {
+export function beep() {
   try {
     navigator.vibrate?.([200, 100, 200]);
     if (!audio) return;

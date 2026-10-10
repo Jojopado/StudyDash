@@ -11,6 +11,8 @@ import { parseSlots, fmtSlots } from './courses.js';
 import * as T from './timer.js';
 import { QUOTES } from './quotes.js';
 import { renderInvest, initInvest, invActions, submitOrder, submitNote } from './invest-view.js';
+import { renderReward, initReward, rwActions, submitItem, tickReward, onRewardChange } from './reward-view.js';
+import { gainNotice } from './reward.js';
 
 const $ = sel => document.querySelector(sel);
 const view = $('#view');
@@ -18,7 +20,7 @@ const fab = $('#fab');
 const backdrop = $('#sheet-backdrop');
 const sheet = $('#sheet');
 
-const ROUTES = { home: renderHome, calendar: renderCalendar, todo: renderTodo, study: renderStudy, invest: renderInvest, quotes: renderQuotes, settings: renderSettings };
+const ROUTES = { home: renderHome, calendar: renderCalendar, todo: renderTodo, study: renderStudy, invest: renderInvest, reward: renderReward, quotes: renderQuotes, settings: renderSettings };
 const route = () => (location.hash.slice(1) in ROUTES ? location.hash.slice(1) : 'home');
 
 // ---------- 畫面 ----------
@@ -43,7 +45,7 @@ function render() {
 
   view.innerHTML = store.ready ? ROUTES[r](store) : '<div class="sub">載入中…</div>';
   document.querySelectorAll('#nav a').forEach(a => a.classList.toggle('active', a.dataset.tab === r));
-  fab.hidden = r === 'settings' || r === 'quotes' || r === 'invest';
+  fab.hidden = r === 'settings' || r === 'quotes' || r === 'invest' || r === 'reward';
 
   if (keep) {
     const sel = `form[data-form="${keep.form}"]${keep.id ? `[data-id="${keep.id}"]` : ''} [name="${keep.name}"]`;
@@ -58,7 +60,7 @@ function toast(msg) {
   t.textContent = msg;
   t.hidden = false;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.hidden = true; }, 2200);
+  toastTimer = setTimeout(() => { t.hidden = true; }, Math.max(2200, msg.length * 110));
 }
 
 // ---------- 底部面板 ----------
@@ -231,7 +233,9 @@ function stopWork(x, patch = {}) {
   const ms = x.workingSince ? Math.max(0, Date.now() - x.workingSince) : 0;
   const minutes = Math.floor(ms / 60000);
   if (minutes >= 1 && STUDY_TYPES.includes(x.type)) {
-    saveSession({ id: newId(), date: today(), minutes, subject: x.courseId ? `c:${x.courseId}` : '', todoId: x.id, createdAt: Date.now() });
+    const ss = { id: newId(), date: today(), minutes, subject: x.courseId ? `c:${x.courseId}` : '', todoId: x.id, createdAt: Date.now() };
+    pendingGain = gainNotice(ss);
+    saveSession(ss);
   }
   saveTodo({ ...x, spentMs: (x.spentMs || 0) + ms, workingSince: 0, ...patch });
   return minutes;
@@ -241,21 +245,26 @@ function stopWork(x, patch = {}) {
 function startWork(x) {
   for (const o of store.state.todos) if (o.workingSince && o.id !== x.id) stopWork(o);
   saveTodo({ ...x, workingSince: Date.now() });
-  toast(`開始做：${x.title}`);
+  toast(`開始做：${x.title}　${takeGain()}`);
 }
 
 // ---------- 番茄鐘 ----------
+// 讀書紀錄存起來，回傳獎勵提示（+金幣、成就、升級）
 function recordFocus(minutes, endedAt = Date.now()) {
-  if (minutes < 1) return;
-  saveSession({ id: newId(), date: ymd(new Date(endedAt)), minutes, subject: T.timer.subject, createdAt: endedAt });
+  if (minutes < 1) return '';
+  const ss = { id: newId(), date: ymd(new Date(endedAt)), minutes, subject: T.timer.subject, createdAt: endedAt };
+  const gain = gainNotice(ss);
+  saveSession(ss);
+  return gain;
 }
+let pendingGain = ''; // 待辦計時停下來時的獎勵提示，接在原本的提示後面
 
 function timerTick() {
   const r = T.check();
   if (r) {
     if (r.done === 'focus') {
-      recordFocus(r.minutes, r.endedAt);
-      toast(`🍅 完成 ${r.minutes} 分鐘「${subjectInfo(T.timer.subject).name}」，休息一下`);
+      const gain = recordFocus(r.minutes, r.endedAt);
+      toast(`🍅 完成 ${r.minutes} 分鐘，休息一下　${gain}`);
     } else {
       toast('☕ 休息結束，再來一輪？');
     }
@@ -264,9 +273,11 @@ function timerTick() {
     tickTimerView();
   }
   tickWorkView();
+  tickReward();
 }
 setInterval(timerTick, 1000);
 
+const takeGain = () => { const g = pendingGain; pendingGain = ''; return g; };
 const fmtSpent = ms => { const m = Math.floor(ms / 60000); return m >= 60 ? `${Math.floor(m / 60)} 小時 ${m % 60} 分` : `${m} 分`; };
 
 // ---------- 點擊 ----------
@@ -298,14 +309,14 @@ const actions = {
     const x = findTodo(el.dataset.id); if (!x) return;
     if (x.workingSince && !x.done) {
       const m = stopWork(x, { done: true });
-      toast(`完成！這件總共花了 ${fmtSpent((x.spentMs || 0) + m * 60000)}`);
+      toast(`完成！這件總共花了 ${fmtSpent((x.spentMs || 0) + m * 60000)}　${takeGain()}`);
     } else saveTodo({ ...x, done: !x.done, workingSince: 0 });
   },
   'todo-start': el => { const x = findTodo(el.dataset.id); if (x) startWork(x); },
   'todo-pause': el => {
     const x = findTodo(el.dataset.id); if (!x?.workingSince) return;
     const m = stopWork(x);
-    toast(`暫停，這次做了 ${m} 分鐘`);
+    toast(`暫停，這次做了 ${m} 分鐘　${takeGain()}`);
   },
   'toggle-step': el => {
     const x = findTodo(el.dataset.id); if (!x) return;
@@ -371,9 +382,9 @@ const actions = {
   'timer-finish': () => {
     const m = T.focusedMinutes();
     if (m < 1) { toast('還不到 1 分鐘，先不記錄'); T.reset('focus'); render(); return; }
-    recordFocus(m);
+    const gain = recordFocus(m);
     T.reset('break');
-    toast(`記錄了 ${m} 分鐘`);
+    toast(`記錄了 ${m} 分鐘　${gain}`);
     render();
   },
   'timer-len': el => { const [f, b] = el.dataset.len.split('/').map(Number); T.setLengths(f, b); render(); },
@@ -438,7 +449,7 @@ const actions = {
   logout: async () => { if (confirm('確定登出？登出後這台裝置看不到雲端資料。')) { await logout(); toast('已登出'); } },
 };
 
-Object.assign(actions, invActions);
+Object.assign(actions, invActions, rwActions);
 
 document.addEventListener('click', ev => {
   if (ev.target === backdrop) { closeSheet(); return; }
@@ -499,7 +510,7 @@ document.addEventListener('submit', async ev => {
     const next = { ...sheetCtx.data, workingSince: cur.workingSince || 0, spentMs: spent, title, due: f.due || '', note: (f.note || '').trim(), done: !!f.done };
     if (next.done && next.workingSince) stopWork(next, { done: true }); else saveTodo(next);
     closeSheet();
-    toast('已儲存');
+    toast(`已儲存　${takeGain()}`);
   } else if (kind === 'add-todo') {
     const title = (f.title || '').trim();
     if (!title) return;
@@ -520,9 +531,11 @@ document.addEventListener('submit', async ev => {
   } else if (kind === 'session') {
     const minutes = parseInt(f.minutes, 10);
     if (!(minutes > 0)) { toast('分鐘數要大於 0'); return; }
-    saveSession({ id: newId(), date: f.date, minutes, subject: f.subject, createdAt: Date.now() });
+    const ss = { id: newId(), date: f.date, minutes, subject: f.subject, manual: true, createdAt: Date.now() };
+    const gain = gainNotice(ss);
+    saveSession(ss);
     closeSheet();
-    toast(`記錄了 ${minutes} 分鐘`);
+    toast(`記錄了 ${minutes} 分鐘　${gain}`);
   } else if (kind === 'topic') {
     const name = (f.name || '').trim();
     if (!name) return;
@@ -538,6 +551,8 @@ document.addEventListener('submit', async ev => {
     if (input) { input.value = ''; input.focus(); }
   } else if (kind === 'inv-order') {
     await submitOrder(form);
+  } else if (kind === 'rw-item') {
+    submitItem(form);
   } else if (kind === 'inv-note') {
     await submitNote(form);
   } else if (kind === 'login') {
@@ -556,6 +571,7 @@ document.addEventListener('change', async ev => {
   const el = ev.target;
   if (el.dataset.action === 'custom-bg') { savePrefs({ bg: el.value }); return; }
   if (el.dataset.action === 'timer-subject') { T.setSubject(el.value); return; }
+  if (onRewardChange(el)) return;
   if (!['import', 'merge'].includes(el.dataset.action) || !el.files?.[0]) return;
   try {
     const obj = JSON.parse(await el.files[0].text());
@@ -601,6 +617,7 @@ subscribe(render);
 render();
 initStore();
 initInvest({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
+initReward({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW 註冊失敗', e));
