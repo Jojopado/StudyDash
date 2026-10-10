@@ -45,3 +45,29 @@ export function classRow({ c, s }) {
 }
 
 export const courseById = (courses, id) => (courses || []).find(c => c.id === id);
+
+// 「二 13:20–15:10、四 09:10–12:00」：節次換成實際時間
+export const fmtSlotTimes = slots =>
+  (slots || []).map(s => `${DAY_CH[s.day]} ${slotTime(s)}`).join('、');
+
+// 週課表：一列一節（左邊標上課時間），課程依節次跨列
+export function timetable(courses) {
+  const slots = (courses || []).flatMap(c => (c.slots || []).map(s => ({ c, s })));
+  if (!slots.length) return '';
+  const days = [1, 2, 3, 4, 5].concat([6, 0].filter(d => slots.some(x => x.s.day === d)));
+  const first = Math.min(...slots.map(x => x.s.from));
+  const last = Math.max(...slots.map(x => x.s.to));
+  const rowOf = p => p - first + 2;
+  let cells = `<div class="tt-corner"></div>${days.map((d, i) => `<div class="tt-day" style="grid-column:${i + 2}">${DAY_CH[d]}</div>`).join('')}`;
+  for (let p = first; p <= last; p++) {
+    cells += `<div class="tt-time" style="grid-row:${rowOf(p)}"><b>${p}</b><span>${PERIODS[p][0]}</span><span>${PERIODS[p][1]}</span></div>`;
+    for (let i = 0; i < days.length; i++) cells += `<div class="tt-cell" style="grid-row:${rowOf(p)};grid-column:${i + 2}"></div>`;
+  }
+  for (const { c, s } of slots) {
+    const col = days.indexOf(s.day) + 2;
+    cells += `<div class="tt-class" data-action="edit-course" data-id="${c.id}" title="${esc(c.name)} ${slotTime(s)}"
+      style="grid-column:${col};grid-row:${rowOf(s.from)} / ${rowOf(s.to) + 1};background:${esc(c.color)}22;border-color:${esc(c.color)}">
+      <b>${esc(c.name)}</b><span>${slotTime(s)}</span>${c.room ? `<span>${esc(c.room)}</span>` : ''}</div>`;
+  }
+  return `<div class="tt" style="grid-template-columns:46px repeat(${days.length}, 1fr);grid-template-rows:auto repeat(${last - first + 1}, minmax(44px, auto))">${cells}</div>`;
+}

@@ -2,6 +2,7 @@
 import { store } from './store.js';
 import { esc } from './util.js';
 import * as I from './invest.js';
+import { learnCard } from './invest-learn.js';
 
 const { inv, fmtMoney, fmtPrice, fmtPct, fmtSigned, upDown } = I;
 
@@ -446,14 +447,14 @@ export function renderInvest() {
     ${inv.error ? `<div class="banner">報價抓不到：${esc(inv.error)}</div>` : ''}`;
   if (!meta) {
     if (!inv.byCode.size && !inv.busy && !autoTried) { autoTried = true; refresh(); }
-    return head + openAccountCard() + rulesCard();
+    return head + openAccountCard() + `<div class="grid two" style="margin-top:14px;align-items:start">${learnCard()}${rulesCard()}</div>`;
   }
   const L = I.ledger();
   if (invUi.code) return stockPage(meta, L);
   return `${head}<div class="grid">
     <div class="grid two">${summary(L, meta)}${equityChart(meta)}</div>
     <div class="grid two"><div class="grid">${holdingsCard(L)}${openOrdersCard()}</div><div class="grid">${watchCard(meta)}</div></div>
-    <div class="grid two"><div class="grid">${historyCard()}</div><div class="grid">${upcomingDivs()}${rulesCard()}</div></div></div>`;
+    <div class="grid two"><div class="grid">${historyCard()}</div><div class="grid">${upcomingDivs()}${learnCard()}${rulesCard()}</div></div></div>`;
 }
 
 // ---------- 下單面板 ----------

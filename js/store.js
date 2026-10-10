@@ -2,7 +2,7 @@
 import { firebaseConfig } from './firebase-config.js';
 
 const LS_KEY = 'studydash.v1';
-const COLS = ['events', 'topics', 'todos', 'courses', 'sessions', 'inv_meta', 'inv_orders', 'inv_divs', 'inv_snaps', 'rw_redeems'];
+const COLS = ['events', 'topics', 'todos', 'courses', 'sessions', 'inv_meta', 'inv_orders', 'inv_divs', 'inv_snaps', 'rw_redeems', 'expenses', 'decks', 'cards'];
 const PREFS_KEY = 'studydash.prefs';
 const EMPTY = () => Object.fromEntries(COLS.map(c => [c, []]));
 const pick = data => Object.fromEntries(COLS.map(c => [c, data[c] || []]));
@@ -225,4 +225,5 @@ export function mergeData(obj) {
   for (const t of obj.todos || []) saveTodo(t);
   for (const c of obj.courses || []) saveCourse(c);
   for (const x of obj.sessions || []) saveSession(x);
+  for (const col of ['expenses', 'decks', 'cards']) for (const d of obj[col] || []) saveDoc(col, d);
 }

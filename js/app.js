@@ -1,18 +1,20 @@
 import {
-  store, subscribe, initStore, newId, saveEvent, deleteEvent, saveTopic, deleteTopic, saveTodo, deleteTodo, savePrefs,
+  store, subscribe, initStore, newId, saveEvent, deleteEvent, saveTodo, deleteTodo, savePrefs,
   saveCourse, deleteCourse, saveSession, deleteSession,
   exportData, importData, mergeData, login, signup, logout,
 } from './store.js';
 import { TYPES, TOPIC_COLORS, BG_PRESETS, isLight, today, addDays, ymd, esc } from './util.js';
 import {
-  ui, renderHome, renderCalendar, renderTodo, renderStudy, renderQuotes, renderSettings, shiftMonth, tickTimerView, tickWorkView, subjectInfo,
+  ui, renderHome, renderCalendar, renderTodo, renderStudy, renderSettings, shiftMonth, tickTimerView, tickWorkView, subjectInfo,
 } from './views.js';
-import { parseSlots, fmtSlots } from './courses.js';
+import { parseSlots, fmtSlots, PERIODS } from './courses.js';
 import * as T from './timer.js';
-import { QUOTES } from './quotes.js';
 import { renderInvest, initInvest, invActions, submitOrder, submitNote } from './invest-view.js';
-import { renderReward, initReward, rwActions, submitItem, tickReward, onRewardChange } from './reward-view.js';
+import { learnActions } from './invest-learn.js';
+import { renderReward, initReward, rwActions } from './reward-view.js';
 import { gainNotice } from './reward.js';
+import { renderMoney, initMoney, moneyActions, moneyForms } from './money.js';
+import { renderCards, initCards, cardActions, cardForms, cardsKey } from './cards.js';
 
 const $ = sel => document.querySelector(sel);
 const view = $('#view');
@@ -20,7 +22,13 @@ const fab = $('#fab');
 const backdrop = $('#sheet-backdrop');
 const sheet = $('#sheet');
 
-const ROUTES = { home: renderHome, calendar: renderCalendar, todo: renderTodo, study: renderStudy, invest: renderInvest, reward: renderReward, quotes: renderQuotes, settings: renderSettings };
+const ROUTES = {
+  home: renderHome, calendar: renderCalendar, todo: renderTodo, study: renderStudy, cards: renderCards, money: renderMoney,
+  invest: renderInvest, reward: renderReward, settings: renderSettings,
+};
+// 手機底部放不下的，收在「更多」裡（電腦版側邊欄全部列出）
+const MORE = ['invest', 'reward', 'settings'];
+const NO_FAB = ['settings', 'invest', 'reward', 'money', 'cards'];
 const route = () => (location.hash.slice(1) in ROUTES ? location.hash.slice(1) : 'home');
 
 // ---------- 畫面 ----------
@@ -44,8 +52,8 @@ function render() {
   }
 
   view.innerHTML = store.ready ? ROUTES[r](store) : '<div class="sub">載入中…</div>';
-  document.querySelectorAll('#nav a').forEach(a => a.classList.toggle('active', a.dataset.tab === r));
-  fab.hidden = r === 'settings' || r === 'quotes' || r === 'invest' || r === 'reward';
+  document.querySelectorAll('#nav a').forEach(a => a.classList.toggle('active', a.dataset.tab === r || (a.dataset.tab === 'more' && MORE.includes(r))));
+  fab.hidden = NO_FAB.includes(r);
 
   if (keep) {
     const sel = `form[data-form="${keep.form}"]${keep.id ? `[data-id="${keep.id}"]` : ''} [name="${keep.name}"]`;
@@ -164,25 +172,6 @@ function colorChips(cur) {
   return TOPIC_COLORS.map(c => `<button type="button" data-action="pick-color" data-color="${c}" class="${c === cur ? 'on' : ''}" style="background:${c}" aria-label="${c}"></button>`).join('');
 }
 
-function openTopicSheet(tp) {
-  const isNew = !tp.id;
-  const t = { id: newId(), name: '', color: TOPIC_COLORS[store.state.topics.length % TOPIC_COLORS.length], targetDate: '', note: '', goals: [], createdAt: Date.now(), ...tp };
-  openSheet(`<h2>${isNew ? '新增自學主題' : '編輯主題'}</h2>
-    <form data-form="topic">
-      <label class="field"><span>主題名稱</span><input type="text" name="name" value="${esc(t.name)}" placeholder="例如：ROS2、DSP、日文" required autocomplete="off"></label>
-      <div class="field"><span>顏色</span><div class="colors" id="color-chips">${colorChips(t.color)}</div></div>
-      <label class="field"><span>目標完成日（可不填）</span><input type="date" name="targetDate" value="${t.targetDate || ''}"></label>
-      <label class="field"><span>備註</span><textarea name="note" placeholder="為什麼學、用什麼教材…">${esc(t.note)}</textarea></label>
-      <div class="actions">
-        ${isNew ? '' : '<button type="button" class="btn danger" data-action="delete-topic">刪除</button>'}
-        <span class="spacer"></span>
-        <button type="button" class="btn" data-action="close-sheet">取消</button>
-        <button type="submit" class="btn primary">儲存</button>
-      </div>
-    </form>`, { kind: 'topic', data: t });
-  if (isNew) sheet.querySelector('[name=name]').focus();
-}
-
 function openCourseSheet(cs) {
   const isNew = !cs.id;
   const c = { id: newId(), name: '', color: TOPIC_COLORS[store.state.courses.length % TOPIC_COLORS.length], teacher: '', room: '', slots: [], start: '', end: '', createdAt: Date.now(), ...cs };
@@ -191,6 +180,8 @@ function openCourseSheet(cs) {
       <label class="field"><span>課名</span><input type="text" name="name" value="${esc(c.name)}" placeholder="例如：機器學習" required autocomplete="off"></label>
       <div class="field"><span>顏色</span><div class="colors" id="color-chips">${colorChips(c.color)}</div></div>
       <label class="field"><span>上課時間（星期＋節次，例如：二5-6, 四2-4）</span><input type="text" name="slots" value="${esc(fmtSlots(c.slots))}" placeholder="四5-7" autocomplete="off"></label>
+      <details class="sub period-help"><summary>節次對照時間</summary><div class="period-grid">${
+        Object.entries(PERIODS).map(([n, [a, b]]) => `<span><b>${n}</b> ${a}–${b}</span>`).join('')}</div></details>
       <div class="row">
         <label class="field" style="flex:1"><span>教室</span><input type="text" name="room" value="${esc(c.room)}" autocomplete="off"></label>
         <label class="field" style="flex:1"><span>老師</span><input type="text" name="teacher" value="${esc(c.teacher)}" autocomplete="off"></label>
@@ -210,7 +201,7 @@ function openCourseSheet(cs) {
 }
 
 function openSessionSheet() {
-  const opts = [['', '自由讀書'], ...store.state.courses.map(c => [`c:${c.id}`, c.name]), ...store.state.topics.map(t => [`t:${t.id}`, t.name])];
+  const opts = [['', '自由讀書'], ...(store.prefs.studyTags || []).map(g => [`g:${g.id}`, `🏷️ ${g.name}`]), ...store.state.courses.map(c => [`c:${c.id}`, c.name])];
   openSheet(`<h2>補記錄讀書時間</h2>
     <form data-form="session">
       <label class="field"><span>讀了什麼</span><select name="subject">${opts.map(([v, l]) => `<option value="${v}" ${v === T.timer.subject ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></label>
@@ -222,6 +213,41 @@ function openSessionSheet() {
         <button type="button" class="btn" data-action="close-sheet">取消</button>
         <button type="submit" class="btn primary">儲存</button></div>
     </form>`, { kind: 'session' });
+}
+
+// ---------- 讀書標籤 ----------
+const tags = () => store.prefs.studyTags || [];
+function tagRows() {
+  return tags().map(g => `<div class="goal">
+      <button type="button" class="tag-dot" data-action="tag-color" data-id="${g.id}" style="background:${esc(g.color)}" title="換顏色"></button>
+      <div class="text" data-action="tag-rename" data-id="${g.id}" title="點一下改名字">${esc(g.name)}</div>
+      <button type="button" class="del" data-action="tag-del" data-id="${g.id}" aria-label="刪除">✕</button></div>`).join('')
+    || '<div class="empty">還沒有標籤</div>';
+}
+function openTagSheet() {
+  openSheet(`<h2>🏷️ 讀書標籤</h2>
+    <div class="sub" style="margin-bottom:8px">番茄鐘和補記錄可以選標籤，讀書時數會分開統計。點名字改名、點色點換顏色。</div>
+    <div id="tag-list">${tagRows()}</div>
+    <form class="add-goal" data-form="tag"><input type="text" name="name" placeholder="新標籤，例如：Meeting、論文、面試" autocomplete="off">
+      <button class="btn primary" type="submit">加入</button></form>
+    <div class="sub" style="margin-top:8px">刪掉標籤不會刪掉讀書紀錄，只是那些紀錄會變成「自由讀書」。</div>
+    <div class="actions"><span class="spacer"></span><button type="button" class="btn" data-action="close-sheet">完成</button></div>`, { kind: 'tags' });
+  sheet.querySelector('[name=name]').focus();
+}
+function saveTags(list) {
+  savePrefs({ studyTags: list });
+  const el = sheet.querySelector('#tag-list');
+  if (el) el.innerHTML = tagRows();
+}
+
+// ---------- 手機的「更多」 ----------
+function openMoreSheet() {
+  const item = (href, ico, label, sub) => `<a class="more-item" href="${href}"><span class="ico">${ico}</span><span><b>${label}</b><span class="sub">${sub}</span></span></a>`;
+  openSheet(`<h2>更多</h2><div class="more-list">
+    ${item('#invest', '📈', '模擬投資', '台股真實報價、投資入門')}
+    ${item('#reward', '🦜', '獎勵', '金幣、鸚鵡、成就')}
+    ${item('#settings', '⚙️', '設定', '同步、課表、背景、備份')}
+  </div>`, { kind: 'more' });
 }
 
 // ---------- 待辦計時 ----------
@@ -273,7 +299,6 @@ function timerTick() {
     tickTimerView();
   }
   tickWorkView();
-  tickReward();
 }
 setInterval(timerTick, 1000);
 
@@ -282,7 +307,6 @@ const fmtSpent = ms => { const m = Math.floor(ms / 60000); return m >= 60 ? `${M
 
 // ---------- 點擊 ----------
 const findEvent = id => store.state.events.find(e => e.id === id);
-const findTopic = id => store.state.topics.find(t => t.id === id);
 const findTodo = id => store.state.todos.find(t => t.id === id);
 const findCourse = id => store.state.courses.find(c => c.id === id);
 
@@ -344,37 +368,6 @@ const actions = {
   },
   'pick-bg': el => savePrefs({ bg: el.dataset.color }),
 
-  'new-topic': () => openTopicSheet({}),
-  'edit-topic': el => { const t = findTopic(el.dataset.id); if (t) openTopicSheet(t); },
-  'topic-open': el => {
-    const id = el.dataset.id;
-    if (ui.openTopics.has(id)) ui.openTopics.delete(id); else ui.openTopics.add(id);
-    render();
-  },
-  'topic-focus': el => {
-    T.setSubject(`t:${el.dataset.id}`);
-    if (!T.timer.running) { T.reset('focus'); T.start(); }
-    render();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    toast(`開始專注：${subjectInfo(T.timer.subject).name}`);
-  },
-  'toggle-goal': el => {
-    const t = findTopic(el.dataset.id); if (!t) return;
-    saveTopic({ ...t, goals: t.goals.map(g => g.id === el.dataset.goal ? { ...g, done: !g.done } : g) });
-  },
-  'edit-goal': el => {
-    const t = findTopic(el.dataset.id); if (!t) return;
-    const g = t.goals.find(x => x.id === el.dataset.goal); if (!g) return;
-    const text = prompt('修改小目標', g.text);
-    if (text == null || !text.trim() || text.trim() === g.text) return;
-    saveTopic({ ...t, goals: t.goals.map(x => x.id === g.id ? { ...x, text: text.trim() } : x) });
-  },
-  'del-goal': el => {
-    const t = findTopic(el.dataset.id); if (!t) return;
-    const g = t.goals.find(x => x.id === el.dataset.goal);
-    if (g && confirm(`刪除「${g.text}」？`)) saveTopic({ ...t, goals: t.goals.filter(x => x.id !== g.id) });
-  },
-
   'timer-start': () => { T.start(); render(); },
   'timer-pause': () => { T.pause(); render(); },
   'timer-reset': () => { T.reset(); render(); },
@@ -401,20 +394,6 @@ const actions = {
     sheet.querySelector('#course-chips').innerHTML = courseChips(el.dataset.course);
   },
 
-  'quote-next': () => {
-    let i;
-    do { i = Math.floor(Math.random() * QUOTES.length); } while (QUOTES.length > 1 && i === ui.quote);
-    ui.quote = i;
-    render();
-  },
-  'quote-show': el => { ui.quote = +el.dataset.i; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); },
-  'quote-cat': el => { ui.quoteCat = el.dataset.key; render(); },
-  'quote-fav': el => {
-    const i = +el.dataset.i;
-    const favs = store.prefs.favQuotes || [];
-    savePrefs({ favQuotes: favs.includes(i) ? favs.filter(n => n !== i) : [...favs, i] });
-  },
-
   'pick-type': el => {
     sheetCtx.data.type = el.dataset.type;
     sheet.querySelector('#type-chips').innerHTML = typeChips(el.dataset.type);
@@ -427,9 +406,22 @@ const actions = {
   'delete-event': () => {
     if (confirm(`刪除「${sheetCtx.data.title}」？`)) { deleteEvent(sheetCtx.data.id); closeSheet(); toast('已刪除'); }
   },
-  'delete-topic': () => {
-    if (confirm(`刪除主題「${sheetCtx.data.name}」和裡面所有小目標？`)) { deleteTopic(sheetCtx.data.id); closeSheet(); toast('已刪除'); }
+  'tags-manage': openTagSheet,
+  'tag-color': el => {
+    saveTags(tags().map(g => g.id === el.dataset.id ? { ...g, color: TOPIC_COLORS[(TOPIC_COLORS.indexOf(g.color) + 1) % TOPIC_COLORS.length] } : g));
   },
+  'tag-rename': el => {
+    const g = tags().find(x => x.id === el.dataset.id); if (!g) return;
+    const name = prompt('標籤名稱', g.name);
+    if (name?.trim()) saveTags(tags().map(x => x.id === g.id ? { ...x, name: name.trim().slice(0, 20) } : x));
+  },
+  'tag-del': el => {
+    const g = tags().find(x => x.id === el.dataset.id);
+    if (!g || !confirm(`刪除標籤「${g.name}」？`)) return;
+    if (T.timer.subject === `g:${g.id}`) T.setSubject('');
+    saveTags(tags().filter(x => x.id !== g.id));
+  },
+  'nav-more': openMoreSheet,
 
   export: async () => {
     const json = JSON.stringify(exportData(), null, 2);
@@ -449,7 +441,8 @@ const actions = {
   logout: async () => { if (confirm('確定登出？登出後這台裝置看不到雲端資料。')) { await logout(); toast('已登出'); } },
 };
 
-Object.assign(actions, invActions, rwActions);
+Object.assign(actions, invActions, learnActions, rwActions, moneyActions, cardActions);
+const moduleForms = { ...moneyForms, ...cardForms };
 
 document.addEventListener('click', ev => {
   if (ev.target === backdrop) { closeSheet(); return; }
@@ -463,7 +456,7 @@ document.addEventListener('click', ev => {
 });
 
 fab.addEventListener('click', () => {
-  if (route() === 'study') openTopicSheet({});
+  if (route() === 'study') openSessionSheet();
   else if (route() === 'todo') openTodoSheet({ type: ui.todoFilter === 'all' ? 'homework' : ui.todoFilter, courseId: ui.todoCourse === 'all' ? '' : ui.todoCourse });
   else openEventSheet({ date: route() === 'calendar' ? ui.selDay : today() });
 });
@@ -536,23 +529,20 @@ document.addEventListener('submit', async ev => {
     saveSession(ss);
     closeSheet();
     toast(`記錄了 ${minutes} 分鐘　${gain}`);
-  } else if (kind === 'topic') {
-    const name = (f.name || '').trim();
-    if (!name) return;
-    saveTopic({ ...sheetCtx.data, name, targetDate: f.targetDate || '', note: (f.note || '').trim() });
-    closeSheet();
-    toast('已儲存');
-  } else if (kind === 'add-goal') {
-    const text = (f.text || '').trim();
-    const t = findTopic(form.dataset.id);
-    if (!text || !t) return;
-    saveTopic({ ...t, goals: [...(t.goals || []), { id: newId(), text, done: false }] });
-    const input = view.querySelector(`form[data-id="${t.id}"] [name=text]`);
-    if (input) { input.value = ''; input.focus(); }
   } else if (kind === 'inv-order') {
     await submitOrder(form);
-  } else if (kind === 'rw-item') {
-    submitItem(form);
+  } else if (kind === 'tag') {
+    const name = (f.name || '').trim().slice(0, 20);
+    if (!name) return;
+    if (tags().some(g => g.name === name)) { toast('已經有這個標籤了'); return; }
+    const g = { id: newId(), name, color: TOPIC_COLORS[tags().length % TOPIC_COLORS.length] };
+    if (!T.timer.running) T.setSubject(`g:${g.id}`);   // 新標籤直接選起來（先選再存，重畫時下拉選單才會對）
+    saveTags([...tags(), g]);
+    form.reset();
+    form.querySelector('[name=name]').focus();
+    toast(`加入標籤「${name}」`);
+  } else if (moduleForms[kind]) {
+    moduleForms[kind](form, f, sheetCtx?.data);
   } else if (kind === 'inv-note') {
     await submitNote(form);
   } else if (kind === 'login') {
@@ -571,14 +561,14 @@ document.addEventListener('change', async ev => {
   const el = ev.target;
   if (el.dataset.action === 'custom-bg') { savePrefs({ bg: el.value }); return; }
   if (el.dataset.action === 'timer-subject') { T.setSubject(el.value); return; }
-  if (onRewardChange(el)) return;
   if (!['import', 'merge'].includes(el.dataset.action) || !el.files?.[0]) return;
   try {
     const obj = JSON.parse(await el.files[0].text());
     // 不是完整備份（例如課表檔）時，按「匯入備份」也當成「加入檔案」，不會覆蓋
     const partial = !Array.isArray(obj.events) || !Array.isArray(obj.topics);
     if (el.dataset.action === 'merge' || partial) {
-      const parts = [['events', '個行程'], ['todos', '個待辦'], ['courses', '門課'], ['topics', '個主題'], ['sessions', '筆讀書紀錄']]
+      const parts = [['events', '個行程'], ['todos', '個待辦'], ['courses', '門課'], ['topics', '個主題'], ['sessions', '筆讀書紀錄'],
+        ['decks', '個卡組'], ['cards', '張字卡'], ['expenses', '筆帳']]
         .filter(([k]) => obj[k]?.length).map(([k, l]) => `${obj[k].length} ${l}`);
       if (!parts.length) { toast('檔案裡沒有可以加入的資料'); return; }
       if (!confirm(`加入 ${parts.join('、')}？原本的資料不會被刪。`)) return;
@@ -596,10 +586,13 @@ document.addEventListener('change', async ev => {
   }
 });
 
-document.addEventListener('keydown', ev => { if (ev.key === 'Escape' && !backdrop.hidden) closeSheet(); });
+document.addEventListener('keydown', ev => {
+  if (ev.key === 'Escape' && !backdrop.hidden) { closeSheet(); return; }
+  if (backdrop.hidden && cardsKey(ev)) ev.preventDefault();
+});
 
 // ---------- 啟動 ----------
-window.addEventListener('hashchange', () => { render(); window.scrollTo(0, 0); });
+window.addEventListener('hashchange', () => { if (sheetCtx?.kind === 'more') closeSheet(); render(); window.scrollTo(0, 0); });
 let wide = matchMedia('(min-width: 900px)').matches;
 window.addEventListener('resize', () => {
   const w = matchMedia('(min-width: 900px)').matches;
@@ -618,6 +611,8 @@ render();
 initStore();
 initInvest({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
 initReward({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
+initMoney({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
+initCards({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW 註冊失敗', e));

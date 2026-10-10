@@ -1,11 +1,11 @@
 import {
   TYPES, DEADLINE_TYPES, WEEKDAYS, today, addDays, parseYmd, ymd, daysUntil,
-  fmtDate, countdown, byDateTime, esc, mdLite, BG_PRESETS,
+  fmtDate, countdown, byDateTime, esc, BG_PRESETS,
 } from './util.js';
-import { classesOn, classRow, courseById, fmtSlots } from './courses.js';
+import { classesOn, classRow, courseById, fmtSlotTimes, timetable } from './courses.js';
 import { timer, leftMs, fmtClock } from './timer.js';
-import { QUOTES, QUOTE_CATS, quoteOfDay } from './quotes.js';
 import { rewardMini } from './reward-view.js';
+import { monthSpent } from './money.js';
 
 // 畫面狀態（不存檔）
 export const ui = {
@@ -15,9 +15,6 @@ export const ui = {
   todoFilter: 'all',  // 'all' | TYPES 的 key
   todoCourse: 'all',  // 'all' | course id
   showDoneTodos: false,
-  openTopics: new Set(),
-  quote: null,        // 雞湯區目前顯示第幾句（null = 今日一句）
-  quoteCat: 'all',
 };
 
 let S; // 這次畫面用的 store（每個 render 一開始設定）
@@ -45,20 +42,18 @@ const row = (e, opts) => (e.kind === 'todo' ? todoRow(e.src, opts) : evRow(e, op
 const list = (items, opts, emptyText) =>
   items.length ? items.map(e => row(e, opts)).join('') : `<div class="empty">${emptyText}</div>`;
 
-function topicPct(t) {
-  const g = t.goals || [];
-  return g.length ? Math.round(g.filter(x => x.done).length / g.length * 100) : 0;
-}
-
 function syncBanner(s) {
   if (!s.cloudAvailable || s.mode === 'cloud') return '';
   return `<div class="banner">目前資料只存在這台裝置。<a href="#settings">登入</a>就能和電腦／手機同步。</div>`;
 }
 
 // ---------- 讀書時數 ----------
+// 讀了什麼：'' 自由讀書、'c:id' 課程、'g:id' 自訂標籤（prefs.studyTags）、't:id' 舊的自學主題（只剩紀錄）
+export const studyTags = () => S.prefs.studyTags || [];
 export function subjectInfo(key) {
   const [k, id] = (key || '').split(':');
   if (k === 'c') { const c = courseById(S.state.courses, id); if (c) return { name: c.name, color: c.color }; }
+  if (k === 'g') { const g = studyTags().find(x => x.id === id); if (g) return { name: g.name, color: g.color }; }
   if (k === 't') { const t = S.state.topics.find(x => x.id === id); if (t) return { name: t.name, color: t.color }; }
   return { name: '自由讀書', color: '#94a3b8' };
 }
@@ -92,16 +87,15 @@ export function renderHome(s) {
     .filter(e => DEADLINE_TYPES.includes(e.type) && !e.done && daysUntil(e.date) >= -30)
     .sort(byDateTime).slice(0, 10);
   const week = evs.filter(e => { const n = daysUntil(e.date); return n >= 1 && n <= 7; }).sort(byDateTime);
-  const topics = [...s.state.topics].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
   const todos = s.state.todos.filter(x => !x.done).sort(workFirst);
-  const q = QUOTES[quoteOfDay(t)];
+  const spent = monthSpent();
 
   return `${syncBanner(s)}
   <div class="page-head"><div>
     <div class="sub">${d.getFullYear()} 年</div>
     <h1>${d.getMonth() + 1} 月 ${d.getDate()} 日 星期${WEEKDAYS[d.getDay()]}</h1>
   </div></div>
-  <a href="#quotes" class="quote-mini">🍵 ${esc(q[1])}</a>
+  <a href="#money" class="quote-mini">💰 這個月花了 $${spent.toLocaleString()}${s.prefs.moneyBudget ? ` · 預算還剩 $${Math.max(0, s.prefs.moneyBudget - spent).toLocaleString()}` : ''} ›</a>
   <div class="grid two">
     <section class="card"><h2>☀️ 今天</h2>${classes.map(classRow).join('')}${
       todays.length || !classes.length ? list(todays, { showDate: false }, classes.length ? '' : '今天沒有安排') : ''}</section>
@@ -110,14 +104,7 @@ export function renderHome(s) {
       todos.length ? todos.slice(0, 6).map(x => todoRow(x)).join('') : '<div class="empty">沒有待辦事項</div>'}</section>
     <section class="card"><h2>🗓️ 接下來 7 天</h2>${list(week, {}, '這週沒有其他事')}</section>
     <section class="card"><h2>📖 讀書 <a href="#study" class="sub" style="font-weight:400">今天 ${fmtMin(minutesOn(t))} · 7 天 ${fmtMin(weekMinutes())} ›</a></h2>${
-      topics.length ? topics.map(tp => {
-        const p = topicPct(tp);
-        return `<a href="#study" class="ev"><span class="bar" style="background:${esc(tp.color)}"></span>
-          <div class="main"><div class="title">${esc(tp.name)}</div>
-          <div class="progress" style="margin-top:6px"><div style="width:${p}%;background:${esc(tp.color)}"></div></div></div>
-          <span class="badge">${p}%</span></a>`;
-      }).join('') : '<div class="empty">還沒有自學主題，到「讀書」新增一個吧</div>'
-    }</section>
+      subjBars() || '<div class="empty">這 7 天還沒有讀書紀錄，到「讀書」開個番茄鐘吧</div>'}</section>
   </div>`;
 }
 
@@ -292,8 +279,8 @@ export function renderTodo(s) {
 function subjectOptions(cur) {
   const opt = (v, label) => `<option value="${v}" ${v === cur ? 'selected' : ''}>${esc(label)}</option>`;
   return opt('', '自由讀書')
-    + (S.state.courses.length ? `<optgroup label="課程">${S.state.courses.map(c => opt(`c:${c.id}`, c.name)).join('')}</optgroup>` : '')
-    + (S.state.topics.length ? `<optgroup label="自學主題">${S.state.topics.map(t => opt(`t:${t.id}`, t.name)).join('')}</optgroup>` : '');
+    + (studyTags().length ? `<optgroup label="標籤">${studyTags().map(g => opt(`g:${g.id}`, g.name)).join('')}</optgroup>` : '')
+    + (S.state.courses.length ? `<optgroup label="課程">${S.state.courses.map(c => opt(`c:${c.id}`, c.name)).join('')}</optgroup>` : '');
 }
 
 function timerCard() {
@@ -304,7 +291,9 @@ function timerCard() {
   return `<section class="card timer ${focus ? '' : 'rest'}">
     <div class="row"><h2 style="margin:0">${focus ? '🍅 專注' : '☕ 休息'}</h2><span class="spacer"></span>
       <div class="seg">${['25/5', '50/10', '15/3'].map(p => `<button data-action="timer-len" data-len="${p}" class="${p === preset ? 'on' : ''}">${p}</button>`).join('')}</div></div>
-    <select data-action="timer-subject" class="timer-subject" ${timer.running && focus ? 'disabled' : ''}>${subjectOptions(timer.subject)}</select>
+    <div class="row timer-subject-row">
+      <select data-action="timer-subject" class="timer-subject" ${timer.running && focus ? 'disabled' : ''}>${subjectOptions(timer.subject)}</select>
+      <button class="btn small" data-action="tags-manage" title="新增／修改標籤">🏷️ 標籤</button></div>
     <div class="clock" id="timer-clock">${fmtClock(leftMs())}</div>
     <div class="progress"><div id="timer-bar" style="width:${pct}%;background:${focus ? 'var(--accent)' : 'var(--ok)'}"></div></div>
     <div class="row wrap" style="margin-top:12px;justify-content:center">
@@ -323,11 +312,6 @@ function statsCard() {
   const days = [];
   for (let i = 6; i >= 0; i--) { const ds = addDays(t, -i); days.push([ds, minutesOn(ds)]); }
   const max = Math.max(60, ...days.map(d => d[1]));
-  const from = addDays(t, -6);
-  const bySubj = {};
-  for (const x of S.state.sessions) if (x.date >= from) bySubj[x.subject || ''] = (bySubj[x.subject || ''] || 0) + (x.minutes || 0);
-  const subj = Object.entries(bySubj).sort((a, b) => b[1] - a[1]);
-  const smax = Math.max(1, ...subj.map(x => x[1]));
   const recent = [...S.state.sessions].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).slice(0, 5);
 
   return `<section class="card">
@@ -337,62 +321,29 @@ function statsCard() {
     <div class="bars">${days.map(([ds, m]) => `<div class="bcol ${ds === t ? 'today' : ''}" title="${fmtDate(ds)} ${m} 分">
       <span class="bval">${m || ''}</span><div class="bfill" style="height:${Math.round(m / max * 100)}%"></div>
       <span class="blabel">${WEEKDAYS[parseYmd(ds).getDay()]}</span></div>`).join('')}</div>
-    ${subj.map(([k, m]) => { const i = subjectInfo(k); return `<div class="subj"><span>${esc(i.name)}</span>
-      <div class="progress" style="flex:1"><div style="width:${Math.round(m / smax * 100)}%;background:${esc(i.color)}"></div></div><span class="sub">${fmtMin(m)}</span></div>`; }).join('')}
+    ${subjBars()}
     ${recent.length ? `<div class="sub" style="margin:10px 0 2px">最近紀錄</div>${recent.map(x => `<div class="goal">
       <div class="text">${fmtDate(x.date, false)} · ${esc(subjectInfo(x.subject).name)} · ${x.minutes} 分</div>
       <button class="del" data-action="del-session" data-id="${x.id}" aria-label="刪除">✕</button></div>`).join('')}` : ''}
   </section>`;
 }
 
-function topicCard(t) {
-  const p = topicPct(t);
-  const goals = t.goals || [];
-  const cd = t.targetDate ? countdown(t.targetDate) : null;
-  const open = ui.openTopics.has(t.id);
-  const next = goals.find(g => !g.done);
-  const mins = weekMinutes(x => x.subject === `t:${t.id}`);
-  const goalRow = g => `<div class="goal ${g.done ? 'done' : ''}">
-      <button class="check ${g.done ? 'on' : ''}" data-action="toggle-goal" data-id="${t.id}" data-goal="${g.id}" aria-label="完成">${g.done ? '✓' : ''}</button>
-      <div class="text" data-action="edit-goal" data-id="${t.id}" data-goal="${g.id}" title="點一下改文字">${esc(g.text)}</div>
-      ${open ? `<button class="del" data-action="del-goal" data-id="${t.id}" data-goal="${g.id}" aria-label="刪除">✕</button>` : ''}
-    </div>`;
-  return `<section class="card topic">
-    <div class="head" data-action="topic-open" data-id="${t.id}">
-      <span class="bar" style="width:6px;height:22px;border-radius:4px;background:${esc(t.color)}"></span>
-      <div class="name">${esc(t.name)}</div>
-      ${cd ? `<span class="badge ${cd.cls}" title="目標日 ${fmtDate(t.targetDate)}">${cd.text}</span>` : ''}
-      <button class="btn small" data-action="topic-focus" data-id="${t.id}" title="用番茄鐘讀這個主題">▶ 專注</button>
-      <span class="fold">${open ? '▾' : '▸'}</span>
-    </div>
-    <div class="row" style="margin-bottom:6px">
-      <div class="progress" style="flex:1"><div style="width:${p}%;background:${esc(t.color)}"></div></div>
-      <span class="sub">${goals.filter(g => g.done).length}/${goals.length} · ${p}%${mins ? ` · 7 天 ${fmtMin(mins)}` : ''}</span>
-    </div>
-    ${open ? `
-      ${!t.note ? '' : t.note.length > 160 || t.note.includes('|')
-        ? `<details class="note-box"><summary>📝 筆記</summary><div class="md">${mdLite(t.note)}</div></details>`
-        : `<div class="sub" style="margin-bottom:6px">${esc(t.note)}</div>`}
-      ${goals.map(goalRow).join('')}
-      <form class="add-goal" data-form="add-goal" data-id="${t.id}">
-        <input type="text" name="text" placeholder="新增小目標，例如：看完第 3 章" autocomplete="off">
-        <button class="btn" type="submit">加入</button>
-      </form>
-      <div class="row" style="margin-top:8px"><span class="spacer"></span><button class="btn small ghost" data-action="edit-topic" data-id="${t.id}">編輯主題</button></div>`
-    : next ? `<div class="sub" style="margin-top:4px">下一步</div>${goalRow(next)}`
-    : `<div class="sub" style="margin-top:4px">${goals.length ? '全部完成 🎉' : '還沒有小目標，點標題展開來新增'}</div>`}
-  </section>`;
+// 最近 7 天每個科目／標籤讀了多久
+function subjBars() {
+  const from = addDays(today(), -6);
+  const bySubj = {};
+  for (const x of S.state.sessions) if (x.date >= from) bySubj[x.subject || ''] = (bySubj[x.subject || ''] || 0) + (x.minutes || 0);
+  const subj = Object.entries(bySubj).sort((a, b) => b[1] - a[1]);
+  const smax = Math.max(1, ...subj.map(x => x[1]));
+  return subj.map(([k, m]) => { const i = subjectInfo(k); return `<div class="subj"><span>${esc(i.name)}</span>
+      <div class="progress" style="flex:1"><div style="width:${Math.round(m / smax * 100)}%;background:${esc(i.color)}"></div></div><span class="sub">${fmtMin(m)}</span></div>`; }).join('');
 }
 
 export function renderStudy(s) {
   S = s;
-  const topics = [...s.state.topics].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
-  return `<div class="page-head"><h1>讀書</h1></div>
+  return `<div class="page-head"><h1>讀書</h1><span class="sub">用「🏷️ 標籤」自己分類，例如 Meeting、論文、面試準備</span></div>
     ${rewardMini()}
-    <div class="grid two">${timerCard()}${statsCard()}</div>
-    <div class="page-head" style="margin-top:22px"><h2 style="margin:0;font-size:20px">🌱 自學主題</h2>
-      <button class="btn primary" data-action="new-topic">＋ 新增主題</button></div>
-    <div class="grid two">${topics.map(topicCard).join('') || '<div class="card"><div class="empty">把想自學的東西拆成小目標，一個一個打勾。<br>例如：ROS2 → 裝好環境、寫第一個 node、做 TF 練習…</div></div>'}</div>`;
+    <div class="grid two">${timerCard()}${statsCard()}</div>`;
 }
 
 // 番茄鐘每秒更新：只改數字和進度條，不重畫整頁
@@ -410,35 +361,6 @@ export function tickWorkView() {
   for (const el of document.querySelectorAll('.live[data-since]')) {
     el.textContent = fmtElapsed(+el.dataset.base + Math.max(0, Date.now() - +el.dataset.since));
   }
-}
-
-// ---------- 心靈雞湯 ----------
-export function renderQuotes(s) {
-  S = s;
-  const favs = s.prefs.favQuotes || [];
-  const i = ui.quote ?? quoteOfDay(today());
-  const [cat, text] = QUOTES[i];
-  const fav = favs.includes(i);
-  const cats = Object.entries(QUOTE_CATS);
-  const shown = QUOTES.map((q, n) => [n, q]).filter(([, q]) => ui.quoteCat === 'fav' ? false : ui.quoteCat === 'all' || q[0] === ui.quoteCat);
-  return `<div class="page-head"><h1>心靈雞湯</h1><span class="sub">讀不下去的時候來這裡喘口氣</span></div>
-    <section class="card quote-card">
-      <div class="sub">${ui.quote == null ? '今日一句' : '隨機一句'} · ${QUOTE_CATS[cat]}</div>
-      <div class="quote-text">${esc(text)}</div>
-      <div class="row wrap" style="justify-content:center">
-        <button class="btn primary" data-action="quote-next">🎲 換一句</button>
-        <button class="btn" data-action="quote-fav" data-i="${i}">${fav ? '💛 已收藏' : '🤍 收藏'}</button>
-        <a class="btn" href="#study">🍅 好，去讀 25 分鐘</a>
-      </div>
-    </section>
-    <div class="chips" style="margin:16px 0 10px">
-      <button data-action="quote-cat" data-key="all" class="${ui.quoteCat === 'all' ? 'on' : ''}">全部</button>
-      ${cats.map(([k, l]) => `<button data-action="quote-cat" data-key="${k}" class="${ui.quoteCat === k ? 'on' : ''}">${l}</button>`).join('')}
-      <button data-action="quote-cat" data-key="fav" class="${ui.quoteCat === 'fav' ? 'on' : ''}">💛 收藏 ${favs.length || ''}</button>
-    </div>
-    <section class="card">${(ui.quoteCat === 'fav' ? favs.filter(n => QUOTES[n]).map(n => [n, QUOTES[n]]) : shown)
-      .map(([n, q]) => `<div class="quote-row" data-action="quote-show" data-i="${n}">${favs.includes(n) ? '💛 ' : ''}${esc(q[1])}</div>`).join('')
-      || '<div class="empty">還沒有收藏，看到喜歡的按「收藏」</div>'}</section>`;
 }
 
 // ---------- 設定 ----------
@@ -465,8 +387,9 @@ export function renderSettings(s) {
     <section class="card"><h2>☁️ 同步</h2>${sync}</section>
     <section class="card"><div class="row" style="margin-bottom:8px"><h2 style="margin:0">📘 課表</h2><span class="spacer"></span>
       <button class="btn small" data-action="new-course">＋ 新增課程</button></div>
+      ${timetable(courses)}
       ${courses.length ? courses.map(c => `<div class="ev" data-action="edit-course" data-id="${c.id}"><span class="bar" style="background:${esc(c.color)}"></span>
-        <div class="main"><div class="title">${esc(c.name)}</div><div class="meta">${fmtSlots(c.slots)}${c.room ? ` · ${esc(c.room)}` : ''}</div></div></div>`).join('')
+        <div class="main"><div class="title">${esc(c.name)}</div><div class="meta">${fmtSlotTimes(c.slots) || '還沒填上課時間'}${c.room ? ` · ${esc(c.room)}` : ''}</div></div></div>`).join('')
         : '<div class="empty">還沒有課程。可以一門一門新增，或用「加入檔案」匯入課表 JSON。</div>'}
     </section>
     <section class="card"><h2>🎨 背景顏色</h2>
@@ -486,6 +409,6 @@ export function renderSettings(s) {
     <section class="card"><h2>📱 裝到 iPhone</h2>
       <div class="sub">用 <b>Safari</b> 打開這個網址 → 點下方「分享」⬆️ → 「加入主畫面」。之後從主畫面打開就是全螢幕 App。</div>
     </section>
-    <section class="card"><h2>ℹ️ 關於</h2><div class="sub">學習儀表板 v0.5 · ${s.mode === 'cloud' ? '雲端模式' : '本機模式'} · ${s.state.events.length} 個行程、${s.state.todos.length} 個待辦、${courses.length} 門課、${s.state.topics.length} 個自學主題</div></section>
+    <section class="card"><h2>ℹ️ 關於</h2><div class="sub">學習儀表板 v0.8 · ${s.mode === 'cloud' ? '雲端模式' : '本機模式'} · ${s.state.events.length} 個行程、${s.state.todos.length} 個待辦、${courses.length} 門課、${s.state.cards.length} 張字卡、${s.state.expenses.length} 筆帳</div></section>
   </div>`;
 }
