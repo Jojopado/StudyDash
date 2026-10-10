@@ -2,7 +2,7 @@
 import { firebaseConfig } from './firebase-config.js';
 
 const LS_KEY = 'studydash.v1';
-const COLS = ['events', 'topics', 'todos', 'courses', 'sessions'];
+const COLS = ['events', 'topics', 'todos', 'courses', 'sessions', 'inv_meta', 'inv_orders', 'inv_divs', 'inv_snaps'];
 const PREFS_KEY = 'studydash.prefs';
 const EMPTY = () => Object.fromEntries(COLS.map(c => [c, []]));
 const pick = data => Object.fromEntries(COLS.map(c => [c, data[c] || []]));
@@ -57,7 +57,7 @@ function localBackend() {
       commit();
     },
     remove(col, id) { data[col] = (data[col] || []).filter(d => d.id !== id); commit(); },
-    async replaceAll(next) { data = pick(next); commit(); },
+    async replaceAll(next) { data = { ...data, ...Object.fromEntries(COLS.filter(c => Array.isArray(next[c])).map(c => [c, next[c]])) }; commit(); },
     putPrefs() { /* 本機模式只存 localStorage */ },
   };
 }
@@ -107,7 +107,8 @@ function cloudBackend(uid) {
     async replaceAll(next) {
       // Firestore 一個 batch 上限 500 筆，分批寫
       const ops = [];
-      for (const col of COLS) {
+      // 備份檔裡沒有的資料（例如舊備份沒有模擬投資）就不動
+      for (const col of COLS.filter(c => Array.isArray(next[c]))) {
         const existing = await getDocs(colRef(col));
         existing.forEach(s => ops.push(['del', col, s.id]));
         for (const d of next[col] || []) ops.push(['set', col, d]);
@@ -190,6 +191,9 @@ export function saveCourse(c) { backend.put('courses', { ...c, updatedAt: Date.n
 export function deleteCourse(id) { backend.remove('courses', id); }
 export function saveSession(x) { backend.put('sessions', { ...x, updatedAt: Date.now() }); }
 export function deleteSession(id) { backend.remove('sessions', id); }
+// 模擬投資等其他集合用
+export function saveDoc(col, d) { backend.put(col, { ...d, updatedAt: Date.now() }); }
+export function removeDoc(col, id) { backend.remove(col, id); }
 
 // ---------- 外觀設定 ----------
 function readPrefs() {

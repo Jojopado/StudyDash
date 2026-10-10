@@ -10,6 +10,7 @@ import {
 import { parseSlots, fmtSlots } from './courses.js';
 import * as T from './timer.js';
 import { QUOTES } from './quotes.js';
+import { renderInvest, initInvest, invActions, submitOrder, submitNote } from './invest-view.js';
 
 const $ = sel => document.querySelector(sel);
 const view = $('#view');
@@ -17,7 +18,7 @@ const fab = $('#fab');
 const backdrop = $('#sheet-backdrop');
 const sheet = $('#sheet');
 
-const ROUTES = { home: renderHome, calendar: renderCalendar, todo: renderTodo, study: renderStudy, quotes: renderQuotes, settings: renderSettings };
+const ROUTES = { home: renderHome, calendar: renderCalendar, todo: renderTodo, study: renderStudy, invest: renderInvest, quotes: renderQuotes, settings: renderSettings };
 const route = () => (location.hash.slice(1) in ROUTES ? location.hash.slice(1) : 'home');
 
 // ---------- 畫面 ----------
@@ -42,7 +43,7 @@ function render() {
 
   view.innerHTML = store.ready ? ROUTES[r](store) : '<div class="sub">載入中…</div>';
   document.querySelectorAll('#nav a').forEach(a => a.classList.toggle('active', a.dataset.tab === r));
-  fab.hidden = r === 'settings' || r === 'quotes';
+  fab.hidden = r === 'settings' || r === 'quotes' || r === 'invest';
 
   if (keep) {
     const sel = `form[data-form="${keep.form}"]${keep.id ? `[data-id="${keep.id}"]` : ''} [name="${keep.name}"]`;
@@ -437,6 +438,8 @@ const actions = {
   logout: async () => { if (confirm('確定登出？登出後這台裝置看不到雲端資料。')) { await logout(); toast('已登出'); } },
 };
 
+Object.assign(actions, invActions);
+
 document.addEventListener('click', ev => {
   if (ev.target === backdrop) { closeSheet(); return; }
   const el = ev.target.closest('[data-action]');
@@ -533,6 +536,10 @@ document.addEventListener('submit', async ev => {
     saveTopic({ ...t, goals: [...(t.goals || []), { id: newId(), text, done: false }] });
     const input = view.querySelector(`form[data-id="${t.id}"] [name=text]`);
     if (input) { input.value = ''; input.focus(); }
+  } else if (kind === 'inv-order') {
+    await submitOrder(form);
+  } else if (kind === 'inv-note') {
+    await submitNote(form);
   } else if (kind === 'login') {
     const mode = ev.submitter?.value || 'login';
     try {
@@ -593,6 +600,7 @@ document.addEventListener('visibilitychange', () => {
 subscribe(render);
 render();
 initStore();
+initInvest({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW 註冊失敗', e));
