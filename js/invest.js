@@ -217,6 +217,14 @@ export async function fetchMonth(code, ym) {
   inv.days.set(key, { at: Date.now(), rows });
   return rows;
 }
+// 新聞：[[code, name], …] → { items: { code: [{ t, u, s, at }] }, ann: [{ c, t, body, at }], error }
+export async function fetchNews(pairs) {
+  const spec = pairs.map(([c, n]) => `${c}:${n.replace(/[,:]/g, ' ')}`).join(',');
+  const data = await api(`/news?days=3&s=${encodeURIComponent(spec)}`);
+  if (!data?.items) throw new Error('中繼站還沒有新聞功能，要把新版 worker/quote-proxy.js 重新部署到 Cloudflare');
+  return data;
+}
+
 export async function fetchBars(code, months = 3) {
   const now = twNow().ymd;
   const yms = [];

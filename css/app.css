@@ -514,3 +514,15 @@ input.money-date { width: auto; padding: 4px 8px; }
 .lesson-ok { color: var(--ok); font-weight: 700; }
 .lesson .md { font-size: 14px; margin-top: 8px; }
 .lesson .md-table table { min-width: 0; width: 100%; }
+
+/* ---------- 新聞 ---------- */
+.news-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; padding: 8px 0; border-top: 1px solid var(--line); }
+.news-row:first-of-type { border-top: 0; }
+.news-row .news-title { flex: 1 1 100%; order: 1; }
+.news-row .sub { order: 2; font-size: 12px; }
+.news-tag { order: 0; font-size: 11px; padding: 1px 7px; border-radius: 999px; background: var(--card2); color: var(--muted); }
+a.news-row:hover .news-title { text-decoration: underline; }
+.news-row.ann { display: block; }
+.news-row.ann summary { display: flex; flex-wrap: wrap; gap: 2px 8px; cursor: pointer; list-style: none; }
+.news-row.ann summary::-webkit-details-marker { display: none; }
+.news-body { white-space: pre-wrap; font-size: 13px; color: var(--muted); margin-top: 6px; }

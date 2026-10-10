@@ -11,7 +11,108 @@ export const invUi = {
   query: '',         // 自選股搜尋
   bars: new Map(),   // code → 日 K（畫面用）
   loading: false,
+  newsCode: 'all',   // 新聞卡篩選哪一檔
+  newsAll: false,    // 新聞卡展開全部
 };
+
+// ---------- 新聞（打開這頁時抓，30 分鐘內不重抓；中繼站那邊也快取 30 分鐘） ----------
+const NEWS_KEY = 'studydash.inv.news';
+const NEWS_TTL = 30 * 60e3;
+let news = readNews();   // { key, at, data, error }
+let newsBusy = false;
+const oneNews = new Map(); // 個股頁：code → { at, data }
+function readNews() { try { return JSON.parse(localStorage.getItem(NEWS_KEY)) || null; } catch { return null; } }
+
+// 持有＋自選（不含預設的 0050 對照組，除非自己加進自選）
+function newsCodes() {
+  const a = I.account();
+  const set = new Set(I.ledger().positions.map(p => p.code));
+  for (const c of a?.watch || []) set.add(c);
+  return [...set].slice(0, 12);
+}
+
+async function ensureNews(force = false) {
+  const codes = newsCodes();
+  const key = [...codes].sort().join(',');
+  if (!codes.length || newsBusy) return;
+  if (!force && news && news.key === key && Date.now() - news.at < NEWS_TTL) return;
+  newsBusy = true;
+  try {
+    const data = await I.fetchNews(codes.map(c => [c, I.nameOf(c)]));
+    news = { key, at: Date.now(), data, error: data.error || '' };
+    try { localStorage.setItem(NEWS_KEY, JSON.stringify(news)); } catch { /* ignore */ }
+  } catch (e) {
+    news = { ...(news || { data: null }), key, at: Date.now(), error: e.message || String(e) };
+  } finally {
+    newsBusy = false;
+  }
+  if (isActive()) ctx.render();
+}
+
+async function ensureOneNews(code) {
+  const hit = oneNews.get(code);
+  if (hit && (hit.busy || Date.now() - hit.at < NEWS_TTL)) return;
+  oneNews.set(code, { at: Date.now(), busy: true, data: hit?.data || null });
+  try {
+    const data = await I.fetchNews([[code, I.nameOf(code)]]);
+    oneNews.set(code, { at: Date.now(), data });
+  } catch (e) {
+    oneNews.set(code, { at: Date.now(), data: hit?.data || null, error: e.message || String(e) });
+  }
+  if (isActive() && invUi.code === code) ctx.render();
+}
+
+function ago(at) {
+  const m = Math.max(0, Math.round((Date.now() - at) / 60000));
+  if (m < 60) return `${m || 1} 分鐘前`;
+  if (m < 24 * 60) return `${Math.round(m / 60)} 小時前`;
+  return `${Math.round(m / 1440)} 天前`;
+}
+
+function newsRows(items, ann, withTag) {
+  const tag = c => (withTag ? `<span class="news-tag">${esc(I.nameOf(c))}</span>` : '');
+  return ann.map(a => `<details class="news-row ann">
+      <summary>${tag(a.c)}<span class="news-title">📢 ${esc(a.t)}</span><span class="sub">重大訊息 · ${ago(a.at)}</span></summary>
+      <div class="news-body">${esc(a.body)}</div></details>`).join('')
+    + items.map(x => `<a class="news-row" href="${esc(x.u)}" target="_blank" rel="noopener">
+      ${tag(x.c)}<span class="news-title">${esc(x.t)}</span><span class="sub">${esc(x.s)} · ${ago(x.at)}</span></a>`).join('');
+}
+
+function newsCard() {
+  const codes = newsCodes();
+  if (!codes.length) return `<div class="card"><h2>📰 新聞</h2><div class="empty">加自選股或買了股票之後，這裡會出現那些公司最近 3 天的新聞。</div></div>`;
+  ensureNews();
+  const d = news?.key === [...codes].sort().join(',') ? news.data : news?.data;
+  const head = `<div class="row" style="margin-bottom:8px"><h2 style="margin:0">📰 新聞</h2><span class="spacer"></span>
+    <span class="sub">${newsBusy ? '更新中…' : news?.at ? `持有＋自選 · 最近 3 天 · ${new Date(news.at).toTimeString().slice(0, 5)} 更新` : ''}</span>
+    <button class="btn small ghost" data-action="inv-news-refresh" ${newsBusy ? 'disabled' : ''}>⟳</button></div>`;
+  if (!d) return `<div class="card">${head}<div class="empty">${news?.error ? `抓不到新聞：${esc(news.error)}` : '載入中…'}</div></div>`;
+  const has = codes.filter(c => (d.items[c] || []).length || d.ann.some(a => a.c === c));
+  const f = has.includes(invUi.newsCode) ? invUi.newsCode : 'all';
+  const items = codes.filter(c => f === 'all' || c === f).flatMap(c => (d.items[c] || []).map(x => ({ ...x, c }))).sort((a, b) => b.at - a.at);
+  const ann = d.ann.filter(a => f === 'all' || a.c === f).sort((a, b) => b.at - a.at);
+  const limit = invUi.newsAll ? 999 : 10;
+  const chip = (k, label) => `<button type="button" data-action="inv-news-filter" data-code="${k}" class="${k === f ? 'on' : ''}">${esc(label)}</button>`;
+  return `<div class="card">${head}
+    ${has.length > 1 ? `<div class="chips" style="margin-bottom:6px">${chip('all', '全部')}${has.map(c => chip(c, I.nameOf(c))).join('')}</div>` : ''}
+    ${news.error ? `<div class="sub" style="margin-bottom:6px">部分來源抓不到：${esc(news.error)}</div>` : ''}
+    ${items.length || ann.length ? newsRows(items.slice(0, limit), ann, f === 'all') : '<div class="empty">最近 3 天沒有相關新聞。</div>'}
+    ${items.length > limit ? `<button class="btn small ghost" data-action="inv-news-more" style="margin-top:6px">再顯示 ${items.length - limit} 則</button>` : ''}
+    <div class="sub inv-note">新聞來自 Google 新聞（抓不到時用鉅亨網）的搜尋，可能混到名字相近的其他新聞；📢 是公司在公開資訊觀測站發的重大訊息（只有上市公司）。</div>
+  </div>`;
+}
+
+function stockNewsCard(code) {
+  const fromBatch = news?.data?.items?.[code] ? news.data : null;
+  if (!fromBatch) ensureOneNews(code);
+  const d = fromBatch || oneNews.get(code)?.data;
+  const err = oneNews.get(code)?.error;
+  const items = (d?.items?.[code] || []).map(x => ({ ...x, c: code }));
+  const ann = (d?.ann || []).filter(a => a.c === code);
+  return `<div class="card" style="margin-top:14px"><h2>📰 最近 3 天的新聞</h2>
+    ${!d ? `<div class="empty">${err ? `抓不到新聞：${esc(err)}` : '載入中…'}</div>`
+      : items.length || ann.length ? newsRows(items, ann, false) : '<div class="empty">最近 3 天沒有相關新聞。</div>'}</div>`;
+}
 
 let ctx = null; // { openSheet, closeSheet, toast, render, sheetData, isActive }
 const isActive = () => location.hash === '#invest';
@@ -424,6 +525,7 @@ function stockPage(meta, L) {
       </div>
       <div class="card"><h2>日 K（近 3 個月）</h2>${kChart(code)}</div>
     </div>
+    ${stockNewsCard(code)}
     ${trades.length ? `<div class="card" style="margin-top:14px"><h2>我在這檔的交易</h2>${trades.map(o => `<div class="inv-row" data-action="inv-trade" data-id="${o.id}">
         <span class="side ${o.side}">${sideLabel(o)}</span>
         <div class="nm"><b>${md(o.fill.day)} · ${qty(o)} @ ${fmtPrice(o.fill.price)}</b><span class="sub">${o.note ? esc(o.note) : '（沒寫理由）'}</span></div>
@@ -453,7 +555,7 @@ export function renderInvest() {
   if (invUi.code) return stockPage(meta, L);
   return `${head}<div class="grid">
     <div class="grid two">${summary(L, meta)}${equityChart(meta)}</div>
-    <div class="grid two"><div class="grid">${holdingsCard(L)}${openOrdersCard()}</div><div class="grid">${watchCard(meta)}</div></div>
+    <div class="grid two" style="align-items:start"><div class="grid">${holdingsCard(L)}${openOrdersCard()}</div><div class="grid">${watchCard(meta)}${newsCard()}</div></div>
     <div class="grid two"><div class="grid">${historyCard()}</div><div class="grid">${upcomingDivs()}${learnCard()}${rulesCard()}</div></div></div>`;
 }
 
@@ -607,6 +709,9 @@ export const invActions = {
     loadBars(el.dataset.code);
   },
   'inv-back': () => { invUi.code = null; ctx.render(); },
+  'inv-news-filter': el => { invUi.newsCode = el.dataset.code; invUi.newsAll = false; ctx.render(); },
+  'inv-news-more': () => { invUi.newsAll = true; ctx.render(); },
+  'inv-news-refresh': () => { ensureNews(true); ctx.render(); },
   'inv-watch-add': el => {
     const a = I.account(); if (!a) return;
     if (!a.watch.includes(el.dataset.code)) I.setWatch([...a.watch, el.dataset.code]);

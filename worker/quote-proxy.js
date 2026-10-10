@@ -9,6 +9,7 @@
 //   /search?q=環球               用名稱／代號找股票（上市＋上櫃）
 // 注意：櫃買中心擋 Cloudflare 的連線，上櫃的日 K 和配息改用 Yahoo 股市的資料。
 //   /holidays                   今年休市日
+//   /news?s=2330:台積電,0050:元大台灣50&days=3   每檔最近的新聞（Google 新聞，被擋就用鉅亨網）＋今天的重大訊息（證交所，只有上市）
 
 const ALLOW = [/^https:\/\/jojopado\.github\.io$/, /^http:\/\/localhost(:\d+)?$/, /^http:\/\/127\.0\.0\.1(:\d+)?$/];
 const UA = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36', Accept: 'application/json,text/plain,*/*' };
@@ -139,6 +140,73 @@ async function holidays() {
   return j.map(r => ({ d: rocDate(r.Date), n: r.Name, trade: /(開始|最後)交易/.test(r.Name) })).filter(r => r.d);
 }
 
+// ---------- 新聞 ----------
+const unxml = s => s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
+  .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
+const xmlTag = (x, t) => { const m = new RegExp(`<${t}[^>]*>([\\s\\S]*?)</${t}>`).exec(x); return m ? unxml(m[1]).trim() : ''; };
+
+async function googleNews(code, name, days) {
+  const q = `"${name}" OR "${code}" when:${days}d`;
+  const r = await fetch(`https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=zh-TW&gl=TW&ceid=TW:zh-Hant`,
+    { headers: { 'User-Agent': UA['User-Agent'] } });
+  if (!r.ok) throw new Error(`news.google.com ${r.status}`);
+  const xml = await r.text();
+  const seen = new Set();
+  const out = [];
+  for (const m of xml.matchAll(/<item>([\s\S]*?)<\/item>/g)) {
+    const src = xmlTag(m[1], 'source');
+    let t = xmlTag(m[1], 'title');
+    if (src && t.endsWith(` - ${src}`)) t = t.slice(0, -(src.length + 3));
+    if (!t || seen.has(t)) continue;
+    seen.add(t);
+    out.push({ t, u: xmlTag(m[1], 'link'), s: src, at: Date.parse(xmlTag(m[1], 'pubDate')) || 0 });
+  }
+  const since = Date.now() - days * 86400e3;
+  return out.filter(x => x.at >= since).sort((a, b) => b.at - a.at).slice(0, 5);
+}
+
+// Google 擋掉時改用鉅亨網的關鍵字搜尋
+async function cnyesNews(name, days) {
+  const j = await getJson(`https://ess.api.cnyes.com/ess/api/v1/news/keyword?q=${encodeURIComponent(name)}&limit=10&page=1`);
+  const since = Date.now() - days * 86400e3;
+  return (j.data?.items || []).map(x => ({
+    t: unxml(String(x.title || '').replace(/<[^>]+>/g, '')).trim(),
+    u: `https://news.cnyes.com/news/id/${x.newsId}`, s: '鉅亨網', at: (x.publishAt || 0) * 1000,
+  })).filter(x => x.t && x.at >= since).slice(0, 5);
+}
+
+async function stockNews(code, name, days) {
+  try { return await googleNews(code, name, days); }
+  catch (e) {
+    const list = await cnyesNews(name, days);
+    return list.length ? list : cnyesNews(code, days);   // ETF 全名常常搜不到，改用代號
+  }
+}
+
+// 證交所「上市公司每日重大訊息」（只有最近一天）
+async function announcements(codes) {
+  const rows = await getJson('https://openapi.twse.com.tw/v1/opendata/t187ap04_L');
+  const want = new Set(codes);
+  const get = (r, k) => String(r[Object.keys(r).find(x => x.trim() === k)] ?? '').trim();
+  return rows.filter(r => want.has(get(r, '公司代號'))).map(r => {
+    const d = rocDate(get(r, '發言日期'));
+    const tm = get(r, '發言時間').padStart(6, '0');
+    return {
+      c: get(r, '公司代號'), t: get(r, '主旨'), body: get(r, '說明').slice(0, 800),
+      at: d ? Date.parse(`${d}T${tm.slice(0, 2)}:${tm.slice(2, 4)}:${tm.slice(4, 6)}+08:00`) || 0 : 0,
+    };
+  });
+}
+
+async function news(spec, days) {
+  const pairs = spec.split(',').map(x => x.split(':')).filter(([c, n]) => isCode(c) && n).slice(0, 12);
+  days = Math.min(7, Math.max(1, days || 3));
+  const errors = [];
+  const lists = await Promise.all(pairs.map(([c, n]) => stockNews(c, n.slice(0, 20), days).catch(e => { errors.push(e.message); return []; })));
+  const ann = await announcements(pairs.map(p => p[0])).catch(e => { errors.push(e.message); return []; });
+  return { items: Object.fromEntries(pairs.map(([c], i) => [c, lists[i]])), ann, error: errors[0] || '' };
+}
+
 // ---------- 路由 ----------
 const ROUTES = {
   '/rt': { ttl: 4, run: q => realtime(q.get('ch') || '') },
@@ -151,6 +219,7 @@ const ROUTES = {
   '/div': { ttl: 3 * 3600, run: q => dividends(q.get('otc') || '') },
   '/search': { ttl: 3600, run: q => search(q.get('q') || '') },
   '/holidays': { ttl: 86400, run: () => holidays() },
+  '/news': { ttl: 1800, run: q => news(q.get('s') || '', +q.get('days') || 3) },
 };
 
 function corsHeaders(origin) {
