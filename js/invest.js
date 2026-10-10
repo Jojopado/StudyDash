@@ -164,17 +164,34 @@ async function cached(key, maxAgeMs, path, map = x => x) {
   }
 }
 
+// 櫃買中心擋 Cloudflare，上櫃清單抓不到時用 App 內建的（js/otc-list.json）
+let otcBuiltin = null;
+async function builtinOtc() {
+  if (!otcBuiltin) otcBuiltin = fetch(new URL('./otc-list.json', import.meta.url)).then(r => r.json()).then(j => j.items).catch(() => []);
+  return otcBuiltin;
+}
+
 export async function loadBasics() {
   if (!configured()) return;
+  // 持有或掛單中的上櫃股：配息要另外查
+  const otcHeld = [...new Set(store.state.inv_orders.filter(o => o.m === 'otc' && o.status !== 'cancelled').map(o => o.code))].sort().join(',');
   const [list, hol, div] = await Promise.all([
     cached('list', 12 * 3600e3, '/list'),
     cached('holidays', 3 * 86400e3, '/holidays', rows => Object.fromEntries(rows.map(r => [r.d, { n: r.n, trade: r.trade }]))),
-    cached('div', 3 * 3600e3, '/div').catch(() => []),
+    cached('div.' + otcHeld, 3 * 3600e3, `/div?otc=${otcHeld}`).catch(() => []),
   ]);
+  if (!list.items.some(x => x.m === 'otc')) list.items = [...list.items, ...await builtinOtc()];
   inv.list = list.items;
   inv.byCode = new Map(list.items.map(x => [x.c, x]));
   holidayMap = hol;
   inv.divList = div;
+}
+
+// 本機清單找不到時，問 mis 的名稱查詢（新上市櫃的股票也找得到）
+export async function searchRemote(q) {
+  const rows = await api(`/search?q=${encodeURIComponent(q)}`);
+  for (const x of rows) if (!inv.byCode.has(x.c)) { const item = { ...x, p: null }; inv.byCode.set(x.c, item); inv.list.push(item); }
+  return rows;
 }
 
 export const marketOf = code => inv.byCode.get(code)?.m || inv.quotes.get(code)?.m || 'tse';
@@ -318,9 +335,13 @@ export async function settle(now = twNow()) {
       if (!isTradingDay(o.tradeDay)) {
         next = ended(o, `${o.tradeDay} 休市${holidayName(o.tradeDay) ? `（${holidayName(o.tradeDay)}）` : ''}`, now.ms);
       } else {
-        let bar;
-        try { bar = await barOn(o.code, o.tradeDay); } catch { continue; } // 抓不到資料就下次再算
+        let bar = null;
+        try { bar = await barOn(o.code, o.tradeDay); } catch { /* 下面用即時報價補 */ }
+        // 日 K 還沒更新或抓不到：即時報價如果就是那一天的，用它的開高低收
+        const q = inv.quotes.get(o.code);
+        if (!bar && q?.d === o.tradeDay && q.o != null && q.z != null) bar = [q.d, q.o, q.h, q.l, q.z, q.v];
         if (!bar) {
+          if (inv.days.get(`${o.code}:${o.tradeDay.slice(0, 7).replace('-', '')}`) == null) continue; // 抓不到資料就下次再算
           // 當天沒有成交資料：可能是颱風假或停牌；等隔天資料都齊了再判定
           if (o.tradeDay < addDay(now.ymd, -1)) next = ended(o, '當天沒有成交（停牌或休市）', now.ms);
         } else {

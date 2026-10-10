@@ -5,11 +5,13 @@
 //   /rt?ch=tse_2330,otc_6488   即時報價（約 5 秒延遲）
 //   /list                       全部上市＋上櫃股票／ETF（代號、名稱、市場、昨收）
 //   /day?code=2330&m=tse&ym=202610   某個月的日 K
-//   /div                        即將除權息的清單
+//   /div?otc=6488,8440          即將除權息的清單（上櫃另外用 Yahoo 查持有的幾檔）
+//   /search?q=環球               用名稱／代號找股票（上市＋上櫃）
+// 注意：櫃買中心擋 Cloudflare 的連線，上櫃的日 K 和配息改用 Yahoo 股市的資料。
 //   /holidays                   今年休市日
 
 const ALLOW = [/^https:\/\/jojopado\.github\.io$/, /^http:\/\/localhost(:\d+)?$/, /^http:\/\/127\.0\.0\.1(:\d+)?$/];
-const UA = { 'User-Agent': 'Mozilla/5.0 StudyDash', Accept: 'application/json,text/plain,*/*' };
+const UA = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0 Safari/537.36', Accept: 'application/json,text/plain,*/*' };
 
 const num = s => {
   const n = parseFloat(String(s ?? '').replace(/,/g, ''));
@@ -21,6 +23,8 @@ function rocDate(s) {
   return m ? `${+m[1] + 1911}-${m[2]}-${m[3]}` : null;
 }
 const isCode = c => /^\d{4,6}[A-Z]?$/.test(c);
+// 股票＝4 碼、特別股＝4 碼＋字母、ETF＝00 開頭；其他 6 碼（權證）不要
+const isStock = c => /^\d{4}[A-Z]?$/.test(c) || /^00\d{2,4}[A-Z]?$/.test(c);
 
 async function getJson(url) {
   const r = await fetch(url, { headers: UA, cf: { cacheTtl: 0 } });
@@ -53,32 +57,58 @@ async function realtime(ch) {
 async function stockList() {
   const [tse, otc] = await Promise.all([
     getJson('https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL'),
-    getJson('https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes'),
+    getJson('https://www.tpex.org.tw/openapi/v1/tpex_mainboard_daily_close_quotes').catch(() => []), // 被擋時 App 用內建的上櫃清單
   ]);
   const out = [];
-  for (const r of tse) if (isCode(r.Code)) out.push({ c: r.Code, n: r.Name.trim(), m: 'tse', p: num(r.ClosingPrice) });
-  for (const r of otc) if (isCode(r.SecuritiesCompanyCode)) out.push({ c: r.SecuritiesCompanyCode, n: r.CompanyName.trim(), m: 'otc', p: num(r.Close) });
+  for (const r of tse) if (isStock(r.Code)) out.push({ c: r.Code, n: r.Name.trim(), m: 'tse', p: num(r.ClosingPrice) });
+  for (const r of otc) if (isStock(r.SecuritiesCompanyCode)) out.push({ c: r.SecuritiesCompanyCode, n: r.CompanyName.trim(), m: 'otc', p: num(r.Close) });
   return { date: rocDate(tse[0]?.Date || '') || null, items: out };
 }
 
 // ---------- 日 K ----------
+const r2 = x => (x == null ? null : Math.round(x * 100) / 100);
+const twYmd = sec => new Date(sec * 1000 + 8 * 3600e3).toISOString().slice(0, 10);
+
+async function yahooChart(code, m, query) {
+  const sym = `${code}.${m === 'otc' ? 'TWO' : 'TW'}`;
+  const j = await getJson(`https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&${query}`);
+  const r = j.chart?.result?.[0];
+  if (!r) throw new Error(j.chart?.error?.description || 'Yahoo 沒有資料');
+  return r;
+}
+
 async function daily(code, m, ym) {
   if (!isCode(code) || !/^\d{6}$/.test(ym)) throw new Error('參數不對');
-  let rows;
-  if (m === 'otc') {
-    const j = await getJson(`https://www.tpex.org.tw/www/zh-tw/afterTrading/tradingStock?code=${code}&date=${ym.slice(0, 4)}/${ym.slice(4)}/01&response=json`);
-    rows = j.tables?.[0]?.data || [];
-    // 櫃買的成交量單位是「張」
-    return rows.map(r => [rocDate(r[0]), num(r[3]), num(r[4]), num(r[5]), num(r[6]), num(r[1])]).filter(r => r[0] && r[4] != null);
+  if (m !== 'otc') {
+    try {
+      const j = await getJson(`https://www.twse.com.tw/rwd/zh/afterTrading/STOCK_DAY?date=${ym}01&stockNo=${code}&response=json`);
+      // 證交所的成交量單位是「股」→ 換成張
+      return (j.data || []).map(r => [rocDate(r[0]), num(r[3]), num(r[4]), num(r[5]), num(r[6]), Math.round((num(r[1]) || 0) / 1000)]).filter(r => r[0] && r[4] != null);
+    } catch { /* 證交所暫時抓不到就改用 Yahoo */ }
   }
-  const j = await getJson(`https://www.twse.com.tw/rwd/zh/afterTrading/STOCK_DAY?date=${ym}01&stockNo=${code}&response=json`);
-  rows = j.data || [];
-  // 證交所的成交量單位是「股」→ 換成張
-  return rows.map(r => [rocDate(r[0]), num(r[3]), num(r[4]), num(r[5]), num(r[6]), Math.round((num(r[1]) || 0) / 1000)]).filter(r => r[0] && r[4] != null);
+  const y = +ym.slice(0, 4), mo = +ym.slice(4);
+  const p1 = Date.UTC(y, mo - 1, 1) / 1000 - 8 * 3600, p2 = Date.UTC(y, mo, 1) / 1000 - 8 * 3600;
+  const r = await yahooChart(code, m, `period1=${p1}&period2=${p2}`);
+  const q = r.indicators?.quote?.[0] || {};
+  const out = [];
+  (r.timestamp || []).forEach((t, i) => {
+    if (q.close?.[i] == null || q.open?.[i] == null) return;
+    out.push([twYmd(t), r2(q.open[i]), r2(q.high[i]), r2(q.low[i]), r2(q.close[i]), Math.round((q.volume?.[i] || 0) / 1000)]);
+  });
+  return out.filter(row => row[0].replace('-', '').slice(0, 6) === ym);
+}
+
+// ---------- 搜尋（mis 的名稱查詢，上市上櫃都有）----------
+async function search(q) {
+  q = q.trim().slice(0, 20);
+  if (!q) return [];
+  const j = await getJson(`https://mis.twse.com.tw/stock/api/getStockNames.jsp?n=${encodeURIComponent(q)}`);
+  return (j.datas || []).map(d => ({ c: d.c, n: d.n, m: String(d.key || '').startsWith('otc_') ? 'otc' : 'tse' }))
+    .filter(d => isStock(d.c)).slice(0, 20);
 }
 
 // ---------- 除權息預告 ----------
-async function dividends() {
+async function dividends(otcCodes) {
   const [tse, otc] = await Promise.all([
     getJson('https://openapi.twse.com.tw/v1/exchangeReport/TWT48U_ALL').catch(() => []),
     getJson('https://www.tpex.org.tw/openapi/v1/tpex_exright_prepost').catch(() => []),
@@ -91,6 +121,13 @@ async function dividends() {
   for (const r of otc) {
     const d = rocDate(r.ExRrightsExDividendDate);
     if (d && isCode(r.SecuritiesCompanyCode)) out.push({ c: r.SecuritiesCompanyCode, d, cash: num(r.CashDividend) || 0, stock: num(r.StockDividendRatio) || 0 });
+  }
+  // 櫃買被擋時：持有的上櫃股用 Yahoo 查最近的配息（只有現金股利）
+  if (!otc.length) {
+    const codes = otcCodes.split(',').filter(isCode).slice(0, 15);
+    const lists = await Promise.all(codes.map(c => yahooChart(c, 'otc', 'range=6mo&events=div').then(r =>
+      Object.values(r.events?.dividends || {}).map(e => ({ c, d: twYmd(e.date), cash: r2(e.amount) || 0, stock: 0 }))).catch(() => [])));
+    out.push(...lists.flat());
   }
   return out;
 }
@@ -111,7 +148,8 @@ const ROUTES = {
     ttl: q => (q.get('ym') === new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 7).replace('-', '') ? 600 : 7 * 86400),
     run: q => daily(q.get('code') || '', q.get('m') || 'tse', q.get('ym') || ''),
   },
-  '/div': { ttl: 3 * 3600, run: () => dividends() },
+  '/div': { ttl: 3 * 3600, run: q => dividends(q.get('otc') || '') },
+  '/search': { ttl: 3600, run: q => search(q.get('q') || '') },
   '/holidays': { ttl: 86400, run: () => holidays() },
 };
 

@@ -181,6 +181,7 @@ function watchCard(meta) {
   if (q) {
     const lq = q.toLowerCase();
     const hits = (inv.list || []).filter(x => x.c.startsWith(q) || x.n.toLowerCase().includes(lq)).slice(0, 8);
+    if (hits.length < 3) remoteSearch(q);
     results = `<div class="inv-results">${hits.length ? hits.map(x => `<div class="inv-row" data-action="inv-stock" data-code="${x.c}">
         <div class="nm"><b>${esc(x.n)}</b><span class="sub">${x.c} · ${x.m === 'otc' ? '上櫃' : '上市'}${I.isEtf(x.c) ? ' · ETF' : ''}</span></div>
         <div class="num"><b>${fmtPrice(x.p)}</b><span class="sub">昨收</span></div>
@@ -200,6 +201,17 @@ function watchCard(meta) {
   return `<div class="card"><h2>自選股</h2>
     <form data-form="inv-search" class="inv-search" onsubmit="return false"><input type="search" name="q" value="${esc(invUi.query)}" placeholder="🔍 代號或名稱，例如 2330、台積電、0056" autocomplete="off"></form>
     ${results}${rows || '<div class="empty">還沒有自選股</div>'}</div>`;
+}
+
+let remoteTimer = null;
+const remoteDone = new Set();
+function remoteSearch(q) {
+  if (q.length < 2 || remoteDone.has(q)) return;
+  clearTimeout(remoteTimer);
+  remoteTimer = setTimeout(async () => {
+    remoteDone.add(q);
+    try { const rows = await I.searchRemote(q); if (rows.length && invUi.query.trim() === q) ctx.render(); } catch { /* 查不到就算了 */ }
+  }, 400);
 }
 
 function historyCard() {
