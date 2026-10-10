@@ -1,6 +1,6 @@
 // 自己的檔案：先抓網路（有更新馬上生效），離線時用快取。
 // Firebase SDK（網址含版本號，不會變）：快取優先。
-const CACHE = 'studydash-v10';
+const CACHE = 'studydash-v11';
 const SHELL = [
   './', './index.html', './css/app.css', './manifest.webmanifest',
   './js/app.js', './js/store.js', './js/views.js', './js/util.js', './js/courses.js', './js/timer.js', './js/quotes.js', './js/firebase-config.js',
@@ -36,8 +36,9 @@ self.addEventListener('fetch', e => {
 
   if (url.origin !== location.origin) return; // Firestore 等 API 不經過快取
 
+  // no-cache：每次都跟 GitHub 確認有沒有新版（沒變只回 304，很快），不吃瀏覽器 10 分鐘的 HTTP 快取
   e.respondWith(
-    fetch(req).then(res => {
+    fetch(req, { cache: 'no-cache' }).then(res => {
       if (res.ok) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); }
       return res;
     }).catch(() => caches.match(req, { ignoreSearch: true }).then(hit => hit || caches.match('./index.html'))),
