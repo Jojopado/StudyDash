@@ -15,6 +15,7 @@ import { renderMoney, initMoney, moneyActions, moneyForms } from './money.js';
 import { renderCards, initCards, cardActions, cardForms, cardsKey } from './cards.js';
 import { renderMemo, initMemo, memoActions, memoForms, memoKey } from './memo.js';
 import { renderDocs, initDocs, docActions, docForms } from './docs.js';
+import { renderQuiz, initQuiz, quizActions, quizKey, quizTick } from './quiz.js';
 import { isDragging } from './drag.js';
 
 const $ = sel => document.querySelector(sel);
@@ -24,12 +25,12 @@ const backdrop = $('#sheet-backdrop');
 const sheet = $('#sheet');
 
 const ROUTES = {
-  home: renderHome, calendar: renderCalendar, todo: renderTodo, study: renderStudy, cards: renderCards, money: renderMoney, memo: renderMemo, docs: renderDocs,
+  home: renderHome, calendar: renderCalendar, todo: renderTodo, study: renderStudy, cards: renderCards, money: renderMoney, memo: renderMemo, docs: renderDocs, quiz: renderQuiz,
   invest: renderInvest, settings: renderSettings,
 };
 // 手機底部放不下的，收在「更多」裡（電腦版側邊欄全部列出）
-const MORE = ['memo', 'docs', 'invest', 'settings'];
-const NO_FAB = ['settings', 'invest', 'money', 'cards', 'memo', 'docs'];
+const MORE = ['memo', 'docs', 'quiz', 'invest', 'settings'];
+const NO_FAB = ['settings', 'invest', 'money', 'cards', 'memo', 'docs', 'quiz'];
 const route = () => (location.hash.slice(1) in ROUTES ? location.hash.slice(1) : 'home');
 
 // ---------- 畫面 ----------
@@ -250,6 +251,7 @@ function openMoreSheet() {
   openSheet(`<h2>更多</h2><div class="more-list">
     ${item('#memo', '📝', '隨手記', '怕忘記的事先記下來，用標籤分類')}
     ${item('#docs', '📄', '文件', 'PDF 放上來，手機電腦都能看')}
+    ${item('#quiz', '🎯', '測驗', '證照考古題選擇題、錯題本、模擬考')}
     ${item('#invest', '📈', '模擬投資', '台股真實報價、投資入門')}
     ${item('#settings', '⚙️', '設定', '同步、課表、背景、備份')}
   </div>`, { kind: 'more' });
@@ -302,6 +304,7 @@ function timerTick() {
   tickWorkView();
 }
 setInterval(timerTick, 1000);
+setInterval(quizTick, 1000);
 
 const fmtSpent = ms => { const m = Math.floor(ms / 60000); return m >= 60 ? `${Math.floor(m / 60)} 小時 ${m % 60} 分` : `${m} 分`; };
 
@@ -447,7 +450,7 @@ const actions = {
   logout: async () => { if (confirm('確定登出？登出後這台裝置看不到雲端資料。')) { await logout(); toast('已登出'); } },
 };
 
-Object.assign(actions, invActions, learnActions, moneyActions, cardActions, memoActions, docActions);
+Object.assign(actions, invActions, learnActions, moneyActions, cardActions, memoActions, docActions, quizActions);
 const moduleForms = { ...moneyForms, ...cardForms, ...memoForms, ...docForms };
 
 document.addEventListener('click', ev => {
@@ -594,7 +597,7 @@ document.addEventListener('change', async ev => {
 document.addEventListener('keydown', ev => {
   if (ev.key === 'Escape' && !backdrop.hidden) { closeSheet(); return; }
   if (memoKey(ev)) { ev.preventDefault(); return; }
-  if (backdrop.hidden && cardsKey(ev)) ev.preventDefault();
+  if (backdrop.hidden && (cardsKey(ev) || quizKey(ev))) ev.preventDefault();
 });
 
 // ---------- 啟動 ----------
@@ -621,6 +624,7 @@ initMoney({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.dat
 initCards({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
 initMemo({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
 initDocs({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
+initQuiz({ openSheet, closeSheet, toast, render });
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW 註冊失敗', e));
