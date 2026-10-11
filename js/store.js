@@ -2,7 +2,7 @@
 import { firebaseConfig } from './firebase-config.js';
 
 const LS_KEY = 'studydash.v1';
-const COLS = ['events', 'topics', 'todos', 'courses', 'sessions', 'inv_meta', 'inv_orders', 'inv_divs', 'inv_snaps', 'rw_redeems', 'expenses', 'decks', 'cards', 'memos'];
+const COLS = ['events', 'topics', 'todos', 'courses', 'sessions', 'inv_meta', 'inv_orders', 'inv_divs', 'inv_snaps', 'rw_redeems', 'expenses', 'decks', 'cards', 'memos', 'docs'];
 const PREFS_KEY = 'studydash.prefs';
 const EMPTY = () => Object.fromEntries(COLS.map(c => [c, []]));
 const pick = data => Object.fromEntries(COLS.map(c => [c, data[c] || []]));
@@ -194,6 +194,50 @@ export function deleteSession(id) { backend.remove('sessions', id); }
 // 模擬投資等其他集合用
 export function saveDoc(col, d) { backend.put(col, { ...d, updatedAt: Date.now() }); }
 export function removeDoc(col, id) { backend.remove(col, id); }
+
+// ---------- PDF 檔案內容 ----------
+// 切成 900KB 一塊存在 users/{uid}/doc_chunks/{檔案id}_{序號}（Firestore 一筆上限 1MB）。
+// 不在 COLS 裡：不會即時同步，要看的時候才下載。
+export const CHUNK = 900 * 1024;
+
+async function pool(n, limit, fn) {
+  let next = 0;
+  const worker = async () => { while (next < n) await fn(next++); };
+  await Promise.all(Array.from({ length: Math.min(limit, n) }, worker));
+}
+const chunkRef = (fileId, i) => fb.fsMod.doc(fb.db, 'users', store.user.uid, 'doc_chunks', `${fileId}_${i}`);
+
+export async function uploadChunks(fileId, u8, onProgress) {
+  if (store.mode !== 'cloud') throw new Error('沒有登入');
+  const { setDoc, Bytes } = fb.fsMod;
+  const n = Math.max(1, Math.ceil(u8.length / CHUNK));
+  let done = 0;
+  await pool(n, 3, async i => {
+    await setDoc(chunkRef(fileId, i), { fileId, i, data: Bytes.fromUint8Array(u8.subarray(i * CHUNK, (i + 1) * CHUNK)) });
+    onProgress?.(++done, n);
+  });
+  return n;
+}
+
+export async function downloadChunks(fileId, n, size, onProgress) {
+  if (store.mode !== 'cloud') throw new Error('要登入才能從雲端下載');
+  const { getDoc } = fb.fsMod;
+  const out = new Uint8Array(size);
+  let done = 0;
+  await pool(n, 4, async i => {
+    const snap = await getDoc(chunkRef(fileId, i));
+    if (!snap.exists()) throw new Error('雲端的檔案不完整，請重新加入');
+    out.set(snap.data().data.toUint8Array(), i * CHUNK);
+    onProgress?.(++done, n);
+  });
+  return out;
+}
+
+export async function deleteChunks(fileId, n) {
+  if (store.mode !== 'cloud' || !n) return;
+  const { deleteDoc } = fb.fsMod;
+  await pool(n, 6, i => deleteDoc(chunkRef(fileId, i)));
+}
 
 // ---------- 外觀設定 ----------
 function readPrefs() {

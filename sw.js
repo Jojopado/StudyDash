@@ -1,11 +1,14 @@
 // 自己的檔案：先抓網路（有更新馬上生效），離線時用快取。
 // Firebase SDK（網址含版本號，不會變）：快取優先。
-const CACHE = 'studydash-v18';
+const CACHE = 'studydash-v19';
+// pdf.js 的中文字型對照檔（cmaps），從 CDN 抓一次就留著，換版也不清
+const PDF_CACHE = 'studydash-pdfjs';
 const SHELL = [
   './', './index.html', './css/app.css', './manifest.webmanifest',
   './js/app.js', './js/store.js', './js/views.js', './js/util.js', './js/courses.js', './js/timer.js', './js/firebase-config.js',
   './js/invest.js', './js/invest-view.js', './js/invest-config.js', './js/otc-list.json',
   './js/invest-learn.js', './js/money.js', './js/cards.js', './js/memo.js', './js/drag.js',
+  './js/docs.js', './js/filecache.js', './js/vendor/pdf.min.js', './js/vendor/pdf.worker.min.js',
   './icons/icon-180.png', './icons/icon-192.png', './icons/icon-512.png',
 ];
 
@@ -16,7 +19,7 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE && k !== PDF_CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });
@@ -32,6 +35,14 @@ self.addEventListener('fetch', e => {
       caches.open(CACHE).then(c => c.put(req, copy));
       return res;
     })));
+    return;
+  }
+
+  if (url.hostname === 'cdn.jsdelivr.net' && url.pathname.startsWith('/npm/pdfjs-dist@')) {
+    e.respondWith(caches.open(PDF_CACHE).then(c => c.match(req).then(hit => hit || fetch(req).then(res => {
+      if (res.ok) c.put(req, res.clone());
+      return res;
+    }))));
     return;
   }
 

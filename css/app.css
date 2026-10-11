@@ -604,3 +604,41 @@ a.news-row:hover .news-title { text-decoration: underline; }
 .memo-home { margin-bottom: 14px; }
 .memo-home .memo-add textarea { min-height: 120px; }
 @media (pointer: coarse) { .drag-handle { font-size: 18px; padding: 10px 8px 10px 0; opacity: .7; } }
+
+/* ---------- 文件（PDF） ---------- */
+.vh { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+.doc-add { position: relative; cursor: pointer; }
+.doc-filters { margin-bottom: 12px; }
+.doc-filters .n { opacity: .6; font-size: 12px; }
+.doc-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); cursor: pointer; }
+.doc-list > .doc-row:first-child, .doc-ups + .doc-row { border-top: 0; }
+.doc-ico { font-size: 26px; flex: none; }
+.doc-main { flex: 1; min-width: 0; }
+.doc-name { font-weight: 600; overflow-wrap: anywhere; }
+.doc-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 2px; }
+.doc-meta .warn { color: #fbbf24; }
+.doc-up { padding: 8px 0 10px; }
+.doc-up .bar { height: 6px; border-radius: 3px; background: var(--card2); overflow: hidden; margin-top: 6px; }
+.doc-up .bar i { display: block; height: 100%; background: var(--accent); transition: width .2s; }
+.doc-foot { margin-top: 10px; }
+.linklike { border: 0; background: none; padding: 0; color: var(--accent); cursor: pointer; font-size: inherit; }
+@media (pointer: coarse) { .drop-hint { display: none; } }
+body.doc-dropping .doc-list { outline: 2px dashed var(--accent); outline-offset: 4px; }
+
+body.reading { overflow: hidden; }
+.reader { position: fixed; inset: 0; z-index: 40; display: flex; flex-direction: column; background: #3a3d44; }
+.reader-bar {
+  display: flex; align-items: center; gap: 2px; flex: none;
+  padding: calc(var(--safe-top) + 6px) 6px 6px; background: var(--card); border-bottom: 1px solid var(--line);
+}
+.reader-bar .btn { padding: 6px 10px; white-space: nowrap; }
+.reader-bar .btn.on { background: var(--card2); }
+.reader-title { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 6px; }
+.reader-page { font-variant-numeric: tabular-nums; color: var(--muted); }
+.reader-body { flex: 1; overflow: auto; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y; overscroll-behavior: contain; }
+.reader-inner { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 10px 8px calc(var(--safe-bottom) + 30px); width: max-content; min-width: 100%; }
+.reader-pg { position: relative; background: #fff; box-shadow: 0 2px 10px rgba(0, 0, 0, .35); flex: none; }
+.reader-pg canvas { display: block; position: absolute; inset: 0; }
+.reader-pgno { position: absolute; left: 50%; top: 40%; transform: translateX(-50%); color: #bbb; font-size: 28px; }
+.reader-msg { color: #e7e9ee; padding: 40px 20px; text-align: center; max-width: 420px; line-height: 1.6; }
+@media (max-width: 520px) { .reader-fit { display: none; } }

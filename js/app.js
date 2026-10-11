@@ -14,6 +14,7 @@ import { learnActions } from './invest-learn.js';
 import { renderMoney, initMoney, moneyActions, moneyForms } from './money.js';
 import { renderCards, initCards, cardActions, cardForms, cardsKey } from './cards.js';
 import { renderMemo, initMemo, memoActions, memoForms, memoKey } from './memo.js';
+import { renderDocs, initDocs, docActions, docForms } from './docs.js';
 import { isDragging } from './drag.js';
 
 const $ = sel => document.querySelector(sel);
@@ -23,12 +24,12 @@ const backdrop = $('#sheet-backdrop');
 const sheet = $('#sheet');
 
 const ROUTES = {
-  home: renderHome, calendar: renderCalendar, todo: renderTodo, study: renderStudy, cards: renderCards, money: renderMoney, memo: renderMemo,
+  home: renderHome, calendar: renderCalendar, todo: renderTodo, study: renderStudy, cards: renderCards, money: renderMoney, memo: renderMemo, docs: renderDocs,
   invest: renderInvest, settings: renderSettings,
 };
 // 手機底部放不下的，收在「更多」裡（電腦版側邊欄全部列出）
-const MORE = ['memo', 'invest', 'settings'];
-const NO_FAB = ['settings', 'invest', 'money', 'cards', 'memo'];
+const MORE = ['memo', 'docs', 'invest', 'settings'];
+const NO_FAB = ['settings', 'invest', 'money', 'cards', 'memo', 'docs'];
 const route = () => (location.hash.slice(1) in ROUTES ? location.hash.slice(1) : 'home');
 
 // ---------- 畫面 ----------
@@ -248,6 +249,7 @@ function openMoreSheet() {
   const item = (href, ico, label, sub) => `<a class="more-item" href="${href}"><span class="ico">${ico}</span><span><b>${label}</b><span class="sub">${sub}</span></span></a>`;
   openSheet(`<h2>更多</h2><div class="more-list">
     ${item('#memo', '📝', '隨手記', '怕忘記的事先記下來，用標籤分類')}
+    ${item('#docs', '📄', '文件', 'PDF 放上來，手機電腦都能看')}
     ${item('#invest', '📈', '模擬投資', '台股真實報價、投資入門')}
     ${item('#settings', '⚙️', '設定', '同步、課表、背景、備份')}
   </div>`, { kind: 'more' });
@@ -445,8 +447,8 @@ const actions = {
   logout: async () => { if (confirm('確定登出？登出後這台裝置看不到雲端資料。')) { await logout(); toast('已登出'); } },
 };
 
-Object.assign(actions, invActions, learnActions, moneyActions, cardActions, memoActions);
-const moduleForms = { ...moneyForms, ...cardForms, ...memoForms };
+Object.assign(actions, invActions, learnActions, moneyActions, cardActions, memoActions, docActions);
+const moduleForms = { ...moneyForms, ...cardForms, ...memoForms, ...docForms };
 
 document.addEventListener('click', ev => {
   if (ev.target === backdrop) { closeSheet(); return; }
@@ -618,6 +620,7 @@ initInvest({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.da
 initMoney({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
 initCards({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
 initMemo({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
+initDocs({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW 註冊失敗', e));
