@@ -35,6 +35,23 @@ function catChips(io, cur) {
     `<button type="button" data-action="money-cat" data-cat="${k}" class="${k === cur ? 'on' : ''}" style="${k === cur ? `background:${color};border-color:${color}` : ''}">${e} ${label}</button>`).join('');
 }
 
+// 目前資金：設定時輸入當下手上有多少錢（prefs.moneyBase = { amount, at }），
+// 之後新記的收入／支出（createdAt 在設定之後）自動加減
+export function currentFunds() {
+  const base = store.prefs.moneyBase;
+  if (!base) return null;
+  return store.state.expenses.filter(x => (x.createdAt || 0) > base.at)
+    .reduce((n, x) => n + (x.io === 'in' ? 1 : -1) * (x.amount || 0), base.amount);
+}
+
+function fundsCard() {
+  const v = currentFunds();
+  if (v == null) return `<section class="card"><div class="row"><div><div class="sub">💳 目前資金</div><div class="sub">輸入現在手上有多少錢，之後記帳會自動加減</div></div>
+    <span class="spacer"></span><button class="btn small primary" data-action="money-base">＋ 設定</button></div></section>`;
+  return `<section class="card"><div class="row"><div><div class="sub">💳 目前資金</div><div class="money-big ${v < 0 ? 'money-over' : ''}">${v < 0 ? '−' : ''}${fmt(Math.abs(v))}</div></div>
+    <span class="spacer"></span><button class="btn small ghost" data-action="money-base">校正</button></div></section>`;
+}
+
 function summaryCard(list) {
   const out = sum(list, 'out'), inc = sum(list, 'in');
   const budget = store.prefs.moneyBudget || 0;
@@ -117,7 +134,7 @@ export function renderMoney() {
         <button class="btn small" data-action="money-month" data-dir="-1">‹</button>
         <div class="label">${monthLabel(moneyUi.month)}</div>
         <button class="btn small" data-action="money-month" data-dir="1">›</button></div></div>
-    <div class="grid two"><div class="grid">${summaryCard(list)}${addCard()}</div><div class="grid">${breakdownCard(list)}${listCard(list)}</div></div>`;
+    <div class="grid two"><div class="grid">${fundsCard()}${summaryCard(list)}${addCard()}</div><div class="grid">${breakdownCard(list)}${listCard(list)}</div></div>`;
 }
 
 // 首頁小卡用
@@ -189,6 +206,15 @@ export const moneyActions = {
     removeDoc('expenses', x.id);
     ctx.closeSheet();
     ctx.toast('已刪除');
+  },
+  'money-base': () => {
+    const cur = currentFunds();
+    const v = prompt('現在手上總共有多少錢？（現金＋存款，留空取消）', cur ?? '');
+    if (v == null || !String(v).trim()) return;
+    const n = Math.round(Number(String(v).replace(/[,$\s]/g, '')));
+    if (!Number.isFinite(n)) { ctx.toast('看不懂這個數字'); return; }
+    savePrefs({ moneyBase: { amount: n, at: Date.now() } });
+    ctx.toast(`目前資金設為 ${fmt(n)}`);
   },
   'money-budget': () => {
     const v = prompt('每月預算（只算支出，填 0 取消）', store.prefs.moneyBudget || '');

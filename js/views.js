@@ -4,8 +4,7 @@ import {
 } from './util.js';
 import { classesOn, classRow, courseById, fmtSlotTimes, timetable } from './courses.js';
 import { timer, leftMs, fmtClock } from './timer.js';
-import { rewardMini } from './reward-view.js';
-import { monthSpent } from './money.js';
+import { monthSpent, currentFunds } from './money.js';
 import { homeMemoCard } from './memo.js';
 import { saveTodo } from './store.js';
 import { handle, onDrop, between } from './drag.js';
@@ -92,13 +91,14 @@ export function renderHome(s) {
   const week = evs.filter(e => { const n = daysUntil(e.date); return n >= 1 && n <= 7; }).sort(byDateTime);
   const todos = s.state.todos.filter(x => !x.done).sort(workFirst);
   const spent = monthSpent();
+  const funds = currentFunds();
 
   return `${syncBanner(s)}
   <div class="page-head"><div>
     <div class="sub">${d.getFullYear()} 年</div>
     <h1>${d.getMonth() + 1} 月 ${d.getDate()} 日 星期${WEEKDAYS[d.getDay()]}</h1>
   </div></div>
-  <a href="#money" class="quote-mini">💰 這個月花了 $${spent.toLocaleString()}${s.prefs.moneyBudget ? ` · 預算還剩 $${Math.max(0, s.prefs.moneyBudget - spent).toLocaleString()}` : ''} ›</a>
+  <a href="#money" class="quote-mini">${funds != null ? `💳 目前資金 ${funds < 0 ? '−' : ''}$${Math.abs(funds).toLocaleString()} · ` : ''}💰 這個月花了 $${spent.toLocaleString()}${s.prefs.moneyBudget ? ` · 預算還剩 $${Math.max(0, s.prefs.moneyBudget - spent).toLocaleString()}` : ''} ›</a>
   ${homeMemoCard()}
   <div class="grid two">
     <section class="card"><h2>☀️ 今天</h2>${classes.map(classRow).join('')}${
@@ -361,7 +361,6 @@ function subjBars() {
 export function renderStudy(s) {
   S = s;
   return `<div class="page-head"><h1>讀書</h1><span class="sub">用「🏷️ 標籤」自己分類，例如 Meeting、論文、面試準備</span></div>
-    ${rewardMini()}
     <div class="grid two">${timerCard()}${statsCard()}</div>`;
 }
 

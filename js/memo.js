@@ -95,7 +95,7 @@ function pickChips() {
 
 export function quickAdd(formName = 'memo-add', placeholder = '想到什麼先記下來… #標籤') {
   return `<form data-form="${formName}" class="memo-add">
-    <textarea name="text" rows="2" placeholder="${placeholder}" autocomplete="off"></textarea>
+    <textarea name="text" rows="5" placeholder="${placeholder}" autocomplete="off"></textarea>
     <div class="memo-add-bar"><div class="chips memo-picks">${pickChips()}</div>
       <button class="btn primary" type="submit">記下來</button></div>
   </form>`;
