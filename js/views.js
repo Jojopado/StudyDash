@@ -6,6 +6,7 @@ import { classesOn, classRow, courseById, fmtSlotTimes, timetable } from './cour
 import { timer, leftMs, fmtClock } from './timer.js';
 import { rewardMini } from './reward-view.js';
 import { monthSpent } from './money.js';
+import { homeMemoCard } from './memo.js';
 
 // 畫面狀態（不存檔）
 export const ui = {
@@ -96,6 +97,7 @@ export function renderHome(s) {
     <h1>${d.getMonth() + 1} 月 ${d.getDate()} 日 星期${WEEKDAYS[d.getDay()]}</h1>
   </div></div>
   <a href="#money" class="quote-mini">💰 這個月花了 $${spent.toLocaleString()}${s.prefs.moneyBudget ? ` · 預算還剩 $${Math.max(0, s.prefs.moneyBudget - spent).toLocaleString()}` : ''} ›</a>
+  ${homeMemoCard()}
   <div class="grid two">
     <section class="card"><h2>☀️ 今天</h2>${classes.map(classRow).join('')}${
       todays.length || !classes.length ? list(todays, { showDate: false }, classes.length ? '' : '今天沒有安排') : ''}</section>

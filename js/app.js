@@ -15,6 +15,7 @@ import { renderReward, initReward, rwActions } from './reward-view.js';
 import { gainNotice } from './reward.js';
 import { renderMoney, initMoney, moneyActions, moneyForms } from './money.js';
 import { renderCards, initCards, cardActions, cardForms, cardsKey } from './cards.js';
+import { renderMemo, initMemo, memoActions, memoForms, memoKey } from './memo.js';
 
 const $ = sel => document.querySelector(sel);
 const view = $('#view');
@@ -23,12 +24,12 @@ const backdrop = $('#sheet-backdrop');
 const sheet = $('#sheet');
 
 const ROUTES = {
-  home: renderHome, calendar: renderCalendar, todo: renderTodo, study: renderStudy, cards: renderCards, money: renderMoney,
+  home: renderHome, calendar: renderCalendar, todo: renderTodo, study: renderStudy, cards: renderCards, money: renderMoney, memo: renderMemo,
   invest: renderInvest, reward: renderReward, settings: renderSettings,
 };
 // 手機底部放不下的，收在「更多」裡（電腦版側邊欄全部列出）
-const MORE = ['invest', 'reward', 'settings'];
-const NO_FAB = ['settings', 'invest', 'reward', 'money', 'cards'];
+const MORE = ['memo', 'invest', 'reward', 'settings'];
+const NO_FAB = ['settings', 'invest', 'reward', 'money', 'cards', 'memo'];
 const route = () => (location.hash.slice(1) in ROUTES ? location.hash.slice(1) : 'home');
 
 // ---------- 畫面 ----------
@@ -244,6 +245,7 @@ function saveTags(list) {
 function openMoreSheet() {
   const item = (href, ico, label, sub) => `<a class="more-item" href="${href}"><span class="ico">${ico}</span><span><b>${label}</b><span class="sub">${sub}</span></span></a>`;
   openSheet(`<h2>更多</h2><div class="more-list">
+    ${item('#memo', '📝', '隨手記', '怕忘記的事先記下來，用標籤分類')}
     ${item('#invest', '📈', '模擬投資', '台股真實報價、投資入門')}
     ${item('#reward', '🦜', '獎勵', '金幣、鸚鵡、成就')}
     ${item('#settings', '⚙️', '設定', '同步、課表、背景、備份')}
@@ -441,8 +443,8 @@ const actions = {
   logout: async () => { if (confirm('確定登出？登出後這台裝置看不到雲端資料。')) { await logout(); toast('已登出'); } },
 };
 
-Object.assign(actions, invActions, learnActions, rwActions, moneyActions, cardActions);
-const moduleForms = { ...moneyForms, ...cardForms };
+Object.assign(actions, invActions, learnActions, rwActions, moneyActions, cardActions, memoActions);
+const moduleForms = { ...moneyForms, ...cardForms, ...memoForms };
 
 document.addEventListener('click', ev => {
   if (ev.target === backdrop) { closeSheet(); return; }
@@ -588,6 +590,7 @@ document.addEventListener('change', async ev => {
 
 document.addEventListener('keydown', ev => {
   if (ev.key === 'Escape' && !backdrop.hidden) { closeSheet(); return; }
+  if (memoKey(ev)) { ev.preventDefault(); return; }
   if (backdrop.hidden && cardsKey(ev)) ev.preventDefault();
 });
 
@@ -613,6 +616,7 @@ initInvest({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.da
 initReward({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
 initMoney({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
 initCards({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
+initMemo({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW 註冊失敗', e));

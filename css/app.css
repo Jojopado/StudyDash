@@ -526,3 +526,41 @@ a.news-row:hover .news-title { text-decoration: underline; }
 .news-row.ann summary { display: flex; flex-wrap: wrap; gap: 2px 8px; cursor: pointer; list-style: none; }
 .news-row.ann summary::-webkit-details-marker { display: none; }
 .news-body { white-space: pre-wrap; font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+/* ---------- 隨手記 ---------- */
+.memo-layout { display: grid; gap: 14px; }
+@media (min-width: 900px) { .memo-layout { grid-template-columns: 190px 1fr; align-items: start; } }
+.memo-side { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.memo-side::-webkit-scrollbar { display: none; }
+.memo-side button {
+  display: flex; align-items: center; gap: 6px; flex: none; cursor: pointer; color: inherit; font-size: 14px;
+  border: 1px solid var(--line); background: var(--card2); border-radius: 999px; padding: 5px 12px;
+}
+.memo-side button i { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.memo-side button .n { color: var(--muted); font-size: 12px; }
+.memo-side button.on { background: var(--accent); border-color: var(--accent); color: #0b0d12; font-weight: 600; }
+.memo-side button.on .n { color: inherit; }
+@media (min-width: 900px) {
+  .memo-side { flex-direction: column; position: sticky; top: 20px; overflow: visible; max-height: calc(100vh - 40px); overflow-y: auto; }
+  .memo-side button { border: 0; background: transparent; border-radius: 10px; padding: 8px 12px; }
+  .memo-side button span:first-of-type { flex: 1; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .memo-side button:hover { background: var(--card2); }
+  .memo-side button.on { background: var(--card2); color: var(--text); }
+}
+.memo-search input { min-height: 36px; padding: 6px 12px; width: 200px; }
+.memo-add textarea { min-height: 60px; margin-bottom: 8px; }
+.memo-add-bar { display: flex; align-items: flex-start; gap: 8px; }
+.memo-picks { flex: 1; min-width: 0; }
+.memo-picks button { font-size: 13px; padding: 3px 10px; }
+.memo { padding: 10px 0; border-top: 1px solid var(--line); cursor: pointer; }
+.card h2 + .memo, .memo-add + .memo { border-top: 0; }
+.memo-add + .memo { margin-top: 6px; border-top: 1px solid var(--line); }
+.memo.pinned { background: linear-gradient(90deg, rgba(251, 191, 36, .08), transparent 60%); }
+.memo-text { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.5; }
+.memo-text.clamp { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.memo-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.memo-tag { font-size: 12px; padding: 1px 8px; border-radius: 999px; color: var(--c); background: color-mix(in srgb, var(--c) 16%, transparent); }
+.memo-pin { border: 0; background: transparent; cursor: pointer; font-size: 14px; filter: grayscale(1) opacity(.35); padding: 2px 4px; }
+.memo-pin.on { filter: none; }
+.memo-home { margin-bottom: 14px; }
+.memo-home .memo-add textarea { min-height: 44px; }
