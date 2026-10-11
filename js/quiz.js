@@ -1,4 +1,4 @@
-// 測驗（#quiz）：證照考古題選擇題。題庫是靜態 JSON（js/quiz-*.json），離線也能做。
+// 測驗（#quiz）：證照考古題選擇題（IoT 755 題、RFID／EPC 177 題）。題庫是靜態 JSON（js/quiz-*.json），離線也能做。
 // 作答紀錄存在 prefs.quiz[bankId][questionId] = [答對次數, 答錯次數, 最後一次是否答對(1/0)]，跟著帳號同步。
 import { store, savePrefs } from './store.js';
 import { esc } from './util.js';
@@ -6,15 +6,19 @@ import { esc } from './util.js';
 let ctx = null; // { openSheet, closeSheet, toast, render }
 export function initQuiz(c) { ctx = c; }
 
-const BANKS = [{ id: 'rfid', file: 'js/quiz-rfid.json' }];
-const EXAM_SIZE = 40;   // GS1 認證考試 40 題、60 分鐘
+const BANKS = [
+  { id: 'iot', file: 'js/quiz-iot.json', short: 'IoT 物聯網', exam: 50, mins: 60 },
+  { id: 'rfid', file: 'js/quiz-rfid.json', short: 'RFID／EPC', exam: 40, mins: 60 },   // GS1 認證考試 40 題、60 分鐘
+];
+const BANK_KEY = 'studydash.quiz.bank';
+const bankCfg = () => BANKS.find(b => b.id === quizUi.bank) || BANKS[0];
 const L = 'ABCD';
 
 const banks = {};       // id -> 題庫資料（載入後）
 let loading = null;
 
 export const quizUi = {
-  bank: 'rfid',
+  bank: (() => { try { return localStorage.getItem(BANK_KEY) || 'iot'; } catch { return 'iot'; } })(),
   mode: null,           // null | 'practice' | 'exam' | 'result'
   title: '',
   queue: [], idx: 0,
@@ -87,7 +91,10 @@ function homeView() {
         <div class="progress thin"><div style="width:${Math.round(gs.done / gs.total * 100)}%"></div></div></div>
       <button class="btn small" data-action="quiz-group" data-id="${g.id}">▶ 依序做</button></div>`;
   }).join('');
+  const EXAM_SIZE = bankCfg().exam;
+  const tabs = BANKS.map(x => `<button type="button" class="${x.id === quizUi.bank ? 'on' : ''}" style="${x.id === quizUi.bank ? 'background:var(--accent);border-color:var(--accent)' : ''}" data-action="quiz-bank" data-id="${x.id}">${esc(x.short)}${banks[x.id] ? ` · ${banks[x.id].questions.length}` : ''}</button>`).join('');
   return `<div class="page-head"><div><h1>測驗</h1><div class="sub">${esc(b.name)} 考古題 · ${s.total} 題 · 沒網路也能做</div></div></div>
+    <div class="chips" style="margin-bottom:12px">${tabs}</div>
     <section class="card">
       <div class="quiz-stats">
         <div><b>${s.done}</b><span>做過 / ${s.total}</span></div>
@@ -101,7 +108,7 @@ function homeView() {
         <button class="btn" data-action="quiz-wrong" ${s.wrong ? '' : 'disabled'}>🔁 錯題本${s.wrong ? ` ${s.wrong}` : ''}</button>
         <button class="btn" data-action="quiz-exam">📝 模擬考 ${EXAM_SIZE} 題</button>
       </div>
-      <div class="sub" style="margin-top:10px">練習：選完馬上看對錯和解析。模擬考：照正式考試 ${EXAM_SIZE} 題、60 分鐘，交卷後才看答案。答錯的題目會進錯題本，之後答對就會移出。</div>
+      <div class="sub" style="margin-top:10px">練習：選完馬上看對錯和解析。模擬考：${EXAM_SIZE} 題、${bankCfg().mins} 分鐘，交卷後才看答案。答錯的題目會進錯題本，之後答對就會移出。</div>
     </section>
     <h2 class="quiz-h2">題組</h2>
     <section class="card">${groups}</section>
@@ -158,7 +165,14 @@ function resultView() {
   const right = exam ? qs.filter((q, i) => quizUi.answers[i] === q.a).length : quizUi.right;
   const done = exam ? total : quizUi.right + quizUi.wrong;
   const score = done ? Math.round(right / done * 100) : 0;
-  const wrongList = exam ? qs.map((q, i) => ({ q, p: quizUi.answers[i] })).filter(x => x.p !== x.q.a) : [];
+  const all = exam ? qs.map((q, i) => ({ q, p: quizUi.answers[i] })) : [];
+  const wrongList = all.filter(x => x.p !== x.q.a);
+  const rightList = all.filter(x => x.p === x.q.a);
+  const reviewCard = ({ q, p }) => `<section class="card quiz-card">
+      <div class="sub">${esc(groupOf(q.g)?.name || '')} 第 ${q.n} 題</div>
+      <div class="quiz-q">${esc(q.q)}</div>
+      <div class="quiz-opts">${q.o.map((o, i) => (o ? `<div class="quiz-opt ${i === q.a ? 'ok' : i === p ? 'bad' : 'dim'}"><span class="quiz-l">${L[i]}</span><span class="quiz-t">${esc(o)}</span></div>` : '')).join('')}</div>
+      <div class="quiz-ex ${p === q.a ? 'good' : 'bad'}"><b>${p === q.a ? `答對了！答案 ${L[q.a]}` : `${p == null ? '沒作答' : `你選 ${L[p]}`}，答案 ${L[q.a]}`}</b><div>${esc(q.e)}</div></div></section>`;
   const mins = Math.round((quizUi.endAt && exam ? Math.min(Date.now(), quizUi.endAt) : Date.now()) - quizUi.startAt) / 60000;
   return `<div class="page-head"><div><button class="btn ghost small" data-action="quiz-exit">← 回測驗</button><h1>${esc(quizUi.title)}</h1></div></div>
     <section class="card flash-done">
@@ -169,11 +183,8 @@ function resultView() {
         ${stats(bank().questions.map(q => q.id)).wrong ? '<button class="btn" data-action="quiz-wrong">🔁 練錯題本</button>' : ''}
         <button class="btn primary" data-action="quiz-exit">回測驗</button></div>
     </section>
-    ${wrongList.length ? `<h2 class="quiz-h2">答錯的 ${wrongList.length} 題</h2>${wrongList.map(({ q, p }) => `<section class="card quiz-card">
-      <div class="sub">${esc(groupOf(q.g)?.name || '')} 第 ${q.n} 題</div>
-      <div class="quiz-q">${esc(q.q)}</div>
-      <div class="quiz-opts">${q.o.map((o, i) => (o ? `<div class="quiz-opt ${i === q.a ? 'ok' : i === p ? 'bad' : 'dim'}"><span class="quiz-l">${L[i]}</span><span class="quiz-t">${esc(o)}</span></div>` : '')).join('')}</div>
-      <div class="quiz-ex bad"><b>${p == null ? '沒作答' : `你選 ${L[p]}`}，答案 ${L[q.a]}</b><div>${esc(q.e)}</div></div></section>`).join('')}` : ''}`;
+    ${wrongList.length ? `<h2 class="quiz-h2">答錯的 ${wrongList.length} 題</h2>${wrongList.map(reviewCard).join('')}` : ''}
+    ${rightList.length ? `<h2 class="quiz-h2">答對的 ${rightList.length} 題（也看一下解析）</h2>${rightList.map(reviewCard).join('')}` : ''}`;
 }
 
 // ---------- 動作 ----------
@@ -182,7 +193,7 @@ function start(ids, title, mode = 'practice') {
   Object.assign(quizUi, {
     mode, title, queue: ids, idx: 0, picked: null, right: 0, wrong: 0,
     answers: mode === 'exam' ? ids.map(() => null) : [],
-    startAt: Date.now(), endAt: mode === 'exam' ? Date.now() + 60 * 60000 : 0,
+    startAt: Date.now(), endAt: mode === 'exam' ? Date.now() + bankCfg().mins * 60000 : 0,
   });
   ctx.render();
   window.scrollTo(0, 0);
@@ -222,7 +233,12 @@ export const quizActions = {
   'quiz-random': () => start(shuffle(bank().questions.map(q => q.id)), '隨機練習'),
   'quiz-new': () => { const r = rec(); start(shuffle(bank().questions.filter(q => !r[q.id]).map(q => q.id)), '沒做過的題目'); },
   'quiz-wrong': () => { const r = rec(); start(shuffle(bank().questions.filter(q => isWrong(r[q.id])).map(q => q.id)), '錯題本'); },
-  'quiz-exam': () => start(shuffle(bank().questions.map(q => q.id)).slice(0, EXAM_SIZE), '模擬考', 'exam'),
+  'quiz-exam': () => start(shuffle(bank().questions.map(q => q.id)).slice(0, bankCfg().exam), '模擬考', 'exam'),
+  'quiz-bank': el => {
+    quizUi.bank = el.dataset.id;
+    try { localStorage.setItem(BANK_KEY, quizUi.bank); } catch {}
+    ctx.render();
+  },
   'quiz-group': el => { const g = groupOf(el.dataset.id); start(bank().questions.filter(q => q.g === g.id).map(q => q.id), g.name); },
   'quiz-pick': el => pick(+el.dataset.i),
   'quiz-next': next,

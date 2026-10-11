@@ -9,6 +9,16 @@ export function initCards(c) { ctx = c; }
 // 答對一次升一格，下次間隔：0 天（今天再來）、1、2、4、7、15、30 天
 const GAPS = [0, 1, 2, 4, 7, 15, 30];
 
+// 內建卡組（js/cards-preset.json，我幫你從 meeting 簡報、paper 報告整理的）：按「加入」才複製進你的資料，複習進度跟著帳號同步。
+// 卡組記 preset、字卡記 pid，之後內容有補充時可以「補上新卡」而不會重複。
+let presets = null, presetLoading = null;
+function loadPresets() {
+  if (presetLoading) return;
+  presetLoading = fetch('js/cards-preset.json').then(r => r.json())
+    .then(d => { presets = d.decks; ctx.render(); })
+    .catch(() => { presetLoading = null; });
+}
+
 export const cardsUi = {
   deck: null,      // 打開的卡組 id
   mode: null,      // null | 'review'（只複習到期的、要評分）| 'browse'（全部翻一遍）
@@ -36,7 +46,37 @@ export function renderCards() {
   return `<div class="page-head"><div><h1>字卡</h1><div class="sub">${totalDue ? `今天有 ${totalDue} 張要複習` : '今天的複習都完成了'} · 沒網路也能看</div></div>
       <button class="btn primary" data-action="card-deck-new">＋ 新卡組</button></div>
     <div class="grid two">${list.map(deckCard).join('') || `<div class="card"><div class="empty">
-      做一組字卡，通勤、坐火車時拿出來翻。<br>例如：DSP 名詞、日文單字、面試問題…<br>可以一張一張加，也可以整批貼上「正面 | 背面」。</div></div>`}</div>`;
+      做一組字卡，通勤、坐火車時拿出來翻。<br>例如：DSP 名詞、日文單字、面試問題…<br>可以一張一張加，也可以整批貼上「正面 | 背面」。</div></div>`}</div>
+    ${presetSection()}`;
+}
+
+function presetSection() {
+  if (!presets) { loadPresets(); return ''; }
+  const rows = presets.map(p => {
+    const d = store.state.decks.find(x => x.preset === p.preset);
+    const have = d ? new Set(cardsOf(d.id).map(c => c.pid).filter(Boolean)) : null;
+    const missing = have ? p.cards.filter(c => !have.has(c.pid)).length : p.cards.length;
+    if (d && !missing) return '';
+    return `<div class="ev"><div class="main"><div class="title" style="color:${esc(p.color)}">${esc(p.name)}</div>
+        <div class="meta">${p.cards.length} 張 · ${esc(p.desc || '')}</div></div>
+      <button class="btn small primary" data-action="card-preset-add" data-id="${esc(p.preset)}">${d ? `補上 ${missing} 張新卡` : '＋ 加入'}</button></div>`;
+  }).join('');
+  return rows ? `<h2 class="quiz-h2">📦 內建卡組</h2><section class="card">${rows}</section>` : '';
+}
+
+function addPreset(id) {
+  const p = presets?.find(x => x.preset === id);
+  if (!p) return;
+  let d = store.state.decks.find(x => x.preset === id);
+  const t = Date.now();
+  if (!d) {
+    d = { id: newId(), name: p.name, color: p.color, preset: id, createdAt: t };
+    saveDoc('decks', d);
+  }
+  const have = new Set(cardsOf(d.id).map(c => c.pid).filter(Boolean));
+  const add = p.cards.filter(c => !have.has(c.pid));
+  add.forEach((c, i) => saveDoc('cards', { id: newId(), deckId: d.id, pid: c.pid, front: c.front, back: c.back, box: 0, due: '', createdAt: t + 1 + i }));
+  ctx.toast(`「${p.name}」加入 ${add.length} 張`);
 }
 
 function deckCard(d) {
@@ -238,6 +278,7 @@ function grade(g) {
 
 export const cardActions = {
   'card-deck-new': () => openDeckSheet(null),
+  'card-preset-add': el => addPreset(el.dataset.id),
   'card-deck-edit': el => openDeckSheet(findDeck(el.dataset.id)),
   'card-deck-open': el => { cardsUi.deck = el.dataset.id; ctx.render(); window.scrollTo(0, 0); },
   'card-deck-color': el => {
