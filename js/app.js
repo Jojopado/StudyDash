@@ -16,6 +16,7 @@ import { gainNotice } from './reward.js';
 import { renderMoney, initMoney, moneyActions, moneyForms } from './money.js';
 import { renderCards, initCards, cardActions, cardForms, cardsKey } from './cards.js';
 import { renderMemo, initMemo, memoActions, memoForms, memoKey } from './memo.js';
+import { isDragging } from './drag.js';
 
 const $ = sel => document.querySelector(sel);
 const view = $('#view');
@@ -41,7 +42,10 @@ function applyBg() {
   document.querySelector('meta[name=theme-color]')?.setAttribute('content', bg);
 }
 
+let renderLater = false;
 function render() {
+  // 拖曳中先不重畫（不然拖著的那列會被換掉），放開後再畫
+  if (isDragging()) { renderLater = true; return; }
   applyBg();
   const r = route();
   // 重畫時保留正在輸入的欄位（例如另一台裝置同步進來時）
@@ -356,6 +360,12 @@ const actions = {
   'todo-filter': el => { ui.todoFilter = el.dataset.key; render(); },
   'todo-course': el => { ui.todoCourse = el.dataset.key; render(); },
   'todo-show-done': () => { ui.showDoneTodos = !ui.showDoneTodos; render(); },
+  'todo-sort-due': () => {
+    if (!confirm('清掉拖曳的順序，改回照期限排序？')) return;
+    for (const x of store.state.todos) if (x.order != null) { const { order, ...rest } = x; saveTodo(rest); }
+    toast('已改回照期限排序');
+  },
+  noop: () => {},
   'delete-todo': () => {
     if (confirm(`刪除「${sheetCtx.data.title}」？`)) { deleteTodo(sheetCtx.data.id); closeSheet(); toast('已刪除'); }
   },
@@ -610,6 +620,7 @@ document.addEventListener('visibilitychange', () => {
 });
 
 subscribe(render);
+window.addEventListener('drag-end', () => { if (renderLater) { renderLater = false; render(); } });
 render();
 initStore();
 initInvest({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });

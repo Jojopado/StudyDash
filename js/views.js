@@ -7,6 +7,8 @@ import { timer, leftMs, fmtClock } from './timer.js';
 import { rewardMini } from './reward-view.js';
 import { monthSpent } from './money.js';
 import { homeMemoCard } from './memo.js';
+import { saveTodo } from './store.js';
+import { handle, onDrop, between } from './drag.js';
 
 // 畫面狀態（不存檔）
 export const ui = {
@@ -205,7 +207,7 @@ export function shiftMonth(dir) {
 const byDue = (a, b) =>
   (a.due ? 0 : 1) - (b.due ? 0 : 1) || (a.due || '').localeCompare(b.due || '') || (a.createdAt || 0) - (b.createdAt || 0);
 
-function todoRow(x, { showDate = true, steps = false } = {}) {
+function todoRow(x, { showDate = true, steps = false, drag = false } = {}) {
   const ty = TYPES[x.type] || TYPES.other;
   const cd = x.due && !x.done ? countdown(x.due) : null;
   const st = x.steps || [];
@@ -220,8 +222,9 @@ function todoRow(x, { showDate = true, steps = false } = {}) {
   const workBtn = x.done ? ''
     : working ? `<button class="work-btn on" data-action="todo-pause" data-id="${x.id}" aria-label="暫停">⏸</button>`
     : `<button class="work-btn" data-action="todo-start" data-id="${x.id}" aria-label="開始做" title="開始做這件（計時）">▶</button>`;
-  return `<div class="ev ${x.done ? 'done' : ''} ${working ? 'working' : ''}" data-action="edit-todo" data-id="${x.id}">
-    <button class="check ${x.done ? 'on' : ''}" data-action="toggle-todo" data-id="${x.id}" aria-label="完成">${x.done ? '✓' : ''}</button>
+  const dragAttr = drag && !x.done ? ` data-drag-id="${x.id}" data-drag-group="${working ? 'w' : 'n'}"` : '';
+  return `<div class="ev ${x.done ? 'done' : ''} ${working ? 'working' : ''}" data-action="edit-todo" data-id="${x.id}"${dragAttr}>
+    ${dragAttr ? handle() : ''}<button class="check ${x.done ? 'on' : ''}" data-action="toggle-todo" data-id="${x.id}" aria-label="完成">${x.done ? '✓' : ''}</button>
     <span class="bar" style="background:${ty.color}"></span>
     <div class="main"><div class="title">${esc(x.title)}</div><div class="meta">${meta}</div>
       ${st.length && !x.done ? `<div class="progress thin"><div style="width:${Math.round(stDone / st.length * 100)}%;background:${ty.color}"></div></div>` : ''}</div>
@@ -243,8 +246,20 @@ function workingCard(x) {
     </div>
   </section>`;
 }
-// 執行中的排最前面
-const workFirst = (a, b) => (b.workingSince ? 1 : 0) - (a.workingSince ? 1 : 0) || byDue(a, b);
+// 執行中的排最前面；再來是拖曳排過的（order 小的在上），沒拖過的照期限排在後面
+const byOrder = (a, b) => (a.order == null ? 1 : 0) - (b.order == null ? 1 : 0) || (a.order ?? 0) - (b.order ?? 0);
+const workFirst = (a, b) => (b.workingSince ? 1 : 0) - (a.workingSince ? 1 : 0) || byOrder(a, b) || byDue(a, b);
+
+// 拖曳待辦：第一次拖時把所有未完成的待辦照目前順序編號，之後放到上下兩件的中間
+onDrop('todos', (id, beforeId, afterId) => {
+  const open = S.state.todos.filter(x => !x.done).sort(workFirst);
+  const ord = new Map(open.map(x => [x.id, x.order]));
+  if (open.some(x => x.order == null)) {
+    open.forEach((x, i) => { ord.set(x.id, i * 1000); if (x.id !== id) saveTodo({ ...x, order: i * 1000 }); });
+  }
+  const x = open.find(z => z.id === id);
+  if (x) saveTodo({ ...x, order: between(ord.get(beforeId) ?? null, ord.get(afterId) ?? null) });
+});
 
 export function renderTodo(s) {
   S = s;
@@ -266,12 +281,14 @@ export function renderTodo(s) {
       Object.entries(TYPES).map(([k, t]) => chip('todo-filter', k, f, t.label, t.color, count(k, fc))).join('')}</div>
     ${courses.length ? `<div class="chips" style="margin-bottom:12px">${chip('todo-course', 'all', fc, '所有課程', '', 0)}${
       courses.map(c => chip('todo-course', c.id, fc, c.name, c.color, count(f, c.id))).join('')}</div>` : ''}
-    <section class="card">
+    <section class="card" data-drag-list="todos">
+      ${open.length > 1 ? `<div class="sub drag-hint" style="margin:0 0 6px">按住 ⋮⋮ 拖曳，重要的拖到上面${
+        s.state.todos.some(x => x.order != null) ? ' · <button type="button" class="linkish" data-action="todo-sort-due">改回照期限排</button>' : ''}</div>` : ''}
       <form class="add-goal" data-form="add-todo" style="margin:0 0 8px">
         <input type="text" name="title" placeholder="新增${(TYPES[addType] || TYPES.other).label}待辦，例如：DSP 第 3 章習題" autocomplete="off">
         <button class="btn" type="submit">加入</button>
       </form>
-      ${open.length ? open.map(x => todoRow(x, { steps: true })).join('') : '<div class="empty">沒有未完成的待辦 🎉</div>'}
+      ${open.length ? open.map(x => todoRow(x, { steps: true, drag: true })).join('') : '<div class="empty">沒有未完成的待辦 🎉</div>'}
       ${done.length ? `<button class="btn small ghost" data-action="todo-show-done" style="margin-top:8px">${ui.showDoneTodos ? '隱藏' : '顯示'}已完成（${done.length}）</button>
         ${ui.showDoneTodos ? done.map(x => todoRow(x)).join('') : ''}` : ''}
     </section>`;
