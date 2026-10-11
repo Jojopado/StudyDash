@@ -427,6 +427,6 @@ export function renderSettings(s) {
     <section class="card"><h2>📱 裝到 iPhone</h2>
       <div class="sub">用 <b>Safari</b> 打開這個網址 → 點下方「分享」⬆️ → 「加入主畫面」。之後從主畫面打開就是全螢幕 App。</div>
     </section>
-    <section class="card"><h2>ℹ️ 關於</h2><div class="sub">學習儀表板 v0.8 · ${s.mode === 'cloud' ? '雲端模式' : '本機模式'} · ${s.state.events.length} 個行程、${s.state.todos.length} 個待辦、${courses.length} 門課、${s.state.cards.length} 張字卡、${s.state.expenses.length} 筆帳</div></section>
+    <section class="card"><h2>ℹ️ 關於</h2><div class="sub">碩士生活 v0.12 · ${s.mode === 'cloud' ? '雲端模式' : '本機模式'} · ${s.state.events.length} 個行程、${s.state.todos.length} 個待辦、${courses.length} 門課、${s.state.cards.length} 張字卡、${s.state.expenses.length} 筆帳</div></section>
   </div>`;
 }

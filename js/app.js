@@ -429,7 +429,7 @@ const actions = {
 
   export: async () => {
     const json = JSON.stringify(exportData(), null, 2);
-    const name = `學習儀表板備份_${today()}.json`;
+    const name = `碩士生活備份_${today()}.json`;
     const file = new File([json], name, { type: 'application/json' });
     // 手機上用分享面板（可直接存到「檔案」/ iCloud），電腦上直接下載
     if (matchMedia('(pointer: coarse)').matches && navigator.canShare?.({ files: [file] })) {

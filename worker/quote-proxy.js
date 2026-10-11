@@ -1,4 +1,4 @@
-// 學習儀表板・模擬投資用的報價中繼站（Cloudflare Worker）
+// 碩士生活・模擬投資用的報價中繼站（Cloudflare Worker）
 // 證交所／櫃買中心的 API 不讓手機網頁直接抓（CORS），由這裡代抓、整理成精簡格式再回傳。
 // 部署：Cloudflare 後台 → Workers → 建立 → 貼上這整個檔案 → Deploy。
 //
