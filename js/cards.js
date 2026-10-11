@@ -73,10 +73,23 @@ function addPreset(id) {
     d = { id: newId(), name: p.name, color: p.color, preset: id, createdAt: t };
     saveDoc('decks', d);
   }
+  // 舊的內建卡組被拆開（例如 DSP 1013 → CH8、CH9）：舊卡組裡同 pid 的卡直接搬過來，保留複習進度
   const have = new Set(cardsOf(d.id).map(c => c.pid).filter(Boolean));
+  let moved = 0;
+  const old = p.from && store.state.decks.find(x => x.preset === p.from);
+  if (old) {
+    const pids = new Set(p.cards.map(c => c.pid));
+    const left = cardsOf(old.id).filter(c => {
+      if (!pids.has(c.pid)) return true;
+      if (!have.has(c.pid)) { saveDoc('cards', { ...c, deckId: d.id }); have.add(c.pid); moved++; }
+      else removeDoc('cards', c.id);
+      return false;
+    });
+    if (!left.length) removeDoc('decks', old.id);
+  }
   const add = p.cards.filter(c => !have.has(c.pid));
   add.forEach((c, i) => saveDoc('cards', { id: newId(), deckId: d.id, pid: c.pid, front: c.front, back: c.back, box: 0, due: '', createdAt: t + 1 + i }));
-  ctx.toast(`「${p.name}」加入 ${add.length} 張`);
+  ctx.toast(`「${p.name}」加入 ${add.length + moved} 張${moved ? `（${moved} 張從舊卡組搬過來，進度保留）` : ''}`);
 }
 
 function deckCard(d) {
