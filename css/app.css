@@ -621,6 +621,16 @@ a.news-row:hover .news-title { text-decoration: underline; }
 .doc-up .bar { height: 6px; border-radius: 3px; background: var(--card2); overflow: hidden; margin-top: 6px; }
 .doc-up .bar i { display: block; height: 100%; background: var(--accent); transition: width .2s; }
 .doc-foot { margin-top: 10px; }
+.doc-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding-bottom: 10px; }
+.doc-head + .doc-row, .doc-head + .doc-ups { border-top: 1px solid var(--line); }
+.doc-crumbs { display: flex; align-items: center; flex-wrap: wrap; gap: 2px; min-width: 0; font-size: 15px; }
+.doc-crumbs .sep { color: var(--muted); padding: 0 2px; }
+.crumb { border: 0; background: none; padding: 4px 6px; border-radius: 8px; cursor: pointer; color: var(--accent); }
+.crumb.cur { font-weight: 700; color: var(--text); }
+.doc-row.folder .doc-name { font-weight: 600; }
+.doc-kind { font-size: 11px; padding: 0 6px; border-radius: 6px; background: var(--card2); border: 1px solid var(--line); }
+.drop-on { outline: 2px dashed var(--accent); outline-offset: -2px; border-radius: 10px; background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.doc-row[draggable] { -webkit-user-drag: element; }
 .linklike { border: 0; background: none; padding: 0; color: var(--accent); cursor: pointer; font-size: inherit; }
 @media (pointer: coarse) { .drop-hint { display: none; } }
 body.doc-dropping .doc-list { outline: 2px dashed var(--accent); outline-offset: 4px; }
@@ -642,3 +652,10 @@ body.reading { overflow: hidden; }
 .reader-pgno { position: absolute; left: 50%; top: 40%; transform: translateX(-50%); color: #bbb; font-size: 28px; }
 .reader-msg { color: #e7e9ee; padding: 40px 20px; text-align: center; max-width: 420px; line-height: 1.6; }
 @media (max-width: 520px) { .reader-fit { display: none; } }
+/* Word／PPT：整份縮放（layout() 設 zoom） */
+.reader .office { flex: none; }
+.reader .office .docx-wrapper { background: transparent; padding: 0; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.reader .office .docx-wrapper > section.docx { margin: 0; box-shadow: 0 2px 10px rgba(0, 0, 0, .35); }
+.reader .office .pptx-preview-wrapper { background: transparent !important; height: auto !important; overflow: visible !important; }
+.reader .office .pptx-preview-slide-wrapper { margin: 0 auto 10px !important; box-shadow: 0 2px 10px rgba(0, 0, 0, .35); }
+.reader-tip { color: #c9ccd3; font-size: 12px; max-width: min(520px, calc(100vw - 32px)); text-align: center; padding: 0 8px; }
