@@ -17,6 +17,7 @@ export const ui = {
   todoFilter: 'all',  // 'all' | TYPES 的 key
   todoCourse: 'all',  // 'all' | course id
   showDoneTodos: false,
+  logDay: today(),    // 讀書成果看哪一天
 };
 
 let S; // 這次畫面用的 store（每個 render 一開始設定）
@@ -65,6 +66,62 @@ const weekMinutes = (filter = () => true) => {
   const from = addDays(today(), -6);
   return S.state.sessions.filter(x => x.date >= from && filter(x)).reduce((n, x) => n + (x.minutes || 0), 0);
 };
+// ---------- 今天讀了什麼 ----------
+// 一筆紀錄的「內容」：自己寫的 note，沒寫就用待辦標題
+function sessionLabel(x) {
+  if (x.note) return x.note;
+  const t = x.todoId && S.state.todos.find(y => y.id === x.todoId);
+  return t ? t.title : '';
+}
+// 同一天、同科目、同內容的合成一行（例如連續 4 個番茄鐘都讀 DSP CH8）
+export function dayLog(s, ds) {
+  S = s;
+  const m = {};
+  for (const x of s.state.sessions) {
+    if (x.date !== ds) continue;
+    const label = sessionLabel(x), subject = x.subject || '';
+    const g = (m[`${subject}|${label}`] ||= { subject, label, minutes: 0, ids: [] });
+    g.minutes += x.minutes || 0;
+    g.ids.push(x.id);
+  }
+  return Object.values(m).sort((a, b) => b.minutes - a.minutes);
+}
+function logRows(groups) {
+  return groups.map(g => {
+    const i = subjectInfo(g.subject);
+    const name = g.label || i.name;
+    const tag = g.label && g.subject ? `<span class="ctag" style="color:${esc(i.color)}">● ${esc(i.name)}</span>` : '';
+    return `<div class="logrow" data-action="edit-log" data-ids="${g.ids.join(',')}">
+      <span class="dot" style="background:${esc(i.color)}"></span>
+      <div class="main"><div class="title">${esc(name)}</div><div class="meta">${tag}${
+        g.label ? '' : '<span class="sub">點一下寫上讀了什麼</span>'}${g.ids.length > 1 ? `<span class="sub">${tag ? ' · ' : ''}${g.ids.length} 段</span>` : ''}</div></div>
+      <b class="mins">${fmtMin(g.minutes)}</b></div>`;
+  }).join('');
+}
+function logCard() {
+  const ds = ui.logDay, t = today();
+  const groups = dayLog(S, ds);
+  const total = groups.reduce((n, g) => n + g.minutes, 0);
+  const d = parseYmd(ds);
+  const title = ds === t ? '今天' : ds === addDays(t, -1) ? '昨天' : `${d.getMonth() + 1}/${d.getDate()}（${WEEKDAYS[d.getDay()]}）`;
+  return `<section class="card log">
+    <div class="row" style="margin-bottom:4px"><h2 style="margin:0">📒 ${title}讀了什麼</h2><span class="spacer"></span>
+      <div class="seg"><button data-action="log-day" data-d="-1" aria-label="前一天">‹</button>${
+        ds !== t ? '<button data-action="log-day" data-d="0">今天</button>' : ''}<button data-action="log-day" data-d="1" ${ds >= t ? 'disabled' : ''} aria-label="後一天">›</button></div></div>
+    <div class="log-total">${total ? `共 <b>${fmtMin(total)}</b><span class="sub"> · ${groups.length} 項</span>` : ''}</div>
+    ${groups.length ? logRows(groups) : `<div class="empty">${ds === t ? '今天還沒有讀書紀錄，開個番茄鐘吧 💪' : '這天沒有讀書紀錄'}</div>`}
+    ${groups.length ? '<div class="row" style="margin-top:8px"><span class="spacer"></span><button class="btn small" data-action="log-copy">📋 複製成文字</button></div>' : ''}
+  </section>`;
+}
+// 複製用的文字（貼到 LINE／筆記）
+export function logText(s, ds) {
+  const groups = dayLog(s, ds);
+  const total = groups.reduce((n, g) => n + g.minutes, 0);
+  const d = parseYmd(ds);
+  return [`📒 ${d.getMonth() + 1}/${d.getDate()}（${WEEKDAYS[d.getDay()]}）讀書成果：共 ${fmtMin(total)}`,
+    ...groups.map(g => { const n = subjectInfo(g.subject).name; return `・${g.label ? `${g.label}${g.subject ? `（${n}）` : ''}` : n} ${fmtMin(g.minutes)}`; })].join('\n');
+}
+
 const fmtMin = m => (m >= 60 ? `${Math.floor(m / 60)} 小時${m % 60 ? ` ${m % 60} 分` : ''}` : `${m} 分`);
 
 // 待辦花費時間：累計的 spentMs ＋ 正在計時的這段（workingSince 存在雲端，手機電腦看到同一個）
@@ -107,8 +164,8 @@ export function renderHome(s) {
     <section class="card"><h2>✅ 待辦 <a href="#todo" class="sub" style="font-weight:400">（${todos.length} 件）全部 ›</a></h2>${
       todos.length ? todos.slice(0, 6).map(x => todoRow(x)).join('') : '<div class="empty">沒有待辦事項</div>'}</section>
     <section class="card"><h2>🗓️ 接下來 7 天</h2>${list(week, {}, '這週沒有其他事')}</section>
-    <section class="card"><h2>📖 讀書 <a href="#study" class="sub" style="font-weight:400">今天 ${fmtMin(minutesOn(t))} · 7 天 ${fmtMin(weekMinutes())} ›</a></h2>${
-      subjBars() || '<div class="empty">這 7 天還沒有讀書紀錄，到「讀書」開個番茄鐘吧</div>'}</section>
+    <section class="card log"><h2>📒 今天讀了什麼 <a href="#study" class="sub" style="font-weight:400">共 ${fmtMin(minutesOn(t))} · 7 天 ${fmtMin(weekMinutes())} ›</a></h2>${
+      logRows(dayLog(s, t)) || '<div class="empty">今天還沒有讀書紀錄，到「讀書」開個番茄鐘吧</div>'}</section>
   </div>`;
 }
 
@@ -313,6 +370,8 @@ function timerCard() {
     <div class="row timer-subject-row">
       <select data-action="timer-subject" class="timer-subject" ${timer.running && focus ? 'disabled' : ''}>${subjectOptions(timer.subject)}</select>
       <button class="btn small" data-action="tags-manage" title="新增／修改標籤">🏷️ 標籤</button></div>
+    <form data-form="timer-note" class="timer-note"><input type="text" name="note" data-action="timer-note" maxlength="60" autocomplete="off"
+      placeholder="這次讀什麼？例如：DSP 8.3 DFT（可不填）" value="${esc(timer.note || '')}"></form>
     <div class="clock" id="timer-clock">${fmtClock(leftMs())}</div>
     <div class="progress"><div id="timer-bar" style="width:${pct}%;background:${focus ? 'var(--accent)' : 'var(--ok)'}"></div></div>
     <div class="row wrap" style="margin-top:12px;justify-content:center">
@@ -342,7 +401,7 @@ function statsCard() {
       <span class="blabel">${WEEKDAYS[parseYmd(ds).getDay()]}</span></div>`).join('')}</div>
     ${subjBars()}
     ${recent.length ? `<div class="sub" style="margin:10px 0 2px">最近紀錄</div>${recent.map(x => `<div class="goal">
-      <div class="text">${fmtDate(x.date, false)} · ${esc(subjectInfo(x.subject).name)} · ${x.minutes} 分</div>
+      <div class="text">${fmtDate(x.date, false)} · ${esc(subjectInfo(x.subject).name)}${sessionLabel(x) ? ` · ${esc(sessionLabel(x))}` : ''} · ${x.minutes} 分</div>
       <button class="del" data-action="del-session" data-id="${x.id}" aria-label="刪除">✕</button></div>`).join('')}` : ''}
   </section>`;
 }
@@ -361,7 +420,7 @@ function subjBars() {
 export function renderStudy(s) {
   S = s;
   return `<div class="page-head"><h1>讀書</h1><span class="sub">用「🏷️ 標籤」自己分類，例如 Meeting、論文、面試準備</span></div>
-    <div class="grid two">${timerCard()}${statsCard()}</div>`;
+    <div class="grid two">${timerCard()}${logCard()}${statsCard()}</div>`;
 }
 
 // 番茄鐘每秒更新：只改數字和進度條，不重畫整頁

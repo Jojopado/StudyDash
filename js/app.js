@@ -5,7 +5,7 @@ import {
 } from './store.js';
 import { TYPES, TOPIC_COLORS, BG_PRESETS, isLight, today, addDays, ymd, esc } from './util.js';
 import {
-  ui, renderHome, renderCalendar, renderTodo, renderStudy, renderSettings, shiftMonth, tickTimerView, tickWorkView, subjectInfo,
+  ui, renderHome, renderCalendar, renderTodo, renderStudy, renderSettings, shiftMonth, tickTimerView, tickWorkView, subjectInfo, logText,
 } from './views.js';
 import { parseSlots, fmtSlots, PERIODS } from './courses.js';
 import * as T from './timer.js';
@@ -206,11 +206,14 @@ function openCourseSheet(cs) {
   if (isNew) sheet.querySelector('[name=name]').focus();
 }
 
+const subjOpts = cur => [['', '自由讀書'], ...(store.prefs.studyTags || []).map(g => [`g:${g.id}`, `🏷️ ${g.name}`]), ...store.state.courses.map(c => [`c:${c.id}`, c.name])]
+  .map(([v, l]) => `<option value="${v}" ${v === cur ? 'selected' : ''}>${esc(l)}</option>`).join('');
+
 function openSessionSheet() {
-  const opts = [['', '自由讀書'], ...(store.prefs.studyTags || []).map(g => [`g:${g.id}`, `🏷️ ${g.name}`]), ...store.state.courses.map(c => [`c:${c.id}`, c.name])];
   openSheet(`<h2>補記錄讀書時間</h2>
     <form data-form="session">
-      <label class="field"><span>讀了什麼</span><select name="subject">${opts.map(([v, l]) => `<option value="${v}" ${v === T.timer.subject ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></label>
+      <label class="field"><span>科目／標籤</span><select name="subject">${subjOpts(T.timer.subject)}</select></label>
+      <label class="field"><span>讀了什麼內容（可不填）</span><input type="text" name="note" maxlength="60" autocomplete="off" placeholder="例如：DSP 8.3 DFT、LeetCode 兩題"></label>
       <div class="row">
         <label class="field" style="flex:1"><span>日期</span><input type="date" name="date" value="${today()}" required></label>
         <label class="field" style="flex:1"><span>分鐘</span><input type="text" inputmode="numeric" name="minutes" value="30" required></label>
@@ -219,6 +222,28 @@ function openSessionSheet() {
         <button type="button" class="btn" data-action="close-sheet">取消</button>
         <button type="submit" class="btn primary">儲存</button></div>
     </form>`, { kind: 'session' });
+}
+
+// 「今天讀了什麼」的一行（可能是好幾段合起來）：改內容／科目；只有一段時也能改分鐘
+function openLogSheet(ids) {
+  const list = ids.map(id => store.state.sessions.find(x => x.id === id)).filter(Boolean);
+  if (!list.length) return;
+  const x = list[0];
+  const todo = x.todoId && findTodo(x.todoId);
+  const total = list.reduce((n, y) => n + (y.minutes || 0), 0);
+  openSheet(`<h2>讀了什麼</h2>
+    <form data-form="log">
+      <label class="field"><span>內容</span><input type="text" name="note" maxlength="60" autocomplete="off" value="${esc(x.note || (todo ? todo.title : ''))}" placeholder="例如：DSP 8.3 DFT、LeetCode 兩題"></label>
+      <label class="field"><span>科目／標籤</span><select name="subject">${subjOpts(x.subject || '')}</select></label>
+      ${list.length === 1 ? `<label class="field"><span>分鐘</span><input type="text" inputmode="numeric" name="minutes" value="${x.minutes}"></label>`
+        : `<div class="sub" style="margin-bottom:8px">這行是 ${list.length} 段合起來的，共 ${total} 分（${list.map(y => y.minutes).join(' + ')}），會一起改。</div>`}
+      <div class="actions">
+        <button type="button" class="btn danger" data-action="delete-log">刪除${list.length > 1 ? `這 ${list.length} 段` : ''}</button>
+        <span class="spacer"></span>
+        <button type="button" class="btn" data-action="close-sheet">取消</button>
+        <button type="submit" class="btn primary">儲存</button></div>
+    </form>`, { kind: 'log', data: ids });
+  sheet.querySelector('[name=note]').focus();
 }
 
 // ---------- 讀書標籤 ----------
@@ -310,7 +335,7 @@ function startWork(x) {
 // 讀書紀錄存起來
 function recordFocus(minutes, endedAt = Date.now()) {
   if (minutes < 1) return;
-  const ss = { id: newId(), date: ymd(new Date(endedAt)), minutes, subject: T.timer.subject, createdAt: endedAt };
+  const ss = { id: newId(), date: ymd(new Date(endedAt)), minutes, subject: T.timer.subject, note: (T.timer.note || '').trim(), createdAt: endedAt };
   saveSession(ss);
 }
 
@@ -415,6 +440,22 @@ const actions = {
   },
   'timer-len': el => { const [f, b] = el.dataset.len.split('/').map(Number); T.setLengths(f, b); render(); },
   'new-session': openSessionSheet,
+  'edit-log': el => openLogSheet(el.dataset.ids.split(',')),
+  'delete-log': () => {
+    const ids = sheetCtx.data;
+    if (!confirm(ids.length > 1 ? `刪除這 ${ids.length} 段讀書紀錄？` : '刪除這筆讀書紀錄？')) return;
+    ids.forEach(deleteSession);
+    closeSheet();
+  },
+  'log-day': el => {
+    const d = +el.dataset.d;
+    ui.logDay = d ? addDays(ui.logDay, d) : today();
+    if (ui.logDay > today()) ui.logDay = today();
+    render();
+  },
+  'log-copy': async () => {
+    try { await navigator.clipboard.writeText(logText(store, ui.logDay)); toast('已複製，可以貼到 LINE 或筆記'); } catch { toast('複製失敗'); }
+  },
   'del-session': el => { if (confirm('刪除這筆讀書紀錄？')) deleteSession(el.dataset.id); },
 
   'new-course': () => openCourseSheet({}),
@@ -561,10 +602,19 @@ document.addEventListener('submit', async ev => {
   } else if (kind === 'session') {
     const minutes = parseInt(f.minutes, 10);
     if (!(minutes > 0)) { toast('分鐘數要大於 0'); return; }
-    const ss = { id: newId(), date: f.date, minutes, subject: f.subject, manual: true, createdAt: Date.now() };
+    const ss = { id: newId(), date: f.date, minutes, subject: f.subject, note: (f.note || '').trim(), manual: true, createdAt: Date.now() };
     saveSession(ss);
     closeSheet();
     toast(`記錄了 ${minutes} 分鐘`);
+  } else if (kind === 'log') {
+    const list = sheetCtx.data.map(id => store.state.sessions.find(x => x.id === id)).filter(Boolean);
+    const minutes = parseInt(f.minutes, 10);
+    if (f.minutes != null && !(minutes > 0)) { toast('分鐘數要大於 0'); return; }
+    for (const x of list) saveSession({ ...x, note: (f.note || '').trim(), subject: f.subject, ...(f.minutes != null ? { minutes } : {}) });
+    closeSheet();
+    toast('已儲存');
+  } else if (kind === 'timer-note') {
+    document.activeElement?.blur();
   } else if (kind === 'inv-order') {
     await submitOrder(form);
   } else if (kind === 'tag') {
@@ -591,6 +641,11 @@ document.addEventListener('submit', async ev => {
       toast(AUTH_ERRORS[e.code] || `失敗：${e.message}`);
     }
   }
+});
+
+// 番茄鐘的「這次讀什麼」：打字就存（存在這台裝置，跟番茄鐘一樣）
+document.addEventListener('input', ev => {
+  if (ev.target.dataset?.action === 'timer-note') T.setNote(ev.target.value);
 });
 
 document.addEventListener('change', async ev => {

@@ -1,7 +1,7 @@
 // 番茄鐘：用「結束時間」計時，App 被切到背景再回來也不會算錯。狀態存在這台裝置。
 const KEY = 'studydash.timer';
 
-const DEFAULTS = { phase: 'focus', running: false, endAt: 0, remaining: 25 * 60000, focusMin: 25, breakMin: 5, subject: '', startedAt: 0 };
+const DEFAULTS = { phase: 'focus', running: false, endAt: 0, remaining: 25 * 60000, focusMin: 25, breakMin: 5, subject: '', note: '', startedAt: 0 };
 
 export const timer = load();
 
@@ -74,6 +74,7 @@ export function setLengths(focusMin, breakMin) {
 }
 
 export function setSubject(s) { timer.subject = s; save(); }
+export function setNote(s) { timer.note = s; save(); }
 
 // 這次專注已經過了幾分鐘（提早結束時用）
 export function focusedMinutes() {
