@@ -705,3 +705,5 @@ body.reading { overflow: hidden; }
 .seg button:disabled { opacity: .35; cursor: default; }
 .timer-note { margin: 8px 0 0; }
 .timer-note input { width: 100%; box-sizing: border-box; }
+.sub .up { color: var(--ok); }
+.sub .down { color: var(--muted); }

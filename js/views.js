@@ -18,6 +18,7 @@ export const ui = {
   todoCourse: 'all',  // 'all' | course id
   showDoneTodos: false,
   logDay: today(),    // 讀書成果看哪一天
+  statRange: 'day',   // 讀書時數：'day' | 'week' | 'month'
 };
 
 let S; // 這次畫面用的 store（每個 render 一開始設定）
@@ -385,32 +386,67 @@ function timerCard() {
   </section>`;
 }
 
+// 讀書時數的區間：日＝最近 7 天、週＝最近 8 週（週一開始）、月＝最近 6 個月；由舊到新，最後一個是現在
+const weekStart = ds => addDays(ds, -((parseYmd(ds).getDay() + 6) % 7));
+function periods(range) {
+  const t = today(), out = [];
+  if (range === 'week') {
+    const ws = weekStart(t);
+    for (let i = 7; i >= 0; i--) {
+      const from = addDays(ws, -7 * i), d = parseYmd(from);
+      out.push({ from, to: addDays(from, 6), label: `${d.getMonth() + 1}/${d.getDate()}`, title: `${fmtDate(from)} 那週` });
+    }
+  } else if (range === 'month') {
+    const d = parseYmd(t);
+    for (let i = 5; i >= 0; i--) {
+      const m = new Date(d.getFullYear(), d.getMonth() - i, 1);
+      out.push({ from: ymd(m), to: ymd(new Date(m.getFullYear(), m.getMonth() + 1, 0)), label: `${m.getMonth() + 1}月`, title: `${m.getFullYear()} 年 ${m.getMonth() + 1} 月` });
+    }
+  } else {
+    for (let i = 6; i >= 0; i--) {
+      const ds = addDays(t, -i);
+      out.push({ from: ds, to: ds, label: WEEKDAYS[parseYmd(ds).getDay()], title: fmtDate(ds) });
+    }
+  }
+  for (const p of out) p.m = S.state.sessions.filter(x => x.date >= p.from && x.date <= p.to).reduce((n, x) => n + (x.minutes || 0), 0);
+  return out;
+}
+const RANGES = { day: ['日', '今天', '昨天'], week: ['週', '這週', '上週'], month: ['月', '這個月', '上個月'] };
+const shortMin = m => (m >= 60 ? `${+(m / 60).toFixed(1)}h` : m ? `${m}` : '');
+
 function statsCard() {
   const t = today();
-  const days = [];
-  for (let i = 6; i >= 0; i--) { const ds = addDays(t, -i); days.push([ds, minutesOn(ds)]); }
-  const max = Math.max(60, ...days.map(d => d[1]));
+  const range = RANGES[ui.statRange] ? ui.statRange : 'day';
+  const [, curName, prevName] = RANGES[range];
+  const ps = periods(range);
+  const cur = ps[ps.length - 1], prev = ps[ps.length - 2];
+  const max = Math.max(60, ...ps.map(p => p.m));
+  // 平均每天：這週／這個月只算到今天為止的天數
+  const days = Math.round((parseYmd(t) - parseYmd(cur.from)) / 86400000) + 1;
+  const diff = cur.m - prev.m;
   const recent = [...S.state.sessions].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).slice(0, 5);
 
   return `<section class="card">
     <div class="row" style="margin-bottom:8px"><h2 style="margin:0">📊 讀書時數</h2><span class="spacer"></span>
+      <div class="seg">${Object.entries(RANGES).map(([k, [l]]) => `<button data-action="stat-range" data-r="${k}" class="${k === range ? 'on' : ''}">${l}</button>`).join('')}</div>
       <button class="btn small" data-action="new-session">＋ 補記錄</button></div>
-    <div class="sub">今天 <b class="big">${fmtMin(minutesOn(t))}</b> · 最近 7 天 <b class="big">${fmtMin(weekMinutes())}</b></div>
-    <div class="bars">${days.map(([ds, m]) => `<div class="bcol ${ds === t ? 'today' : ''}" title="${fmtDate(ds)} ${m} 分">
-      <span class="bval">${m || ''}</span><div class="bfill" style="height:${Math.round(m / max * 100)}%"></div>
-      <span class="blabel">${WEEKDAYS[parseYmd(ds).getDay()]}</span></div>`).join('')}</div>
-    ${subjBars()}
+    <div class="sub">${curName} <b class="big">${fmtMin(cur.m)}</b> · ${prevName} ${fmtMin(prev.m)}${
+      diff ? ` <span class="${diff > 0 ? 'up' : 'down'}">${diff > 0 ? '▲' : '▼'} ${fmtMin(Math.abs(diff))}</span>` : ''}${
+      range !== 'day' ? ` · 平均每天 ${fmtMin(Math.round(cur.m / days))}` : ''}</div>
+    <div class="bars">${ps.map(p => `<div class="bcol ${p === cur ? 'today' : ''}" title="${p.title} ${fmtMin(p.m)}">
+      <span class="bval">${shortMin(p.m)}</span><div class="bfill" style="height:${Math.round(p.m / max * 100)}%"></div>
+      <span class="blabel">${p.label}</span></div>`).join('')}</div>
+    ${cur.m ? `<div class="sub" style="margin:0 0 2px">${curName}各科</div>${subjBars(cur.from, cur.to)}` : ''}
     ${recent.length ? `<div class="sub" style="margin:10px 0 2px">最近紀錄</div>${recent.map(x => `<div class="goal">
       <div class="text">${fmtDate(x.date, false)} · ${esc(subjectInfo(x.subject).name)}${sessionLabel(x) ? ` · ${esc(sessionLabel(x))}` : ''} · ${x.minutes} 分</div>
       <button class="del" data-action="del-session" data-id="${x.id}" aria-label="刪除">✕</button></div>`).join('')}` : ''}
   </section>`;
 }
 
-// 最近 7 天每個科目／標籤讀了多久
-function subjBars() {
-  const from = addDays(today(), -6);
+// 一段日期裡每個科目／標籤讀了多久
+function subjBars(from, to) {
   const bySubj = {};
-  for (const x of S.state.sessions) if (x.date >= from) bySubj[x.subject || ''] = (bySubj[x.subject || ''] || 0) + (x.minutes || 0);
+  for (const x of S.state.sessions) if (x.date >= from && x.date <= to) bySubj[x.subject || ''] = (bySubj[x.subject || ''] || 0) + (x.minutes || 0);
   const subj = Object.entries(bySubj).sort((a, b) => b[1] - a[1]);
   const smax = Math.max(1, ...subj.map(x => x[1]));
   return subj.map(([k, m]) => { const i = subjectInfo(k); return `<div class="subj"><span>${esc(i.name)}</span>

@@ -453,6 +453,7 @@ const actions = {
     if (ui.logDay > today()) ui.logDay = today();
     render();
   },
+  'stat-range': el => { ui.statRange = el.dataset.r; render(); },
   'log-copy': async () => {
     try { await navigator.clipboard.writeText(logText(store, ui.logDay)); toast('已複製，可以貼到 LINE 或筆記'); } catch { toast('複製失敗'); }
   },
