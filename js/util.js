@@ -2,6 +2,7 @@ export const TYPES = {
   exam:     { label: '考試',    color: '#f87171' },
   report:   { label: '報告',    color: '#fbbf24' },
   homework: { label: '作業',    color: '#c084fc' },
+  read:     { label: '讀書',    color: '#2dd4bf' },
   study:    { label: '自學',    color: '#4ade80' },
   meeting:  { label: 'Meeting', color: '#60a5fa' },
   other:    { label: '其他',    color: '#94a3b8' },

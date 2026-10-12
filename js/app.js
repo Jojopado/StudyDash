@@ -150,6 +150,7 @@ function openTodoSheet(td) {
         <div class="add-goal"><input type="text" id="step-input" placeholder="新增一個步驟，按 Enter 加入" autocomplete="off">
           <button type="button" class="btn" data-action="sheet-step-add">加入</button></div>
       </div>
+      <label class="field"><span>預計時間（分鐘，可不填；讀書類直接打勾會用這個算讀書時數）</span><input type="text" inputmode="numeric" name="estMin" value="${x.estMin || ''}" autocomplete="off"></label>
       <label class="field"><span>已花費（分鐘${x.workingSince ? '，不含正在計時的這段' : ''}）</span><input type="text" inputmode="numeric" name="spentMin" value="${Math.round((x.spentMs || 0) / 60000)}" autocomplete="off"></label>
       <label class="field"><span>備註</span><textarea name="note" placeholder="繳交方式、頁數、連結…">${esc(x.note)}</textarea></label>
       <label class="row"><input type="checkbox" name="done" ${x.done ? 'checked' : ''}> 已完成</label>
@@ -258,19 +259,44 @@ function openMoreSheet() {
 }
 
 // ---------- 待辦計時 ----------
-// 作業／報告／考試／自學做的時間也算進讀書時數（課程有標就算那門課）
-const STUDY_TYPES = ['exam', 'report', 'homework', 'study'];
+// 讀書／作業／報告／考試／自學做的時間也算進讀書時數（課程有標就算那門課）
+const STUDY_TYPES = ['read', 'exam', 'report', 'homework', 'study'];
+
+// 記一筆讀書紀錄，回傳 id
+function todoSession(x, minutes) {
+  const ss = { id: newId(), date: today(), minutes, subject: x.courseId ? `c:${x.courseId}` : '', todoId: x.id, createdAt: Date.now() };
+  saveSession(ss);
+  return ss.id;
+}
 
 // 停止計時：把這段時間加進 spentMs，patch 可以順便改其他欄位（例如 done）
 function stopWork(x, patch = {}) {
   const ms = x.workingSince ? Math.max(0, Date.now() - x.workingSince) : 0;
   const minutes = Math.floor(ms / 60000);
-  if (minutes >= 1 && STUDY_TYPES.includes(x.type)) {
-    const ss = { id: newId(), date: today(), minutes, subject: x.courseId ? `c:${x.courseId}` : '', todoId: x.id, createdAt: Date.now() };
-    saveSession(ss);
-  }
+  if (minutes >= 1 && STUDY_TYPES.includes(x.type)) todoSession(x, minutes);
   saveTodo({ ...x, spentMs: (x.spentMs || 0) + ms, workingSince: 0, ...patch });
   return minutes;
+}
+
+// 打勾／取消打勾，回傳要顯示的提示（沒有就空字串）
+// 讀書類沒計時過就直接打勾：用「預計時間」算進讀書時數；取消打勾再扣回來
+function setDone(x, done) {
+  if (done && x.workingSince) {
+    const m = stopWork(x, { done: true });
+    return `完成！這件總共花了 ${fmtSpent((x.spentMs || 0) + m * 60000)}`;
+  }
+  if (done && !x.done && STUDY_TYPES.includes(x.type) && !x.spentMs && x.estMin > 0) {
+    const creditId = todoSession(x, x.estMin);
+    saveTodo({ ...x, done: true, workingSince: 0, spentMs: x.estMin * 60000, creditId, creditMin: x.estMin });
+    return `完成！讀書時數 +${fmtSpent(x.estMin * 60000)}`;
+  }
+  if (!done && x.done && x.creditId) {
+    deleteSession(x.creditId);
+    saveTodo({ ...x, done: false, spentMs: Math.max(0, (x.spentMs || 0) - (x.creditMin || 0) * 60000), creditId: '', creditMin: 0 });
+    return '取消完成，讀書時數扣回來了';
+  }
+  saveTodo({ ...x, done, workingSince: 0 });
+  return '';
 }
 
 // 一次只做一件：開始新的會先暫停其他正在計時的
@@ -334,10 +360,8 @@ const actions = {
   'edit-todo': el => { const x = findTodo(el.dataset.id); if (x) openTodoSheet(x); },
   'toggle-todo': el => {
     const x = findTodo(el.dataset.id); if (!x) return;
-    if (x.workingSince && !x.done) {
-      const m = stopWork(x, { done: true });
-      toast(`完成！這件總共花了 ${fmtSpent((x.spentMs || 0) + m * 60000)}`);
-    } else saveTodo({ ...x, done: !x.done, workingSince: 0 });
+    const msg = setDone(x, !x.done);
+    if (msg) toast(msg);
   },
   'todo-start': el => { const x = findTodo(el.dataset.id); if (x) startWork(x); },
   'todo-pause': el => {
@@ -350,8 +374,8 @@ const actions = {
     const steps = (x.steps || []).map(z => z.id === el.dataset.step ? { ...z, done: !z.done } : z);
     // 步驟全部打勾就順便把待辦完成
     const all = steps.length && steps.every(z => z.done);
-    saveTodo({ ...x, steps, done: all ? true : x.done });
-    if (all) toast('全部步驟完成，待辦打勾了 🎉');
+    if (all && !x.done) toast(setDone({ ...x, steps }, true) || '全部步驟完成，待辦打勾了 🎉');
+    else saveTodo({ ...x, steps });
   },
   'new-todo': el => openTodoSheet({ due: el.dataset.date || '' }),
   'todo-filter': el => { ui.todoFilter = el.dataset.key; render(); },
@@ -509,10 +533,14 @@ document.addEventListener('submit', async ev => {
     const cur = findTodo(sheetCtx.data.id) || sheetCtx.data;
     const min = parseInt(f.spentMin, 10);
     const spent = Number.isFinite(min) && min >= 0 && min !== Math.round((sheetCtx.data.spentMs || 0) / 60000) ? min * 60000 : (cur.spentMs || 0);
-    const next = { ...sheetCtx.data, workingSince: cur.workingSince || 0, spentMs: spent, title, due: f.due || '', note: (f.note || '').trim(), done: !!f.done };
-    if (next.done && next.workingSince) stopWork(next, { done: true }); else saveTodo(next);
+    const est = parseInt(f.estMin, 10);
+    const next = { ...sheetCtx.data, workingSince: cur.workingSince || 0, spentMs: spent, estMin: est > 0 ? est : 0, title, due: f.due || '', note: (f.note || '').trim(), done: !!cur.done };
+    // 手動把已花費調多：多出來的也算讀書時數
+    const addMin = Math.round((spent - (cur.spentMs || 0)) / 60000);
+    if (addMin >= 1 && STUDY_TYPES.includes(next.type)) todoSession(next, addMin);
+    const msg = !!f.done !== !!cur.done ? setDone(next, !!f.done) : (saveTodo(next), '');
     closeSheet();
-    toast(`已儲存`);
+    toast(msg || '已儲存');
   } else if (kind === 'add-todo') {
     const title = (f.title || '').trim();
     if (!title) return;

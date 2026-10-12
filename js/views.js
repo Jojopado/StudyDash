@@ -215,7 +215,7 @@ function todoRow(x, { showDate = true, steps = false, drag = false } = {}) {
   const working = !!x.workingSince && !x.done;
   const spentMin = Math.floor((x.spentMs || 0) / 60000);
   const meta = [working ? '<b class="run-tag">⏱ 執行中</b>' : '待辦', courseTag(x.courseId), ty.label, x.due && showDate ? fmtDate(x.due) : '',
-    st.length ? `☑ ${stDone}/${st.length}` : '', !working && spentMin ? `⏱ ${fmtMin(spentMin)}` : '', x.note ? '📝' : ''].filter(Boolean).join(' · ');
+    st.length ? `☑ ${stDone}/${st.length}` : '', !working && spentMin ? `⏱ ${fmtMin(spentMin)}` : '', !x.done && !spentMin && x.estMin ? `預計 ${fmtMin(x.estMin)}` : '', x.note ? '📝' : ''].filter(Boolean).join(' · ');
   const stepRows = steps && !x.done ? st.map(z => `<div class="step ${z.done ? 'done' : ''}">
       <button class="check small ${z.done ? 'on' : ''}" data-action="toggle-step" data-id="${x.id}" data-step="${z.id}" aria-label="完成">${z.done ? '✓' : ''}</button>
       <span>${esc(z.text)}</span></div>`).join('') : '';
