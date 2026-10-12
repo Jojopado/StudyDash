@@ -9,6 +9,7 @@ export function initQuiz(c) { ctx = c; }
 const BANKS = [
   { id: 'iot', file: 'js/quiz-iot.json', short: 'IoT 物聯網', exam: 50, mins: 60 },
   { id: 'rfid', file: 'js/quiz-rfid.json', short: 'RFID／EPC', exam: 40, mins: 60 },   // GS1 認證考試 40 題、60 分鐘
+  { id: 'dc', file: 'js/quiz-dc.json', short: '資料壓縮', exam: 30, mins: 45 },   // 期中 11/5 練習題（Ch1＋Ch5）
 ];
 const BANK_KEY = 'studydash.quiz.bank';
 const bankCfg = () => BANKS.find(b => b.id === quizUi.bank) || BANKS[0];
@@ -93,7 +94,7 @@ function homeView() {
   }).join('');
   const EXAM_SIZE = bankCfg().exam;
   const tabs = BANKS.map(x => `<button type="button" class="${x.id === quizUi.bank ? 'on' : ''}" style="${x.id === quizUi.bank ? 'background:var(--accent);border-color:var(--accent)' : ''}" data-action="quiz-bank" data-id="${x.id}">${esc(x.short)}${banks[x.id] ? ` · ${banks[x.id].questions.length}` : ''}</button>`).join('');
-  return `<div class="page-head"><div><h1>測驗</h1><div class="sub">${esc(b.name)} 考古題 · ${s.total} 題 · 沒網路也能做</div></div></div>
+  return `<div class="page-head"><div><h1>測驗</h1><div class="sub">${esc(b.name)} ${esc(b.label || '考古題')} · ${s.total} 題 · 沒網路也能做</div></div></div>
     <div class="chips" style="margin-bottom:12px">${tabs}</div>
     <section class="card">
       <div class="quiz-stats">
