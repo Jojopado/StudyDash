@@ -1,6 +1,6 @@
 // 自己的檔案：先抓網路（有更新馬上生效），離線時用快取。
 // Firebase SDK（網址含版本號，不會變）：快取優先。
-const CACHE = 'studydash-v27';
+const CACHE = 'studydash-v28';
 // 閱讀器函式庫（js/vendor，檔名有版本號）和 pdf.js 的中文字型對照檔（CDN）：抓一次就留著，換版也不清
 const LIB_CACHE = 'studydash-lib';
 const SHELL = [
@@ -8,7 +8,7 @@ const SHELL = [
   './js/app.js', './js/store.js', './js/views.js', './js/util.js', './js/courses.js', './js/timer.js', './js/firebase-config.js',
   './js/invest.js', './js/invest-view.js', './js/invest-config.js', './js/otc-list.json',
   './js/invest-learn.js', './js/money.js', './js/cards.js', './js/memo.js', './js/drag.js',
-  './js/docs.js', './js/filecache.js', './js/quiz.js', './js/quiz-rfid.json', './js/quiz-iot.json', './js/quiz-dc.json', './js/cards-preset.json',
+  './js/docs.js', './js/filecache.js', './js/quiz.js', './js/progress.js', './js/quiz-rfid.json', './js/quiz-iot.json', './js/quiz-dc.json', './js/cards-preset.json',
   './icons/icon-180.png', './icons/icon-192.png', './icons/icon-512.png',
 ];
 

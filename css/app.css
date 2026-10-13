@@ -707,3 +707,27 @@ body.reading { overflow: hidden; }
 .timer-note input { width: 100%; box-sizing: border-box; }
 .sub .up { color: var(--ok); }
 .sub .down { color: var(--muted); }
+
+/* ---------- 各科進度 ---------- */
+.prog-chips { margin-bottom: 14px; }
+.prog-subj { padding: 10px 0 10px 10px; border-top: 1px solid var(--line); border-left: 3px solid var(--c); margin-left: -2px; cursor: pointer; }
+.card h2 + .prog-subj { border-top: 0; }
+.prog-subj .name { font-size: 16px; }
+.prog-subj .row { gap: 8px; }
+.prog-at { font-size: 13px; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prog-weak-n { font-size: 12px; color: #fbbf24; white-space: nowrap; }
+.prog-bar { display: flex; height: 6px; background: var(--card2); border-radius: 99px; overflow: hidden; margin: 6px 0 4px; }
+.prog-bar > div { height: 100%; transition: width .3s; }
+.prog-unit { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-top: 1px solid var(--line); }
+.prog-unit .main { flex: 1; min-width: 0; cursor: pointer; }
+.prog-unit .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prog-unit .meta { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prog-st { flex: none; min-width: 64px; border: 1px solid var(--c); color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent);
+  border-radius: 999px; padding: 3px 10px; font-size: 13px; cursor: pointer; font-family: inherit; }
+.prog-add { display: flex; gap: 8px; margin-top: 10px; align-items: flex-start; }
+.prog-add textarea { flex: 1; min-width: 0; resize: vertical; }
+.prog-weak-add { display: grid; gap: 8px; margin-bottom: 6px; }
+.prog-weak-add .row { gap: 8px; }
+.prog-weak-add select { flex: 1; min-width: 0; }
+.prog-weak .text { cursor: pointer; }
+.prog-weak .text .sub { font-size: 12px; }

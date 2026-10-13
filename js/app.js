@@ -16,6 +16,7 @@ import { renderCards, initCards, cardActions, cardForms, cardsKey } from './card
 import { renderMemo, initMemo, memoActions, memoForms, memoKey } from './memo.js';
 import { renderDocs, initDocs, docActions, docForms } from './docs.js';
 import { renderQuiz, initQuiz, quizActions, quizKey, quizTick } from './quiz.js';
+import { renderProgress, initProgress, progressActions, progressForms } from './progress.js';
 import { isDragging } from './drag.js';
 
 const $ = sel => document.querySelector(sel);
@@ -25,12 +26,12 @@ const backdrop = $('#sheet-backdrop');
 const sheet = $('#sheet');
 
 const ROUTES = {
-  home: renderHome, calendar: renderCalendar, todo: renderTodo, study: renderStudy, cards: renderCards, money: renderMoney, memo: renderMemo, docs: renderDocs, quiz: renderQuiz,
+  home: renderHome, calendar: renderCalendar, todo: renderTodo, study: renderStudy, cards: renderCards, money: renderMoney, memo: renderMemo, docs: renderDocs, quiz: renderQuiz, progress: renderProgress,
   invest: renderInvest, settings: renderSettings,
 };
 // 手機底部放不下的，收在「更多」裡（電腦版側邊欄全部列出）
-const MORE = ['memo', 'docs', 'quiz', 'invest', 'settings'];
-const NO_FAB = ['settings', 'invest', 'money', 'cards', 'memo', 'docs', 'quiz'];
+const MORE = ['memo', 'progress', 'docs', 'quiz', 'invest', 'settings'];
+const NO_FAB = ['settings', 'invest', 'money', 'cards', 'memo', 'docs', 'quiz', 'progress'];
 const route = () => (location.hash.slice(1) in ROUTES ? location.hash.slice(1) : 'home');
 
 // ---------- 畫面 ----------
@@ -276,6 +277,7 @@ function openMoreSheet() {
   const item = (href, ico, label, sub) => `<a class="more-item" href="${href}"><span class="ico">${ico}</span><span><b>${label}</b><span class="sub">${sub}</span></span></a>`;
   openSheet(`<h2>更多</h2><div class="more-list">
     ${item('#memo', '📝', '隨手記', '怕忘記的事先記下來，用標籤分類')}
+    ${item('#progress', '📍', '各科進度', '每科讀到哪、哪裡不熟')}
     ${item('#docs', '📄', '文件', 'PDF 放上來，手機電腦都能看')}
     ${item('#quiz', '🎯', '測驗', '證照考古題選擇題、錯題本、模擬考')}
     ${item('#invest', '📈', '模擬投資', '台股真實報價、投資入門')}
@@ -516,8 +518,8 @@ const actions = {
   logout: async () => { if (confirm('確定登出？登出後這台裝置看不到雲端資料。')) { await logout(); toast('已登出'); } },
 };
 
-Object.assign(actions, invActions, learnActions, moneyActions, cardActions, memoActions, docActions, quizActions);
-const moduleForms = { ...moneyForms, ...cardForms, ...memoForms, ...docForms };
+Object.assign(actions, invActions, learnActions, moneyActions, cardActions, memoActions, docActions, quizActions, progressActions);
+const moduleForms = { ...moneyForms, ...cardForms, ...memoForms, ...docForms, ...progressForms };
 
 document.addEventListener('click', ev => {
   if (ev.target === backdrop) { closeSheet(); return; }
@@ -660,7 +662,7 @@ document.addEventListener('change', async ev => {
     const partial = !Array.isArray(obj.events) || !Array.isArray(obj.topics);
     if (el.dataset.action === 'merge' || partial) {
       const parts = [['events', '個行程'], ['todos', '個待辦'], ['courses', '門課'], ['topics', '個主題'], ['sessions', '筆讀書紀錄'],
-        ['decks', '個卡組'], ['cards', '張字卡'], ['expenses', '筆帳']]
+        ['decks', '個卡組'], ['cards', '張字卡'], ['expenses', '筆帳'], ['units', '個單元']]
         .filter(([k]) => obj[k]?.length).map(([k, l]) => `${obj[k].length} ${l}`);
       if (!parts.length) { toast('檔案裡沒有可以加入的資料'); return; }
       if (!confirm(`加入 ${parts.join('、')}？原本的資料不會被刪。`)) return;
@@ -709,6 +711,7 @@ initCards({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.dat
 initMemo({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
 initDocs({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
 initQuiz({ openSheet, closeSheet, toast, render });
+initProgress({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW 註冊失敗', e));
