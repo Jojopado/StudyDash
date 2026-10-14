@@ -1,20 +1,21 @@
-// 各科進度（#progress）：每科拆成單元，標「沒讀／讀過／熟了」，寫「讀到哪」和「不熟的地方」。
-// 資料：units 集合 { subject: 'c:課程id' | 'g:標籤id', name, status 0|1|2, weak: [{ id, text, done, at }], note, order }
-// 「讀到哪」存在 prefs.studyAt = { 科目key: { text, at } }（一科一行，手機電腦同步）
+// 各科進度（#progress）：每科一份章節清單，每章直接點「沒讀／讀過／熟了」；
+// 點章名展開：設成「📍 讀到這裡」、記「哪裡不熟」（搞懂了就打勾）。
+// 資料：units 集合 { subject: 'c:課程id' | 'g:標籤id', name, status 0|1|2, weak: [{ id, text, done, at }], group, groupDate, order }
+// 讀到哪：prefs.studyAt = { 科目key: { unitId, text, at } }
+// 預設章節在 js/progress-preset.json，第一次打開時自動放進還沒有章節的科目（prefs.progSeeded 記已放過）。
 import { store, newId, saveDoc, removeDoc, savePrefs } from './store.js';
-import { handle, onDrop, between } from './drag.js';
-import { esc } from './util.js';
+import { esc, today, daysUntil, fmtDate } from './util.js';
 
 let ctx = null; // { openSheet, closeSheet, toast, render, sheetData }
 export function initProgress(c) { ctx = c; }
 
-// subj: 目前打開哪一科（'' = 總覽）
-export const progUi = { subj: '', showFixed: false };
+// subj: 目前看哪一科（'weak' = 所有不熟的地方）；open: 展開的章節
+export const progUi = { subj: '', open: '' };
 
 export const STATUS = [
-  { label: '沒讀', ico: '○', color: '#94a3b8' },
-  { label: '讀過', ico: '◐', color: '#60a5fa' },
-  { label: '熟了', ico: '●', color: '#4ade80' },
+  { label: '沒讀', color: '#94a3b8' },
+  { label: '讀過', color: '#60a5fa' },
+  { label: '熟了', color: '#4ade80' },
 ];
 const WEAK = '#fbbf24';
 
@@ -24,14 +25,16 @@ const key = u => u.order ?? (u.createdAt || 0);
 const unitsOf = s => units().filter(u => u.subject === s).sort((a, b) => key(a) - key(b));
 const openWeak = u => (u.weak || []).filter(w => !w.done);
 
-// 可以追蹤的科目：課表上的課＋讀書標籤
-export function subjects() {
+// 所有可以追蹤的科目：課表上的課＋讀書標籤
+function allSubjects() {
   return [
     ...store.state.courses.map(c => ({ key: `c:${c.id}`, name: c.name, color: c.color })),
     ...(store.prefs.studyTags || []).map(g => ({ key: `g:${g.id}`, name: g.name, color: g.color })),
   ];
 }
-const subjOf = k => subjects().find(s => s.key === k);
+// 有章節的科目才出現在上面那排
+const subjects = () => allSubjects().filter(s => units().some(u => u.subject === s.key));
+const subjOf = k => allSubjects().find(s => s.key === k);
 
 function ago(ts) {
   if (!ts) return '';
@@ -43,210 +46,288 @@ function ago(ts) {
   return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
-onDrop('units', (id, beforeId, afterId) => {
-  const u = units().find(x => x.id === id);
-  if (!u) return;
-  const k = x => { const y = units().find(z => z.id === x); return y ? key(y) : null; };
-  saveDoc('units', { ...u, order: between(k(beforeId), k(afterId)) });
-});
+// ---------- 預設章節 ----------
+let preset = null;
+fetch('js/progress-preset.json').then(r => r.json()).then(p => { preset = p.subjects || []; seed(); ctx?.render(); }).catch(() => { preset = []; });
 
-// 進度條：熟了（綠）＋讀過（藍），剩下灰
+const seededNow = new Set(); // 已放過的（prefs 還沒同步回來前也算）
+let seeding = false;          // 存檔會馬上重畫、又呼叫 seed()，跑的途中不要再進來
+function seed() {
+  // 要等雲端資料載入完（登入狀態），不然會以為沒有章節
+  if (seeding || !preset || !store.ready || (store.cloudAvailable && store.mode !== 'cloud')) return;
+  seeding = true;
+  try { seedOnce(); } finally { seeding = false; }
+}
+function seedOnce() {
+  const done = { ...(store.prefs.progSeeded || {}) };
+  for (const id of seededNow) done[id] = true;
+  let tags = [...(store.prefs.studyTags || [])];
+  const at = { ...studyAt() };
+  let changed = false;
+  for (const p of preset) {
+    if (done[p.id]) continue;
+    let k = '';
+    if (p.course) { const c = store.state.courses.find(x => x.name === p.course); if (c) k = `c:${c.id}`; }
+    else if (p.tag) {
+      let g = tags.find(x => x.name === p.tag);
+      if (!g) { g = { id: `pp-${p.id}`, name: p.tag, color: p.color || '#94a3b8' }; tags = [...tags, g]; }
+      k = `g:${g.id}`;
+    }
+    if (!k) continue;
+    done[p.id] = true;
+    seededNow.add(p.id);
+    changed = true;
+    if (units().some(u => u.subject === k)) continue; // 自己已經建了章節就不動
+    let n = 0;
+    for (const g of p.groups) {
+      for (const [id, name, status] of g.units) {
+        saveDoc('units', { id: `pp-${id}`, subject: k, name, status: status || 0, weak: [], group: g.name, groupDate: g.date || '', order: ++n * 1000, createdAt: Date.now() });
+      }
+    }
+    // 檔案裡越前面的科目時間越新（第一次打開就先看它）
+    if (p.at && !at[k]?.unitId) at[k] = { unitId: `pp-${p.at}`, text: p.atText || '', at: Date.now() - preset.indexOf(p) * 1000 };
+  }
+  if (changed) savePrefs({ progSeeded: done, studyTags: tags, studyAt: at });
+}
+
+// ---------- 小元件 ----------
 function bar(list) {
   const n = list.length || 1;
   const ok = list.filter(u => u.status === 2).length, read = list.filter(u => u.status === 1).length;
   return `<div class="prog-bar"><div style="width:${ok / n * 100}%;background:${STATUS[2].color}"></div><div style="width:${read / n * 100}%;background:${STATUS[1].color}"></div></div>`;
 }
+const pct = list => (list.length ? Math.round(list.reduce((n, u) => n + (u.status || 0), 0) / (list.length * 2) * 100) : 0);
 
-// ---------- 總覽 ----------
-function overview() {
-  const subs = subjects();
-  if (!subs.length) {
-    return `<section class="card"><div class="empty">還沒有科目。到「設定 → 課表」新增課程，或按下面的「＋ 其他科目」（例如 LeetCode、ROS2）。</div>
-      <button class="btn" data-action="tags-manage">＋ 其他科目</button></section>`;
-  }
-  const allWeak = units().flatMap(u => openWeak(u).map(w => ({ u, w })));
-  const card = s => {
-    const list = unitsOf(s.key);
-    const at = studyAt()[s.key];
-    const weak = list.reduce((n, u) => n + openWeak(u).length, 0);
-    const ok = list.filter(u => u.status === 2).length;
-    return `<div class="prog-subj" data-action="prog-open" data-subj="${esc(s.key)}" style="--c:${esc(s.color)}">
-      <div class="row"><b class="name">${esc(s.name)}</b><span class="spacer"></span>
-        ${weak ? `<span class="prog-weak-n">⚠️ ${weak} 個不熟</span>` : ''}
-        <span class="sub">${list.length ? `${ok}/${list.length} 熟` : '還沒拆單元'}</span></div>
-      ${list.length ? bar(list) : ''}
-      <div class="prog-at ${at?.text ? '' : 'sub'}">📍 ${at?.text ? `${esc(at.text)} <span class="sub">· ${ago(at.at)}</span>` : '還沒寫讀到哪'}</div>
-    </div>`;
-  };
-  return `<div class="grid two">
-    <section class="card"><h2>各科</h2>${subs.map(card).join('')}
-      <button class="btn small" data-action="tags-manage" style="margin-top:10px">＋ 其他科目（不是課表上的課）</button></section>
-    <section class="card"><h2>⚠️ 所有不熟的地方 <span class="sub" style="font-weight:400">${allWeak.length} 個</span></h2>
-      ${allWeak.length ? allWeak.map(({ u, w }) => weakRow(u, w, true)).join('')
-        : '<div class="empty">目前沒有。讀書時哪裡卡住，就到那一科的單元記下來，考前回來看這裡。</div>'}</section>
-  </div>`;
+function seg(u) {
+  return `<div class="pu-seg">${STATUS.map((x, i) => `<button type="button" data-action="prog-set" data-id="${u.id}" data-st="${i}"
+    class="${(u.status || 0) === i ? 'on' : ''}" style="--c:${x.color}">${x.label}</button>`).join('')}</div>`;
 }
 
-function weakRow(u, w, showSubj = false) {
-  const s = showSubj ? subjOf(u.subject) : null;
-  return `<div class="goal prog-weak ${w.done ? 'done' : ''}">
+function weakItem(u, w, showWhere = false) {
+  const s = showWhere ? subjOf(u.subject) : null;
+  return `<div class="pw ${w.done ? 'done' : ''}">
     <button type="button" class="check small ${w.done ? 'on' : ''}" data-action="prog-weak-toggle" data-id="${u.id}" data-w="${w.id}" title="${w.done ? '又不熟了' : '搞懂了'}">${w.done ? '✓' : ''}</button>
-    <div class="text" data-action="prog-unit" data-id="${u.id}">${esc(w.text)}
-      <div class="sub">${s ? `<span style="color:${esc(s.color)}">● ${esc(s.name)}</span> · ` : ''}${esc(u.name)} · ${ago(w.at)}</div></div></div>`;
+    <div class="text">${esc(w.text)}${showWhere ? `<div class="sub">${s ? `<span style="color:${esc(s.color)}">● ${esc(s.name)}</span> · ` : ''}${esc(u.name)}</div>` : ''}</div>
+    ${showWhere ? '' : `<button type="button" class="del" data-action="prog-weak-del" data-id="${u.id}" data-w="${w.id}" aria-label="刪除">✕</button>`}</div>`;
 }
 
-// ---------- 單科 ----------
-function unitRow(u) {
+// 一章：名稱＋三段狀態；展開後是「讀到這裡」和「哪裡不熟」
+function unitRow(u, here) {
+  const open = progUi.open === u.id;
+  const weak = openWeak(u);
   const st = STATUS[u.status || 0];
-  const weak = openWeak(u).length;
-  return `<div class="prog-unit has-handle" data-drag-id="${u.id}" data-drag-group="u">${handle()}
-    <button type="button" class="prog-st" data-action="prog-st" data-id="${u.id}" style="--c:${st.color}" title="點一下換狀態">${st.ico} ${st.label}</button>
-    <div class="main" data-action="prog-unit" data-id="${u.id}"><div class="title">${esc(u.name)}</div>
-      ${weak || u.note ? `<div class="meta">${weak ? `<span style="color:${WEAK}">⚠️ ${weak} 個不熟</span>` : ''}${weak && u.note ? ' · ' : ''}${u.note ? `<span class="sub">${esc(u.note.split('\n')[0])}</span>` : ''}</div>` : ''}</div>
+  const at = studyAt()[u.subject];
+  return `<div class="pu${open ? ' open' : ''}${here ? ' here' : ''}${weak.length ? ' has-weak' : ''}" id="pu-${u.id}" style="--st:${st.color}">
+    <div class="pu-row">
+      <button type="button" class="pu-name" data-action="prog-toggle" data-id="${u.id}">
+        <span class="t">${here ? '<span class="pin">📍</span>' : ''}${esc(u.name)}</span>
+        ${weak.length ? `<span class="pu-weak">⚠️ ${weak.length} 個不熟</span>` : ''}
+      </button>
+      ${seg(u)}
+    </div>
+    ${open ? `<div class="pu-panel">
+      ${here ? `<div class="row pu-here"><span>📍 目前讀到這章</span><span class="spacer"></span><button type="button" class="btn small" data-action="prog-here" data-id="${u.id}">取消</button></div>
+        <form data-form="prog-at-text" data-id="${u.id}" class="add-goal"><input type="text" name="text" value="${esc(at?.text || '')}" maxlength="60" autocomplete="off" placeholder="細到哪？例如：p.142、5-3 節（可不填）"><button class="btn" type="submit">存</button></form>`
+        : `<button type="button" class="btn pu-here-btn" data-action="prog-here" data-id="${u.id}">📍 我讀到這裡</button>`}
+      <div class="pu-sec">哪裡不熟？</div>
+      ${(u.weak || []).map(w => weakItem(u, w)).join('')}
+      <form data-form="prog-weak" data-id="${u.id}" class="add-goal"><input type="text" name="text" maxlength="120" autocomplete="off" placeholder="例如：NYT 什麼時候要拆（打完按 Enter）"><button class="btn primary" type="submit">記</button></form>
+      <div class="pu-tools"><button type="button" class="linkbtn" data-action="prog-rename" data-id="${u.id}">改名</button>
+        <button type="button" class="linkbtn danger" data-action="prog-del" data-id="${u.id}">刪掉這章</button></div>
+    </div>` : ''}
   </div>`;
 }
 
-function detail(s) {
+// ---------- 畫面 ----------
+function subjectPage(s) {
   const list = unitsOf(s.key);
   const at = studyAt()[s.key];
-  const weak = list.flatMap(u => (u.weak || []).filter(w => progUi.showFixed || !w.done).map(w => ({ u, w })));
-  const fixed = list.reduce((n, u) => n + (u.weak || []).filter(w => w.done).length, 0);
-  const cnt = i => list.filter(u => (u.status || 0) === i).length;
-  return `<div class="grid two">
-    <section class="card">
-      <h2>📍 讀到哪 ${at?.at ? `<span class="sub" style="font-weight:400">上次更新：${ago(at.at)}</span>` : ''}</h2>
-      <form data-form="prog-at" class="add-goal" style="margin-top:0"><input type="text" name="text" value="${esc(at?.text || '')}" maxlength="80" autocomplete="off" placeholder="例如：Ch5 讀到 5-3 FGK，p.142">
-        <button class="btn primary" type="submit">更新</button></form>
-      <h2 style="margin-top:16px">單元 <span class="sub" style="font-weight:400">${list.length ? `熟了 ${cnt(2)} · 讀過 ${cnt(1)} · 沒讀 ${cnt(0)}` : ''}</span></h2>
-      ${list.length ? bar(list) : ''}
-      <div data-drag-list="units">${list.map(unitRow).join('') || '<div class="empty">先把這科拆成單元（章節），一行一個，可以一次貼很多行。</div>'}</div>
-      <form data-form="prog-add" class="prog-add"><textarea name="text" rows="2" placeholder="新增單元，例如：Ch5 統計模式（多行＝多個單元）" autocomplete="off"></textarea>
-        <button class="btn" type="submit">加入</button></form>
-      ${list.length ? '<div class="sub" style="margin-top:6px">點狀態換：沒讀 → 讀過 → 熟了。點單元名稱寫筆記、記不熟的地方。</div>' : ''}
-    </section>
-    <section class="card">
-      <h2>⚠️ 不熟的地方 <span class="sub" style="font-weight:400">${weak.filter(x => !x.w.done).length} 個</span></h2>
-      ${list.length ? `<form data-form="prog-weak" class="prog-weak-add">
-        <input type="text" name="text" maxlength="120" autocomplete="off" placeholder="哪裡不熟？例如：NYT 什麼時候要拆">
-        <div class="row"><select name="unit">${list.map(u => `<option value="${u.id}" ${u.id === progUi.lastUnit ? 'selected' : ''}>${esc(u.name)}</option>`).join('')}</select>
-          <button class="btn primary" type="submit">記下來</button></div></form>` : '<div class="empty">先新增單元，就能記不熟的地方。</div>'}
-      ${weak.map(({ u, w }) => weakRow(u, w)).join('')}
-      ${list.length && !weak.length ? '<div class="empty">沒有不熟的地方 👍</div>' : ''}
-      ${fixed ? `<button class="btn small" data-action="prog-fixed" style="margin-top:8px">${progUi.showFixed ? '隱藏' : '顯示'}已搞懂的 ${fixed} 個</button>` : ''}
-    </section>
-  </div>`;
+  const hereU = at?.unitId && list.find(u => u.id === at.unitId);
+  // 照 group 分段（保持章節順序）
+  const groups = [];
+  for (const u of list) {
+    const g = u.group || '自己加的';
+    let x = groups.find(y => y.name === g);
+    if (!x) groups.push(x = { name: g, date: u.groupDate || '', list: [] });
+    x.list.push(u);
+  }
+  const ok = list.filter(u => u.status === 2).length, read = list.filter(u => u.status === 1).length;
+  const weakN = list.reduce((n, u) => n + openWeak(u).length, 0);
+  const next = list.find(u => (u.status || 0) === 0);
+
+  const head = `<section class="card prog-head" style="--c:${esc(s.color)}">
+    <div class="prog-big"><b>${pct(list)}%</b><span class="sub">熟了 ${ok} · 讀過 ${read} · 沒讀 ${list.length - ok - read}${weakN ? ` · <span style="color:${WEAK}">⚠️ ${weakN} 個不熟</span>` : ''}</span></div>
+    ${bar(list)}
+    ${hereU ? `<button type="button" class="prog-here-line" data-action="prog-goto" data-id="${hereU.id}">📍 讀到 <b>${esc(hereU.name)}</b>${at.text ? `，${esc(at.text)}` : ''} <span class="sub">· ${ago(at.at)}</span><span class="spacer"></span>›</button>`
+      : `<div class="sub prog-here-line">📍 點章名 →「我讀到這裡」，下次打開就知道從哪接著讀${next ? `。還沒讀的第一章：${esc(next.name)}` : ''}</div>`}
+  </section>`;
+
+  const groupHtml = g => {
+    const d = g.date && g.date >= today() ? daysUntil(g.date) : null;
+    const gok = g.list.filter(u => u.status === 2).length;
+    return `<section class="card prog-group"><h2>${esc(g.name)}${g.date ? ` <span class="sub" style="font-weight:400">${fmtDate(g.date)}${d != null ? `・剩 ${d} 天` : ''}</span>` : ''}
+      <span class="spacer"></span><span class="sub" style="font-weight:400">熟了 ${gok}/${g.list.length}</span></h2>
+      ${g.list.map(u => unitRow(u, u.id === hereU?.id)).join('')}</section>`;
+  };
+
+  return `${head}${groups.map(groupHtml).join('')}
+    <section class="card"><form data-form="prog-add" data-id="${esc(s.key)}" class="add-goal" style="margin-top:0">
+      <input type="text" name="text" maxlength="80" autocomplete="off" placeholder="＋ 自己加一章">
+      <button class="btn" type="submit">加入</button></form></section>`;
+}
+
+function weakPage() {
+  const all = units().flatMap(u => openWeak(u).map(w => ({ u, w }))).sort((a, b) => (b.w.at || 0) - (a.w.at || 0));
+  return `<section class="card"><h2>⚠️ 所有不熟的地方 <span class="sub" style="font-weight:400">${all.length} 個，搞懂就打勾</span></h2>
+    ${all.length ? all.map(({ u, w }) => weakItem(u, w, true)).join('')
+      : '<div class="empty">目前沒有 👍 讀書時哪裡卡住，點那一章的名字記下來，考前回來這裡看。</div>'}</section>`;
 }
 
 export function renderProgress() {
-  const s = progUi.subj && subjOf(progUi.subj);
-  if (progUi.subj && !s) progUi.subj = '';
-  const chips = subjects().map(x => `<button type="button" data-action="prog-open" data-subj="${esc(x.key)}" class="${x.key === progUi.subj ? 'on' : ''}"
-    style="${x.key === progUi.subj ? `background:${esc(x.color)};border-color:${esc(x.color)}` : ''}">${esc(x.name)}</button>`).join('');
-  return `<div class="page-head"><h1>${s ? `<a href="#progress" data-action="prog-open" data-subj="" class="sub" style="font-weight:400">進度 ›</a> ${esc(s.name)}` : '各科進度'}</h1></div>
-    ${subjects().length ? `<div class="chips prog-chips"><button type="button" data-action="prog-open" data-subj="" class="${s ? '' : 'on'}">總覽</button>${chips}</div>` : ''}
-    ${s ? detail(s) : overview()}`;
+  seed();
+  const subs = subjects();
+  // 沒選（或選的科目不見了）：打開最近更新「讀到哪」的那科；不記下來，資料同步進來後會重新判斷
+  let cur = progUi.subj;
+  if (cur !== 'weak' && !subs.some(s => s.key === cur)) {
+    const recent = subs.map(s => [s, studyAt()[s.key]?.unitId ? studyAt()[s.key].at || 1 : 0]).sort((a, b) => b[1] - a[1])[0];
+    cur = recent ? recent[0].key : '';
+  }
+  const weakAll = units().reduce((n, u) => n + openWeak(u).length, 0);
+  const chip = s => {
+    const on = s.key === cur;
+    return `<button type="button" data-action="prog-subj" data-subj="${esc(s.key)}" class="${on ? 'on' : ''}"
+      style="${on ? `background:${esc(s.color)};border-color:${esc(s.color)}` : `border-color:${esc(s.color)}55`}">${esc(s.name)} <small>${pct(unitsOf(s.key))}%</small></button>`;
+  };
+  const chips = `<div class="prog-chips">${subs.map(chip).join('')}
+    <button type="button" data-action="prog-subj" data-subj="weak" class="${cur === 'weak' ? 'on' : ''}" style="${cur === 'weak' ? `background:${WEAK};border-color:${WEAK}` : ''}">⚠️ 不熟 ${weakAll}</button>
+    <button type="button" data-action="prog-new-subj" aria-label="新增科目">＋</button></div>`;
+  const s = subjOf(cur);
+  let body;
+  if (!preset && !subs.length) body = '<div class="sub">載入中…</div>';
+  else if (cur === 'weak') body = weakPage();
+  else if (s) body = subjectPage(s);
+  else body = `<section class="card"><div class="empty">還沒有科目。按上面的 ＋ 新增一科。</div></section>`;
+  return `<div class="page-head"><h1>各科進度</h1></div>${chips}<div class="prog-body">${body}</div>`;
 }
 
 // 首頁小卡：有不熟的地方才出現
 export function homeProgressCard() {
   const weak = units().flatMap(u => openWeak(u).map(w => ({ u, w }))).sort((a, b) => (b.w.at || 0) - (a.w.at || 0));
   if (!weak.length) return '';
-  return `<section class="card"><h2>⚠️ 不熟的地方 <a href="#progress" class="sub" style="font-weight:400">（${weak.length} 個）全部 ›</a></h2>
-    ${weak.slice(0, 3).map(({ u, w }) => weakRow(u, w, true)).join('')}</section>`;
+  return `<section class="card"><h2>⚠️ 不熟的地方 <a href="#progress" data-action="prog-subj" data-subj="weak" class="sub" style="font-weight:400">（${weak.length} 個）全部 ›</a></h2>
+    ${weak.slice(0, 3).map(({ u, w }) => weakItem(u, w, true)).join('')}</section>`;
 }
 
-// ---------- 單元編輯 ----------
-function weakList(u) {
-  return (u.weak || []).map(w => `<div class="goal ${w.done ? 'done' : ''}">
-    <button type="button" class="check small ${w.done ? 'on' : ''}" data-action="prog-sw-toggle" data-w="${w.id}">${w.done ? '✓' : ''}</button>
-    <div class="text">${esc(w.text)}</div>
-    <button type="button" class="del" data-action="prog-sw-del" data-w="${w.id}" aria-label="刪除">✕</button></div>`).join('')
-    || '<div class="empty">沒有</div>';
-}
-const statusChips = cur => STATUS.map((x, i) => `<button type="button" data-action="prog-sheet-st" data-st="${i}" class="${i === cur ? 'on' : ''}"
-  style="${i === cur ? `background:${x.color};border-color:${x.color}` : ''}">${x.ico} ${x.label}</button>`).join('');
-
-function openUnit(u) {
-  const d = { ...u, weak: [...(u.weak || [])] };
-  ctx.openSheet(`<h2>單元</h2>
-    <form data-form="prog-unit">
-      <label class="field"><span>名稱</span><input type="text" name="name" value="${esc(d.name)}" required autocomplete="off"></label>
-      <div class="field"><span>狀態</span><div class="chips" id="prog-st-chips">${statusChips(d.status || 0)}</div></div>
-      <div class="field"><span>不熟的地方（打勾＝搞懂了）</span>
-        <div id="prog-sw">${weakList(d)}</div>
-        <div class="add-goal"><input type="text" id="prog-sw-input" placeholder="新增一個，按 Enter 加入" autocomplete="off">
-          <button type="button" class="btn" data-action="prog-sw-add">加入</button></div></div>
-      <label class="field"><span>筆記（重點、頁數、考試會考什麼…）</span><textarea name="note" rows="4">${esc(d.note || '')}</textarea></label>
-      <div class="actions">
-        <button type="button" class="btn danger" data-action="prog-unit-del">刪除單元</button>
-        <span class="spacer"></span>
+// ---------- 新增科目 ----------
+function openNewSubject() {
+  const rest = allSubjects().filter(s => !units().some(u => u.subject === s.key));
+  ctx.openSheet(`<h2>新增科目</h2>
+    ${rest.length ? `<div class="field"><span>從課表／讀書標籤選</span><div class="chips">${rest.map(s =>
+      `<button type="button" data-action="prog-start" data-subj="${esc(s.key)}" style="border-color:${esc(s.color)}">${esc(s.name)}</button>`).join('')}</div></div>` : ''}
+    <form data-form="prog-new-subj">
+      <label class="field"><span>或是新的科目名稱</span><input type="text" name="name" maxlength="20" autocomplete="off" placeholder="例如：計算機組織、多益"></label>
+      <label class="field"><span>章節（一行一章，可以先空著）</span><textarea name="units" rows="5" placeholder="Ch1 …&#10;Ch2 …"></textarea></label>
+      <div class="actions"><span class="spacer"></span>
         <button type="button" class="btn" data-action="close-sheet">取消</button>
-        <button type="submit" class="btn primary">儲存</button></div>
-    </form>`, { kind: 'prog-unit', data: d });
+        <button type="submit" class="btn primary">建立</button></div>
+    </form>`, { kind: 'prog-new' });
 }
-const sheetEl = sel => document.querySelector(`#sheet ${sel}`);
-function addSheetWeak() {
-  const input = sheetEl('#prog-sw-input');
-  const text = input?.value.trim();
-  if (!text) return;
-  const d = ctx.sheetData();
-  d.weak.push({ id: newId(), text, done: false, at: Date.now() });
-  sheetEl('#prog-sw').innerHTML = weakList(d);
-  input.value = '';
-  input.focus();
+
+function addUnits(subj, names) {
+  const list = unitsOf(subj);
+  let k = list.length ? key(list[list.length - 1]) : 0;
+  for (const name of names) {
+    k += 1000;
+    saveDoc('units', { id: newId(), subject: subj, name: name.slice(0, 80), status: 0, weak: [], group: '', groupDate: '', order: k, createdAt: Date.now() });
+  }
 }
-// 單元面板裡的輸入框按 Enter＝加入不熟的地方
-document.addEventListener('keydown', ev => {
-  if (ev.key === 'Enter' && ev.target.id === 'prog-sw-input' && !ev.isComposing) { ev.preventDefault(); addSheetWeak(); }
-});
 
 // ---------- 表單 ----------
+const findUnit = id => units().find(x => x.id === id);
+function clearInput(form) { const i = form.querySelector('[name=text]'); if (i) i.value = ''; }
+
 export const progressForms = {
-  'prog-at': (form, f) => {
+  'prog-weak': (form, f) => {
+    const u = findUnit(form.dataset.id);
     const text = String(f.text || '').trim();
-    savePrefs({ studyAt: { ...studyAt(), [progUi.subj]: { text, at: Date.now() } } });
+    if (!u || !text) return;
+    clearInput(form);   // 先清空再存：存檔會重畫，重畫時會保留輸入框的字
+    saveDoc('units', { ...u, weak: [...(u.weak || []), { id: newId(), text, done: false, at: Date.now() }] });
+    requestAnimationFrame(() => document.querySelector(`form[data-form="prog-weak"][data-id="${u.id}"] [name=text]`)?.focus());
+  },
+  'prog-at-text': (form, f) => {
+    const u = findUnit(form.dataset.id);
+    if (!u) return;
+    savePrefs({ studyAt: { ...studyAt(), [u.subject]: { unitId: u.id, text: String(f.text || '').trim(), at: Date.now() } } });
     form.querySelector('[name=text]')?.blur();
-    ctx.toast(text ? '📍 已更新讀到哪' : '已清除');
+    ctx.toast('📍 已記下');
   },
   'prog-add': (form, f) => {
-    const names = String(f.text || '').split('\n').map(x => x.trim()).filter(Boolean);
-    if (!names.length) return;
-    const list = unitsOf(progUi.subj);
-    let k = list.length ? key(list[list.length - 1]) : 0;
-    form.querySelector('[name=text]').value = '';
-    for (const name of names) {
-      k += 1000;
-      saveDoc('units', { id: newId(), subject: progUi.subj, name: name.slice(0, 80), status: 0, weak: [], note: '', order: k, createdAt: Date.now() });
-    }
-    ctx.toast(names.length > 1 ? `加入 ${names.length} 個單元` : `加入「${names[0]}」`);
+    const name = String(f.text || '').trim();
+    const k = form.dataset.id;
+    if (!name || !subjOf(k)) return;
+    clearInput(form);
+    addUnits(k, [name]);
   },
-  'prog-weak': (form, f) => {
-    const text = String(f.text || '').trim();
-    const u = units().find(x => x.id === f.unit);
-    if (!text || !u) return;
-    progUi.lastUnit = u.id;
-    form.querySelector('[name=text]').value = '';
-    saveDoc('units', { ...u, weak: [...(u.weak || []), { id: newId(), text, done: false, at: Date.now() }] });
-    ctx.toast('⚠️ 記下來了，搞懂後打勾');
-  },
-  'prog-unit': (form, f, d) => {
+  'prog-new-subj': (form, f) => {
     const name = String(f.name || '').trim();
-    if (!name) return;
-    saveDoc('units', { ...d, name: name.slice(0, 80), note: String(f.note || '').trim() });
+    const names = String(f.units || '').split('\n').map(x => x.trim()).filter(Boolean);
+    if (!name) { ctx.toast('寫一下科目名稱'); return; }
+    const tags = store.prefs.studyTags || [];
+    let g = tags.find(x => x.name === name);
+    const c = store.state.courses.find(x => x.name === name);
+    let k = c ? `c:${c.id}` : g ? `g:${g.id}` : '';
+    if (!k) {
+      const COLORS = ['#60a5fa', '#4ade80', '#c084fc', '#fbbf24', '#f87171', '#2dd4bf', '#f472b6', '#fb923c'];
+      g = { id: newId(), name, color: COLORS[tags.length % COLORS.length] };
+      savePrefs({ studyTags: [...tags, g] });
+      k = `g:${g.id}`;
+    }
+    addUnits(k, names.length ? names : ['第一章']);
+    progUi.subj = k;
     ctx.closeSheet();
-    ctx.toast('已儲存');
+    ctx.toast(`建立「${name}」`);
   },
 };
 
 // ---------- 點擊 ----------
-const findUnit = id => units().find(x => x.id === id);
 export const progressActions = {
-  'prog-open': el => { progUi.subj = el.dataset.subj; progUi.showFixed = false; if (location.hash !== '#progress') location.hash = '#progress'; else ctx.render(); window.scrollTo(0, 0); },
-  'prog-st': el => {
-    const u = findUnit(el.dataset.id);
-    if (u) saveDoc('units', { ...u, status: ((u.status || 0) + 1) % STATUS.length });
+  'prog-subj': el => {
+    progUi.subj = el.dataset.subj;
+    progUi.open = '';
+    if (location.hash !== '#progress') location.hash = '#progress'; else ctx.render();
   },
-  'prog-unit': el => { const u = findUnit(el.dataset.id); if (u) openUnit(u); },
+  'prog-new-subj': openNewSubject,
+  'prog-start': el => {
+    const s = subjOf(el.dataset.subj);
+    if (!s) return;
+    addUnits(s.key, ['第一章']);
+    progUi.subj = s.key;
+    progUi.open = '';
+    ctx.closeSheet();
+    ctx.toast(`開始追蹤「${s.name}」，章節可以改名或自己加`);
+  },
+  'prog-set': el => {
+    const u = findUnit(el.dataset.id);
+    const st = +el.dataset.st;
+    if (!u || (u.status || 0) === st) return;
+    saveDoc('units', { ...u, status: st });
+    if (st === 2 && openWeak(u).length) ctx.toast(`這章還有 ${openWeak(u).length} 個不熟的地方沒打勾喔`);
+  },
+  'prog-toggle': el => { progUi.open = progUi.open === el.dataset.id ? '' : el.dataset.id; ctx.render(); },
+  'prog-goto': el => {
+    progUi.open = el.dataset.id;
+    ctx.render();
+    document.getElementById(`pu-${el.dataset.id}`)?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  },
+  'prog-here': el => {
+    const u = findUnit(el.dataset.id);
+    if (!u) return;
+    const cur = studyAt()[u.subject];
+    const off = cur?.unitId === u.id;
+    savePrefs({ studyAt: { ...studyAt(), [u.subject]: off ? { unitId: '', text: '', at: Date.now() } : { unitId: u.id, text: '', at: Date.now() } } });
+    if (!off) ctx.toast('📍 記住了，下次從這裡開始');
+  },
   'prog-weak-toggle': el => {
     const u = findUnit(el.dataset.id);
     if (!u) return;
@@ -255,28 +336,20 @@ export const progressActions = {
     saveDoc('units', { ...u, weak });
     if (now) ctx.toast('👍 搞懂了');
   },
-  'prog-fixed': () => { progUi.showFixed = !progUi.showFixed; ctx.render(); },
-  'prog-sheet-st': el => {
-    const d = ctx.sheetData();
-    d.status = +el.dataset.st;
-    sheetEl('#prog-st-chips').innerHTML = statusChips(d.status);
+  'prog-weak-del': el => {
+    const u = findUnit(el.dataset.id);
+    if (u) saveDoc('units', { ...u, weak: (u.weak || []).filter(w => w.id !== el.dataset.w) });
   },
-  'prog-sw-add': addSheetWeak,
-  'prog-sw-toggle': el => {
-    const d = ctx.sheetData();
-    d.weak = d.weak.map(w => w.id === el.dataset.w ? { ...w, done: !w.done } : w);
-    sheetEl('#prog-sw').innerHTML = weakList(d);
+  'prog-rename': el => {
+    const u = findUnit(el.dataset.id);
+    if (!u) return;
+    const name = prompt('章節名稱', u.name);
+    if (name?.trim()) saveDoc('units', { ...u, name: name.trim().slice(0, 80) });
   },
-  'prog-sw-del': el => {
-    const d = ctx.sheetData();
-    d.weak = d.weak.filter(w => w.id !== el.dataset.w);
-    sheetEl('#prog-sw').innerHTML = weakList(d);
-  },
-  'prog-unit-del': () => {
-    const d = ctx.sheetData();
-    if (!confirm(`刪除單元「${d.name}」？裡面記的不熟的地方也會一起刪掉。`)) return;
-    removeDoc('units', d.id);
-    ctx.closeSheet();
-    ctx.toast('已刪除');
+  'prog-del': el => {
+    const u = findUnit(el.dataset.id);
+    if (!u || !confirm(`刪掉「${u.name}」？`)) return;
+    removeDoc('units', u.id);
+    progUi.open = '';
   },
 };

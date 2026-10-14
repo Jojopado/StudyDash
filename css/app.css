@@ -709,25 +709,43 @@ body.reading { overflow: hidden; }
 .sub .down { color: var(--muted); }
 
 /* ---------- 各科進度 ---------- */
-.prog-chips { margin-bottom: 14px; }
-.prog-subj { padding: 10px 0 10px 10px; border-top: 1px solid var(--line); border-left: 3px solid var(--c); margin-left: -2px; cursor: pointer; }
-.card h2 + .prog-subj { border-top: 0; }
-.prog-subj .name { font-size: 16px; }
-.prog-subj .row { gap: 8px; }
-.prog-at { font-size: 13px; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.prog-weak-n { font-size: 12px; color: #fbbf24; white-space: nowrap; }
-.prog-bar { display: flex; height: 6px; background: var(--card2); border-radius: 99px; overflow: hidden; margin: 6px 0 4px; }
+.prog-chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 12px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.prog-chips::-webkit-scrollbar { display: none; }
+.prog-chips button { flex: none; border: 1px solid var(--line); background: var(--card); color: var(--text); border-radius: 999px; padding: 7px 14px;
+  font: inherit; font-size: 14px; cursor: pointer; white-space: nowrap; }
+.prog-chips button small { opacity: .7; margin-left: 2px; }
+.prog-chips button.on { color: #0b0d12; font-weight: 600; }
+.prog-body { display: grid; gap: 14px; max-width: 760px; }
+.prog-head { border-top: 3px solid var(--c); }
+.prog-big { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.prog-big b { font-size: 28px; line-height: 1; }
+.prog-bar { display: flex; height: 8px; background: var(--card2); border-radius: 99px; overflow: hidden; margin: 10px 0; }
 .prog-bar > div { height: 100%; transition: width .3s; }
-.prog-unit { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-top: 1px solid var(--line); }
-.prog-unit .main { flex: 1; min-width: 0; cursor: pointer; }
-.prog-unit .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.prog-unit .meta { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.prog-st { flex: none; min-width: 64px; border: 1px solid var(--c); color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent);
-  border-radius: 999px; padding: 3px 10px; font-size: 13px; cursor: pointer; font-family: inherit; }
-.prog-add { display: flex; gap: 8px; margin-top: 10px; align-items: flex-start; }
-.prog-add textarea { flex: 1; min-width: 0; resize: vertical; }
-.prog-weak-add { display: grid; gap: 8px; margin-bottom: 6px; }
-.prog-weak-add .row { gap: 8px; }
-.prog-weak-add select { flex: 1; min-width: 0; }
-.prog-weak .text { cursor: pointer; }
-.prog-weak .text .sub { font-size: 12px; }
+.prog-here-line { display: flex; align-items: center; gap: 4px; width: 100%; text-align: left; font: inherit; font-size: 14px; color: var(--text);
+  background: var(--card2); border: 0; border-radius: 10px; padding: 10px 12px; cursor: pointer; }
+div.prog-here-line { cursor: default; color: var(--muted); }
+.prog-group h2 { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.pu { border-top: 1px solid var(--line); border-left: 3px solid var(--st); padding-left: 8px; margin-left: -4px; }
+.pu.has-weak { border-left-color: #fbbf24; }
+.pu.here { background: color-mix(in srgb, var(--accent) 10%, transparent); border-radius: 0 10px 10px 0; }
+.pu-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
+.pu-name { flex: 1; min-width: 0; text-align: left; background: none; border: 0; color: var(--text); font: inherit; cursor: pointer; padding: 2px 0; }
+.pu-name .t { display: block; }
+.pu-name .pin { margin-right: 4px; }
+.pu-weak { display: block; font-size: 12px; color: #fbbf24; margin-top: 2px; }
+.pu-seg { flex: none; display: inline-flex; background: var(--card2); border: 1px solid var(--line); border-radius: 9px; padding: 2px; }
+.pu-seg button { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 13px; padding: 5px 8px; border-radius: 7px; cursor: pointer; white-space: nowrap; }
+.pu-seg button.on { background: var(--c); color: #0b0d12; font-weight: 600; }
+.pu-panel { padding: 2px 0 12px; }
+.pu-here-btn { width: 100%; }
+.pu-here { font-size: 14px; margin-bottom: 4px; }
+.pu-sec { font-size: 13px; color: var(--muted); margin: 12px 0 2px; }
+.pw { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
+.card h2 + .pw { padding-top: 2px; }
+.pw .text { flex: 1; min-width: 0; }
+.pw .text .sub { font-size: 12px; }
+.pw.done .text { color: var(--muted); text-decoration: line-through; }
+.pw .del { border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 15px; opacity: .6; }
+.pu-tools { display: flex; gap: 14px; justify-content: flex-end; margin-top: 10px; }
+.linkbtn { border: 0; background: none; color: var(--muted); font: inherit; font-size: 13px; cursor: pointer; padding: 0; text-decoration: underline; }
+.linkbtn.danger { color: var(--danger); }

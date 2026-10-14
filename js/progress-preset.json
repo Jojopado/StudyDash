@@ -1,0 +1,136 @@
+{
+  "_說明": "各科預設章節。第一次打開「進度」時，那科還沒有任何章節就自動放進去（id 固定，兩台裝置不會重複）。course = 課表上的課名；tag = 不在課表上的科目（沒有就建一個讀書標籤）。groups 的 date = 考試日，會顯示倒數。status 1 = 讀過。",
+  "subjects": [
+    {
+      "id": "dc", "course": "資料壓縮",
+      "at": "dc-5", "atText": "",
+      "groups": [
+        { "name": "期中範圍", "date": "2026-11-05", "units": [
+          ["dc-1", "Ch1 資料壓縮簡介（熵、壓縮比、失真）", 1],
+          ["dc-2", "Ch5 統計模式：機率模型、資訊量"],
+          ["dc-3", "Ch5 Huffman 編碼（建樹、平均碼長）"],
+          ["dc-4", "Ch5 Huffman 變形（Shannon-Fano 等）"],
+          ["dc-5", "Ch5 適應性 Huffman FGK（NYT、權重＋順序、Update）"],
+          ["dc-6", "Ch5 算術編碼（區間、編碼／解碼）"],
+          ["dc-7", "作業三 ABACCC 手算"],
+          ["dc-8", "字典編碼 LZ77／LZ78／LZW（會不會考還沒確認）"]
+        ]},
+        { "name": "期末範圍", "date": "2027-01-07", "units": [
+          ["dc-9", "資料壓縮理論基礎"],
+          ["dc-10", "無失真影像編碼"],
+          ["dc-11", "純量量化"],
+          ["dc-12", "向量量化"],
+          ["dc-13", "差分預測編碼（DPCM）"],
+          ["dc-14", "轉換編碼（DCT）"],
+          ["dc-15", "JPEG 標準"],
+          ["dc-16", "小波轉換壓縮"],
+          ["dc-17", "視訊壓縮、動作預估"],
+          ["dc-18", "文獻研討報告（12/24、12/31）"]
+        ]}
+      ]
+    },
+    {
+      "id": "ml", "course": "機器學習",
+      "groups": [
+        { "name": "已經上過", "units": [
+          ["ml-1", "Ch1 Introduction（機器學習是什麼、應用）"],
+          ["ml-2", "Ch2 從例子學類別、假設空間"],
+          ["ml-3", "Ch2 VC dimension"],
+          ["ml-4", "Ch2 PAC learning、雜訊"],
+          ["ml-5", "Ch2 多類別、回歸（線性回歸）"],
+          ["ml-6", "Ch2 模型選擇、泛化、交叉驗證"],
+          ["ml-7", "作業：Boston 房價 每個特徵各做線性回歸"],
+          ["ml-8", "作業：Binomial／Normal（10/05）"]
+        ]},
+        { "name": "接下來", "units": [
+          ["ml-9", "Ch3 Bayesian Decision Theory（貝氏法則、損失、拒絕）"],
+          ["ml-10", "Ch3 判別函數、關聯規則"],
+          ["ml-11", "Ch4 Parametric Methods（MLE、偏差與變異）"],
+          ["ml-12", "Ch5 Multivariate Methods"],
+          ["ml-13", "Ch6 Dimensionality Reduction（PCA、LDA）"],
+          ["ml-14", "Ch7 Clustering（k-means、EM）"],
+          ["ml-15", "Ch8 Nonparametric Methods（KNN）"],
+          ["ml-16", "Ch9 Decision Trees"],
+          ["ml-17", "Ch10 Linear Discrimination"],
+          ["ml-18", "Ch11 Multilayer Perceptrons"]
+        ]}
+      ]
+    },
+    {
+      "id": "aiot", "course": "人工智慧物聯網",
+      "groups": [
+        { "name": "期中範圍", "date": "2026-11-03", "units": [
+          ["aiot-1", "RFID 系統組成（標籤、讀取器、中介軟體）"],
+          ["aiot-2", "RFID 頻段與種類（LF／HF／UHF、被動／主動）"],
+          ["aiot-3", "RFID 應用"],
+          ["aiot-4", "EPC 編碼（SGTIN-96、條碼→URI 換算）"],
+          ["aiot-5", "EPCglobal 網路架構"],
+          ["aiot-6", "ALE 應用層事件（過濾、去重）"],
+          ["aiot-7", "EPCIS 資訊服務"],
+          ["aiot-8", "ONS 與 Discovery Service"],
+          ["aiot-9", "題庫：RFID／EPC 177 題做一輪"],
+          ["aiot-10", "題庫：RFID 錯題本清空"]
+        ]},
+        { "name": "期末範圍", "date": "2027-01-05", "units": [
+          ["aiot-11", "IoT 概論、分層架構"],
+          ["aiot-12", "NFC 近場通訊"],
+          ["aiot-13", "BLE 低功耗藍牙"],
+          ["aiot-14", "IoT 嵌入式系統"],
+          ["aiot-15", "AIoT 應用"],
+          ["aiot-16", "題庫：IoT 755 題做一輪"]
+        ]}
+      ]
+    },
+    {
+      "id": "trw", "course": "科技論文寫作",
+      "groups": [
+        { "name": "期中範圍", "date": "2026-11-04", "units": [
+          ["trw-1", "Academic writing approach"],
+          ["trw-2", "Article search、圖書館資源"],
+          ["trw-3", "Experimental research"],
+          ["trw-4", "Writing up research：Abstract"]
+        ]},
+        { "name": "期末範圍", "date": "2027-01-06", "units": [
+          ["trw-5", "Introduction 怎麼寫"],
+          ["trw-6", "Methods 怎麼寫"],
+          ["trw-7", "Results 怎麼寫"],
+          ["trw-8", "Discussion 怎麼寫"],
+          ["trw-9", "Conclusion 怎麼寫"]
+        ]}
+      ]
+    },
+    {
+      "id": "ds", "tag": "資料結構", "color": "#f472b6",
+      "groups": [
+        { "name": "LeetCode C++（照講義順序）", "units": [
+          ["ds-1", "時間複雜度（講義 01）"],
+          ["ds-2", "陣列與雜湊（講義 02）"],
+          ["ds-3", "堆疊與佇列"],
+          ["ds-4", "搜尋與排序"],
+          ["ds-5", "鏈結串列"],
+          ["ds-6", "樹、二元搜尋樹、堆積"],
+          ["ds-7", "圖（BFS／DFS、最短路徑）"],
+          ["ds-8", "進階樹（AVL、紅黑樹、B 樹）"]
+        ]}
+      ]
+    },
+    {
+      "id": "ros2", "tag": "ROS2", "color": "#fb923c", "at": "ros2-2",
+      "groups": [
+        { "name": "ROS2 Humble", "units": [
+          ["ros2-1", "Topics、Services（CLI）", 1],
+          ["ros2-2", "Actions（CLI）"],
+          ["ros2-3", "rqt_console、launch、rosbag（CLI）"],
+          ["ros2-4", "建 workspace 和 package"],
+          ["ros2-5", "Python publisher／subscriber"],
+          ["ros2-6", "Service／client、參數"],
+          ["ros2-7", "自己寫 launch 檔"],
+          ["ros2-8", "TF2"],
+          ["ros2-9", "URDF"],
+          ["ros2-10", "Gazebo 模擬"],
+          ["ros2-11", "Nav2 導航"]
+        ]}
+      ]
+    }
+  ]
+}
