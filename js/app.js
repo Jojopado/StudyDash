@@ -714,7 +714,7 @@ initMemo({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data
 initDocs({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
 initQuiz({ openSheet, closeSheet, toast, render });
 initProgress({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
-initFit({ openSheet, closeSheet, toast, render });
+initFit({ openSheet, closeSheet, toast, render, sheetEl: () => sheet });
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW 註冊失敗', e));

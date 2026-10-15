@@ -159,10 +159,69 @@ function todayTab() {
     </section>
     <div id="fit-rest" class="fit-rest" hidden></div>
     ${p.list.map((it, i) => exBlock(p, t, it, i + 1)).join('')}
+    ${noteCard(t, p.id, w)}
     <section class="card"><div class="row">
       ${w?.done ? `<span>✅ 今天練完了！${w.doneAt ? `<span class="sub">（${new Date(w.doneAt).toTimeString().slice(0, 5)}）</span>` : ''}</span><span class="spacer"></span><button type="button" class="btn small" data-action="fit-finish" data-day="${p.id}">取消完成</button>`
         : `<span class="sub">做完後記得補充蛋白質（乳清、雞胸、豆漿、茶葉蛋）</span><span class="spacer"></span><button type="button" class="btn primary" data-action="fit-finish" data-day="${p.id}">完成今天的訓練</button>`}
     </div></section>`;
+}
+
+// ---------- 心得 ----------
+export const FEELS = [
+  { id: 'tired', label: '😫 很累' },
+  { id: 'ok', label: '😐 普通' },
+  { id: 'good', label: '🙂 不錯' },
+  { id: 'great', label: '💪 超有力' },
+];
+const feelOf = id => FEELS.find(f => f.id === id);
+
+function noteForm(date, day, w, inSheet = false) {
+  const id = `${date}|${day}`;
+  return `<div class="chips fit-feels">${FEELS.map(f => `<button type="button" data-action="fit-feel" data-id="${esc(id)}" data-feel="${f.id}" class="${w?.feel === f.id ? 'on' : ''}">${f.label}</button>`).join('')}</div>
+    <form data-form="fit-note" data-id="${esc(id)}"${inSheet ? ' data-sheet="1"' : ''}>
+      <textarea name="note" rows="4" maxlength="2000" placeholder="例如：臥推 40 kg 第三組很吃力、深蹲膝蓋有點怪、今天精神很好多做一組、練完吃了雞胸便當…">${esc(w?.note || '')}</textarea>
+      <div class="actions"><span class="sub">${w?.noteAt ? `上次存：${new Date(w.noteAt).toTimeString().slice(0, 5)}` : ''}</span><span class="spacer"></span>
+        ${inSheet ? '<button type="button" class="btn" data-action="close-sheet">取消</button>' : ''}<button type="submit" class="btn primary">存心得</button></div>
+    </form>`;
+}
+function noteCard(date, day, w) {
+  return `<section class="card fit-note"><h2>📝 今天的心得 <span class="sub" style="font-weight:400">感覺怎麼樣？</span></h2>${noteForm(date, day, w)}</section>`;
+}
+
+// 一次訓練的摘要：每個動作 重量 × 次數
+function setsSummary(w) {
+  const p = planOf(w.day);
+  const order = p ? p.list.map(it => it.ex) : [];
+  const keys = Object.keys(w.sets || {}).filter(k => w.sets[k]?.some(Boolean)).sort((a, b) => order.indexOf(a) - order.indexOf(b));
+  return keys.map(k => {
+    const e = exById(k);
+    const ss = w.sets[k].filter(Boolean);
+    const ws = [...new Set(ss.map(x => x.w).filter(Boolean))];
+    return `<div class="fit-ls"><span>${esc(e?.name || k)}</span><span class="sub">${ws.length ? `${ws.join('/')} kg × ` : ''}${ss.map(x => x.r).join('/')} ${UNIT[e?.unit] || '下'}</span></div>`;
+  }).join('');
+}
+
+function logTab() {
+  const list = workouts().filter(w => w.done || w.note || w.feel || Object.values(w.sets || {}).some(a => a?.some(Boolean)))
+    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : (b.createdAt || 0) - (a.createdAt || 0)));
+  const month = today().slice(0, 7);
+  const nMonth = list.filter(w => w.done && w.date.startsWith(month)).length;
+  const head = `<section class="card"><div class="fit-stats">
+    <div><b>${list.filter(w => w.done).length}</b><span class="sub">總共練完</span></div>
+    <div><b>${nMonth}</b><span class="sub">這個月</span></div>
+    <div><b>${weekDone().size}</b><span class="sub">這週</span></div></div></section>`;
+  if (!list.length) return `${head}<section class="card"><div class="empty">還沒有紀錄。練完在「今天」最下面寫心得，就會出現在這裡。</div></section>`;
+  return head + list.map(w => {
+    const p = planOf(w.day);
+    const f = feelOf(w.feel);
+    return `<section class="card fit-log" style="--c:${p?.color || '#94a3b8'}">
+      <div class="row"><span class="fit-badge">${esc(w.day)}</span><div style="flex:1;min-width:0"><b>${fmtDate(w.date)}</b> ${p ? esc(p.name) : ''}
+        <div class="sub">${w.done ? '✅ 練完' : '⏳ 沒按完成'}${f ? ` · ${f.label}` : ''}</div></div>
+        <button type="button" class="btn small" data-action="fit-note-edit" data-id="${esc(`${w.date}|${w.day}`)}">${w.note ? '編輯' : '寫心得'}</button></div>
+      ${w.note ? `<div class="fit-note-text">${esc(w.note)}</div>` : ''}
+      ${setsSummary(w) ? `<details class="fit-det"><summary class="sub">做了哪些（${Object.values(w.sets || {}).filter(a => a?.some(Boolean)).length} 個動作）</summary>${setsSummary(w)}</details>` : ''}
+    </section>`;
+  }).join('');
 }
 
 // ---------- 課表 ----------
@@ -292,12 +351,12 @@ function bodyForm() {
 // ---------- 主畫面 ----------
 export function renderFit() {
   seed();
-  const tabs = [['today', '今天'], ['plan', '課表'], ['lib', '動作庫'], ['body', '身體數據']];
+  const tabs = [['today', '今天'], ['log', '紀錄'], ['plan', '課表'], ['lib', '動作'], ['body', '身體']];
   const chooser = fitUi.tab === 'today' ? `<div class="chips fit-daychips">${PLAN.map(p => {
     const on = (planOf(fitUi.day) || planOn(today())) === p;
     return `<button type="button" data-action="fit-day" data-day="${p.id}" class="${on ? 'on' : ''}" style="${on ? `background:${p.color};border-color:${p.color}` : `border-color:${p.color}66`}">${p.id} ${esc(p.name)}</button>`;
   }).join('')}</div>` : '';
-  const body = { today: todayTab, plan: planTab, lib: libTab, body: bodyTab }[fitUi.tab]();
+  const body = { today: todayTab, log: logTab, plan: planTab, lib: libTab, body: bodyTab }[fitUi.tab]();
   return `<div class="page-head"><h1>健身</h1><div class="seg">${tabs.map(([k, l]) =>
     `<button type="button" data-action="fit-tab" data-tab="${k}" class="${fitUi.tab === k ? 'on' : ''}">${l}</button>`).join('')}</div></div>
     ${chooser}${body}`;
@@ -311,7 +370,7 @@ export function homeFitCard() {
   const w = workouts().find(x => x.id === wid(t, p.id));
   const fin = p.list.filter(it => ((w?.sets?.[it.ex]) || []).filter(Boolean).length >= (it.ex === 'walk' ? 1 : it.sets)).length;
   return `<section class="card"><h2>🏋️ 今天練 ${p.id}｜${esc(p.name)} <a href="#fit" data-action="fit-go" class="sub" style="font-weight:400">${esc(p.where)} ›</a></h2>
-    ${w?.done ? '<div>✅ 練完了，記得吃蛋白質</div>' : `<div class="prog-bar"><div style="width:${fin / p.list.length * 100}%;background:${p.color}"></div></div>
+    ${w?.done ? `<div>✅ 練完了，記得吃蛋白質${w.note ? '' : ' · <a href="#fit" data-action="fit-go">📝 寫一下心得 ›</a>'}</div>` : `<div class="prog-bar"><div style="width:${fin / p.list.length * 100}%;background:${p.color}"></div></div>
     <div class="sub" style="margin-top:6px">${fin}/${p.list.length} 個動作 · ${p.list.slice(0, 4).map(it => esc(exById(it.ex).name)).join('、')}…</div>`}</section>`;
 }
 
@@ -361,6 +420,14 @@ function getW(date, day) {
 }
 
 export const fitForms = {
+  'fit-note': (form, f) => {
+    const [date, day] = form.dataset.id.split('|');
+    const doc = getW(date, day);
+    saveDoc('workouts', { ...doc, note: String(f.note || '').trim(), noteAt: Date.now() });
+    if (form.dataset.sheet) ctx.closeSheet();
+    else form.querySelector('textarea')?.blur();
+    ctx.toast('📝 心得存好了');
+  },
   'fit-set': (form, f) => {
     const [date, day, k] = form.dataset.id.split('|');
     const [ex, i] = k.split(':');
@@ -419,6 +486,23 @@ export const fitActions = {
     saveDoc('workouts', { ...doc, done, doneAt: done ? Date.now() : null });
     restEnd = 0;
     if (done) ctx.toast('💪 辛苦了！這週又完成一次');
+  },
+  'fit-feel': el => {
+    const [date, day] = el.dataset.id.split('|');
+    const doc = getW(date, day);
+    const feel = doc.feel === el.dataset.feel ? '' : el.dataset.feel;
+    // 心得框裡還沒存的字一起存，不然重畫會不見
+    const ta = el.closest('.card, .sheet')?.querySelector('form[data-form="fit-note"] textarea');
+    const note = ta ? ta.value.trim() : doc.note;
+    saveDoc('workouts', { ...doc, feel, note: note || '' });
+    if (el.closest('.sheet')) el.parentElement.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.feel === feel));
+  },
+  'fit-note-edit': el => {
+    const [date, day] = el.dataset.id.split('|');
+    const w = workouts().find(x => x.id === wid(date, day));
+    const p = planOf(day);
+    ctx.openSheet(`<h2>📝 ${fmtDate(date)} ${esc(day)}${p ? ` ${esc(p.name)}` : ''} 的心得</h2>${noteForm(date, day, w, true)}`, { kind: 'fit-note' });
+    ctx.sheetEl()?.querySelector('textarea')?.focus();
   },
   'fit-body-del': el => {
     const b = (store.state.body || []).find(x => x.id === el.dataset.id);
