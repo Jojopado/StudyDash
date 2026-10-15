@@ -17,6 +17,7 @@ import { renderMemo, initMemo, memoActions, memoForms, memoKey } from './memo.js
 import { renderDocs, initDocs, docActions, docForms } from './docs.js';
 import { renderQuiz, initQuiz, quizActions, quizKey, quizTick } from './quiz.js';
 import { renderProgress, initProgress, progressActions, progressForms } from './progress.js';
+import { renderFit, initFit, fitActions, fitForms } from './fit.js';
 import { isDragging } from './drag.js';
 
 const $ = sel => document.querySelector(sel);
@@ -26,12 +27,12 @@ const backdrop = $('#sheet-backdrop');
 const sheet = $('#sheet');
 
 const ROUTES = {
-  home: renderHome, calendar: renderCalendar, todo: renderTodo, study: renderStudy, cards: renderCards, money: renderMoney, memo: renderMemo, docs: renderDocs, quiz: renderQuiz, progress: renderProgress,
+  home: renderHome, calendar: renderCalendar, todo: renderTodo, study: renderStudy, cards: renderCards, money: renderMoney, memo: renderMemo, docs: renderDocs, quiz: renderQuiz, progress: renderProgress, fit: renderFit,
   invest: renderInvest, settings: renderSettings,
 };
 // 手機底部放不下的，收在「更多」裡（電腦版側邊欄全部列出）
-const MORE = ['memo', 'progress', 'docs', 'quiz', 'invest', 'settings'];
-const NO_FAB = ['settings', 'invest', 'money', 'cards', 'memo', 'docs', 'quiz', 'progress'];
+const MORE = ['memo', 'progress', 'docs', 'quiz', 'invest', 'fit', 'settings'];
+const NO_FAB = ['settings', 'invest', 'money', 'cards', 'memo', 'docs', 'quiz', 'progress', 'fit'];
 const route = () => (location.hash.slice(1) in ROUTES ? location.hash.slice(1) : 'home');
 
 // ---------- 畫面 ----------
@@ -281,6 +282,7 @@ function openMoreSheet() {
     ${item('#docs', '📄', '文件', 'PDF 放上來，手機電腦都能看')}
     ${item('#quiz', '🎯', '測驗', '證照考古題選擇題、錯題本、模擬考')}
     ${item('#invest', '📈', '模擬投資', '台股真實報價、投資入門')}
+    ${item('#fit', '🏋️', '健身', '今天練什麼、記重量、動作教學、InBody')}
     ${item('#settings', '⚙️', '設定', '同步、課表、背景、備份')}
   </div>`, { kind: 'more' });
 }
@@ -518,8 +520,8 @@ const actions = {
   logout: async () => { if (confirm('確定登出？登出後這台裝置看不到雲端資料。')) { await logout(); toast('已登出'); } },
 };
 
-Object.assign(actions, invActions, learnActions, moneyActions, cardActions, memoActions, docActions, quizActions, progressActions);
-const moduleForms = { ...moneyForms, ...cardForms, ...memoForms, ...docForms, ...progressForms };
+Object.assign(actions, invActions, learnActions, moneyActions, cardActions, memoActions, docActions, quizActions, progressActions, fitActions);
+const moduleForms = { ...moneyForms, ...cardForms, ...memoForms, ...docForms, ...progressForms, ...fitForms };
 
 document.addEventListener('click', ev => {
   if (ev.target === backdrop) { closeSheet(); return; }
@@ -712,6 +714,7 @@ initMemo({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data
 initDocs({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
 initQuiz({ openSheet, closeSheet, toast, render });
 initProgress({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
+initFit({ openSheet, closeSheet, toast, render });
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
   navigator.serviceWorker.register('sw.js').catch(e => console.warn('SW 註冊失敗', e));
