@@ -4,13 +4,13 @@
 // 第一次打開時把 2026-08-31 的 InBody 放進 body（prefs.fitSeeded）。
 import { store, saveDoc, removeDoc, savePrefs } from './store.js';
 import { esc, today, addDays, parseYmd, fmtDate, WEEKDAYS } from './util.js';
-import { PARTS, EX, exById, PLAN, FIRST_BODY, GOAL } from './fit-data.js';
+import { PARTS, KITS, EX, exById, PLAN, FIRST_BODY, GOAL } from './fit-data.js';
 
 let ctx = null; // { openSheet, closeSheet, toast, render }
 export function initFit(c) { ctx = c; }
 
 // tab: today | plan | lib | body；day: 今天看哪一份課表（'' = 依星期自動）
-export const fitUi = { tab: 'today', day: '', part: 'all', where: 'all' };
+export const fitUi = { tab: 'today', day: '', part: 'all', kit: 'mine' };
 
 const workouts = () => store.state.workouts || [];
 const bodies = () => [...(store.state.body || [])].sort((a, b) => (a.date < b.date ? -1 : 1));
@@ -38,7 +38,8 @@ function anim(e, cls = '') {
   return `<div class="fx-anim ${cls}"><img src="${src(0)}" alt="${esc(e.name)}" loading="lazy"><img class="b" src="${src(1)}" alt="" loading="lazy"></div>`;
 }
 const muscleChips = e => `${e.prim.map(m => `<span class="fx-m prim">${esc(m)}</span>`).join('')}${e.sec.map(m => `<span class="fx-m">${esc(m)}</span>`).join('')}`;
-const whereTags = e => e.where.map(w => `<span class="fx-tag ${w}">${w === 'home' ? '🏠 在家' : '🏋️ 健身房'}</span>`).join('');
+const kitTag = e => `<span class="fx-tag kit-${e.kit}">${KITS.find(k => k.id === e.kit)?.label || ''}${e.kit === 'gym' ? '（以後再說）' : ''}</span>`;
+const imgNote = e => (e.imgNote ? `<div class="sub fx-imgnote">📷 ${esc(e.imgNote)}</div>` : '');
 const range = it => {
   const u = exById(it.ex).unit;
   const r = it.lo === it.hi ? `${it.lo}` : `${it.lo}–${it.hi}`;
@@ -59,6 +60,8 @@ function lastSets(exId, before) {
   return w ? { date: w.date, sets: w.sets[exId] } : null;
 }
 
+// 加重的方法（依器材）
+const ADD = { db: '啞鈴每邊 +1～2 kg', bb: '槓鈴兩邊各加一片', kb: '換重一點的壺鈴，或每組多 3 下', mb: '換重 1～2 kg 的球，或每組多 3 下' };
 function suggest(it, last) {
   const e = exById(it.ex);
   if (!last) return e.unit === 'kg' ? '第一次：選「做完還能再做 1–2 下」的重量' : '';
@@ -66,7 +69,7 @@ function suggest(it, last) {
   const reps = done.map(s => s.r).join('/');
   const head = `上次 ${fmtDate(last.date, false)}：${e.unit === 'kg' && done[0]?.w ? `${done[0].w} kg × ` : ''}${reps} ${UNIT[e.unit]}`;
   const allTop = done.length >= it.sets && done.every(s => +s.r >= it.hi);
-  if (e.unit === 'kg') return `${head}　👉 ${allTop ? `<b>每組都到 ${it.hi} 下了，這次加重</b>（槓鈴 +2.5、啞鈴 +1～2 kg）` : '同重量，試著多做 1 下'}`;
+  if (e.unit === 'kg') return `${head}　👉 ${allTop ? `<b>每組都到 ${it.hi} 下了，這次加重</b>（${ADD[e.kit] || '+1～2 kg'}）` : '同重量，試著多做 1 下'}`;
   return `${head}　👉 ${allTop ? '<b>到上限了，下次加難度或加時間</b>' : '試著多 1 下／多 5 秒'}`;
 }
 
@@ -107,6 +110,7 @@ function exBlock(p, date, it, n) {
         <div class="fx-name"><span class="fx-no">${n}</span>${esc(e.name)}${finished ? ' <span class="ok">✓</span>' : ''}</div>
         <div class="fx-muscles">${muscleChips(e)}</div>
         <div class="fx-goal"><b>${range(it)}</b>${it.rest ? ` · 休息 ${restText(it.rest)}` : ''}${it.note ? ` · ${esc(it.note)}` : ''}</div>
+        ${imgNote(e)}
       </div>
     </div>
     ${suggest(it, last) ? `<div class="fx-last">${suggest(it, last)}</div>` : ''}
@@ -237,20 +241,26 @@ function planTab() {
   }).join('');
   return `<section class="card"><h2>📅 一週安排</h2>
       <table class="fit-table"><tr><th>星期</th><th>內容</th><th>地點</th></tr>${sched}</table>
-      <div class="sub" style="margin-top:8px">週二、週三連著練，所以一天練上半身、一天練下半身，肌肉才休息得到。<b>二、三、五是核心</b>，週六沒空可以跳過。</div></section>
+      <div class="sub" style="margin-top:8px">健身房兩天做<b>有氧＋藥球</b>（你本來就在做的），練肌肉放在家裡的一、四、六。<b>一、二、三、四是核心</b>，週六沒空可以跳過。</div></section>
     <div class="grid two">${PLAN.map(day).join('')}</div>
+    <section class="card"><h2>🫣 不敢用健身房的機器？</h2>
+      <ul class="fit-ul"><li><b>完全沒關係。</b>肌肉不知道你用的是機器還是自己家的啞鈴，重量夠、次數夠就會長。這份課表的肌肉訓練都在家做。</li>
+        <li>在健身房就做你習慣的：<b>跑步機、健身車、藥球</b>。藥球區和墊子區通常人比較少。</li>
+        <li>大家都在看自己的手機和鏡子，其實沒人在看你。戴耳機會比較自在。</li>
+        <li>想挑戰的話，人少的時段（平日下午 2–5 點）可以先試<b>滑輪下拉</b>：坐著、插銷調重量，是最好上手的機器。不想試也完全 OK。</li></ul></section>
     <section class="card"><h2>📈 重量怎麼選、怎麼進步</h2>
       <table class="fit-table">
         <tr><td>選重量</td><td>做完一組時<b>還能再做 1–2 下</b>就是對的重量</td></tr>
-        <tr><td>進步</td><td>例如 8–12 下：每組都做到 12 下 → 下次加 2–2.5 kg，從 8 下重新往上做（這頁會自動提醒你）</td></tr>
+        <tr><td>進步</td><td>例如 8–12 下：每組都做到 12 下 → 下次加重，從 8 下重新往上做（這頁會自動提醒你）。壺鈴和藥球重量固定，就加次數，或換重一點的</td></tr>
         <tr><td>頭兩週</td><td>每個動作只做 <b>2 組</b>，先把動作學好，避免痠到不想動</td></tr>
         <tr><td>休息</td><td>主項 2 分鐘、其他 60–90 秒（按 ✓ 會自動倒數）</td></tr>
         <tr><td>熱身</td><td>動態伸展 5 分鐘＋輕重量暖身 1–2 組</td></tr>
       </table></section>
     <section class="card"><h2>⚠️ 在家練的安全</h2>
-      <ul class="fit-ul"><li>沒有深蹲架<b>不要硬把槓鈴扛上肩</b>，在家練腿用高腳杯深蹲／分腿蹲。</li>
+      <ul class="fit-ul"><li>槓鈴<b>不要扛上肩深蹲</b>（沒有架子很危險），練腿用壺鈴高腳杯深蹲和啞鈴分腿蹲。</li>
         <li>沒有臥推椅就做<b>地板臥推</b>，安全又不傷肩。</li>
-        <li>槓鈴兩邊的槓片一定要<b>上卡扣</b>。</li>
+        <li>啞鈴片插上槓之後，兩邊的螺帽一定要<b>鎖緊</b>，每組做之前檢查一下。</li>
+        <li>壺鈴擺盪前，確認前後<b>沒有東西和人</b>。</li>
         <li>划船、硬舉時<b>背一拱起來就停</b>，代表太重了。</li></ul></section>
     <section class="card"><h2>🍱 搭配飲食</h2>
       <table class="fit-table">
@@ -264,7 +274,8 @@ function planTab() {
 
 // ---------- 動作庫 ----------
 function libTab() {
-  const list = EX.filter(e => (fitUi.part === 'all' || e.part === fitUi.part) && (fitUi.where === 'all' || e.where.includes(fitUi.where)));
+  const okKit = e => fitUi.kit === 'all' || (fitUi.kit === 'mine' ? e.kit !== 'gym' : e.kit === fitUi.kit);
+  const list = EX.filter(e => (fitUi.part === 'all' || e.part === fitUi.part) && okKit(e));
   const chip = (id, label, color) => {
     const on = fitUi.part === id;
     return `<button type="button" data-action="fit-part" data-part="${id}" class="${on ? 'on' : ''}" style="${on && color ? `background:${color};border-color:${color}` : color ? `border-color:${color}66` : ''}">${label}</button>`;
@@ -276,11 +287,11 @@ function libTab() {
       <div class="fx-card-b"><div class="fx-name"><span class="fx-pdot" style="background:${pt.color}"></span>${esc(e.name)}</div>
         <div class="sub">${esc(e.en)} · ${esc(e.equip)}</div>
         <div class="fx-muscles">${muscleChips(e)}</div>
-        <div class="fx-tags">${whereTags(e)}</div></div></button>`;
+        <div class="fx-tags">${kitTag(e)}</div></div></button>`;
   };
   return `<div class="chips fit-parts">${chip('all', '全部')}${PARTS.map(p => chip(p.id, p.label, p.color)).join('')}</div>
-    <div class="seg fit-where">${[['all', '全部'], ['home', '🏠 在家可做'], ['gym', '🏋️ 健身房']].map(([k, l]) =>
-      `<button type="button" data-action="fit-where" data-where="${k}" class="${fitUi.where === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+    <div class="chips fit-kits">${[{ id: 'mine', label: '✅ 我有的器材' }, ...KITS, { id: 'all', label: '全部' }].map(k =>
+      `<button type="button" data-action="fit-kit" data-kit="${k.id}" class="${fitUi.kit === k.id ? 'on' : ''}">${k.label}</button>`).join('')}</div>
     <div class="sub" style="margin:8px 0">共 ${list.length} 個動作。紅字是主要練到的肌肉，點卡片看怎麼做。</div>
     <div class="fx-grid">${list.map(card).join('')}</div>
     <div class="sub" style="margin-top:12px">圖片來源：free-exercise-db（公眾領域）</div>`;
@@ -381,9 +392,9 @@ function openEx(id) {
   const pt = partOf(e.part);
   const inPlan = PLAN.filter(p => p.list.some(it => it.ex === id)).map(p => { const it = p.list.find(x => x.ex === id); return `<b style="color:${p.color}">${p.id}</b> 週${WEEKDAYS[p.weekday]} ${range(it)}`; });
   ctx.openSheet(`<h2>${esc(e.name)} <span class="sub" style="font-weight:400">${esc(e.en)}</span></h2>
-    ${anim(e, 'big')}
+    ${anim(e, 'big')}${imgNote(e)}
     <div class="fx-detail">
-      <div class="row" style="flex-wrap:wrap;gap:6px"><span class="fx-tag" style="background:${pt.color}33;color:${pt.color}">${pt.label}</span>${whereTags(e)}<span class="fx-tag">🧰 ${esc(e.equip)}</span></div>
+      <div class="row" style="flex-wrap:wrap;gap:6px"><span class="fx-tag" style="background:${pt.color}33;color:${pt.color}">${pt.label}</span>${kitTag(e)}<span class="fx-tag">🧰 ${esc(e.equip)}</span></div>
       <div class="pu-sec">練到哪裡</div><div class="fx-muscles">${muscleChips(e)}</div><div class="sub">紅色＝主要、灰色＝次要</div>
       <div class="pu-sec">怎麼做</div><ol class="fit-ol">${e.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
       <div class="pu-sec">注意</div><ul class="fit-ul">${e.tips.map(s => `<li>${esc(s)}</li>`).join('')}</ul>
@@ -467,7 +478,7 @@ export const fitActions = {
   'fit-tab': el => { fitUi.tab = el.dataset.tab; ctx.render(); window.scrollTo(0, 0); },
   'fit-day': el => { fitUi.tab = 'today'; fitUi.day = el.dataset.day === planOn(today())?.id ? '' : el.dataset.day; ctx.render(); },
   'fit-part': el => { fitUi.part = el.dataset.part; ctx.render(); },
-  'fit-where': el => { fitUi.where = el.dataset.where; ctx.render(); },
+  'fit-kit': el => { fitUi.kit = el.dataset.kit; ctx.render(); },
   'fit-ex': el => openEx(el.dataset.ex),
   'fit-rest-skip': () => { restEnd = 0; const el = document.getElementById('fit-rest'); if (el) el.hidden = true; },
   'fit-unset': el => {

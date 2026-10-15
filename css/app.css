@@ -848,3 +848,8 @@ div.prog-here-line { cursor: default; color: var(--muted); }
 .fit-det { margin-top: 8px; }
 .fit-det summary { cursor: pointer; }
 .fit-ls { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; border-top: 1px dashed var(--line); font-size: 14px; }
+.fit-kits { margin-top: 2px; }
+.fit-kits button { font-size: 13px; }
+.fx-tag.kit-gym { opacity: .7; }
+.fx-imgnote { font-size: 12px; margin-top: 2px; }
+.fit-rest[hidden] { display: none; }
