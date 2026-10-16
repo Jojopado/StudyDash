@@ -67,7 +67,7 @@ function lastSets(exId, before) {
 }
 
 // 加重的方法（依器材）
-const ADD = { db: '啞鈴每邊 +1～2 kg', bb: '槓鈴兩邊各加一片', kb: '換重一點的壺鈴，或每組多 3 下', mb: '換重 1～2 kg 的球，或每組多 3 下' };
+const ADD = { db: '啞鈴每邊 +1～2 kg', bb: '槓鈴兩邊各加一片', kb: '壺鈴只有 8 kg：下去放慢到 3 秒、底下停 1 秒，或改用比較重的啞鈴', mb: '換重 1～2 kg 的球，或每組多 3 下' };
 function suggest(it, last) {
   const e = exById(it.ex);
   if (!last) return e.unit === 'kg' ? '第一次：選「做完還能再做 1–2 下」的重量' : '';
