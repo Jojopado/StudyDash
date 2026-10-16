@@ -238,43 +238,25 @@ export const EX = [
 
 export const exById = id => EX.find(x => x.id === id);
 
-// 一週課表：weekday 0=日 … 6=六
-// 健身房兩天：做你本來就在做的（跑步機、健身車、藥球），不用大機器；練肌肉主要放在家（啞鈴、槓鈴、壺鈴）
-// sets 組數、lo–hi 次數（sec 秒、min 分）、each＝每邊
+// 課表：不綁星期，每天自己選一份（今天頁會依上次練的時間推薦）
+// kind：upper 上半身、lower 下半身、full 全身、gym 學校健身房（週二、三在學校）
+// sets 組數、lo–hi 次數（sec 秒、min 分）、each＝每邊、start＝第一次建議重量
 export const PLAN = [
-  { id: 'A', weekday: 1, name: '上半身（推＋拉）', where: '在家', color: '#f87171', mins: 45, list: [
+  { id: 'A', kind: 'upper', name: '上半身・推（胸、肩、三頭）', where: '在家', color: '#f87171', mins: 40, list: [
     { ex: 'db-floor', sets: 3, lo: 8, hi: 12, rest: 90, note: '主項', start: '每手 6～7 kg' },
-    { ex: 'db-row', sets: 3, lo: 10, hi: 12, rest: 60, each: true, note: '一手撐床', start: '7～9 kg' },
+    { ex: 'incline-pushup', sets: 3, lo: 8, hi: 15, rest: 60, note: '先從桌子或床沿開始' },
     { ex: 'lateral', sets: 3, lo: 12, hi: 15, rest: 60, start: '每手 2.5～4 kg（只裝 1 片或空把手）' },
-    { ex: 'incline-pushup', sets: 2, lo: 8, hi: 15, rest: 60, note: '先從桌子或床沿開始' },
-    { ex: 'db-curl', sets: 2, lo: 10, hi: 12, rest: 60, start: '每手 4～6 kg' },
-    { ex: 'oh-ext', sets: 2, lo: 10, hi: 12, rest: 60, note: '坐在床沿做', start: '雙手捧 1 顆 6～8 kg' },
+    { ex: 'oh-ext', sets: 3, lo: 10, hi: 12, rest: 60, note: '坐在床沿做', start: '雙手捧 1 顆 6～8 kg' },
+    { ex: 'plank', sets: 2, lo: 30, hi: 45, rest: 45 },
   ] },
-  { id: 'B', weekday: 2, name: '有氧＋藥球（腿、背）', where: '健身房', color: '#fbbf24', mins: 60, list: [
-    { ex: 'walk', sets: 1, lo: 10, hi: 10, rest: 0, note: '暖身，坡度 5%' },
-    { ex: 'mb-squat', sets: 3, lo: 12, hi: 15, rest: 60 },
-    { ex: 'mb-rdl', sets: 3, lo: 12, hi: 15, rest: 60, note: '球輕一點，背打直' },
-    { ex: 'side-plank', sets: 2, lo: 20, hi: 30, rest: 30, each: true },
-    { ex: 'deadbug', sets: 2, lo: 10, hi: 10, rest: 45, each: true },
-    { ex: 'bike', sets: 1, lo: 20, hi: 30, rest: 0 },
-  ] },
-  { id: 'C', weekday: 3, name: '有氧＋核心', where: '健身房', color: '#2dd4bf', mins: 60, list: [
-    { ex: 'bike', sets: 1, lo: 10, hi: 10, rest: 0, note: '暖身' },
-    { ex: 'mb-crunch', sets: 3, lo: 12, hi: 15, rest: 45 },
-    { ex: 'plank', sets: 3, lo: 30, hi: 45, rest: 45 },
-    { ex: 'side-plank', sets: 2, lo: 20, hi: 30, rest: 30, each: true },
-    { ex: 'glute-bridge', sets: 3, lo: 12, hi: 15, rest: 45, note: '藥球放骨盆上' },
-    { ex: 'walk', sets: 1, lo: 30, hi: 40, rest: 0, note: '坡度快走，微喘還能講話' },
-  ] },
-  { id: 'D', weekday: 4, name: '下半身＋核心', where: '在家', color: '#4ade80', mins: 45, list: [
-    { ex: 'goblet', sets: 3, lo: 15, hi: 20, rest: 60, note: '8 kg 壺鈴，下去數 3 秒、底下停 1 秒' },
-    { ex: 'split-squat', sets: 3, lo: 8, hi: 12, rest: 60, each: true, start: '每手 5～7 kg' },
-    { ex: 'db-rdl', sets: 3, lo: 10, hi: 15, rest: 90, note: '重量先輕，背打直', start: '每手 6～8 kg' },
-    { ex: 'glute-bridge', sets: 3, lo: 12, hi: 15, rest: 60 },
-    { ex: 'deadbug', sets: 2, lo: 10, hi: 10, rest: 45, each: true },
+  { id: 'F', kind: 'upper', name: '上半身・拉（背、二頭）', where: '在家', color: '#60a5fa', mins: 40, list: [
+    { ex: 'db-row', sets: 3, lo: 10, hi: 12, rest: 60, each: true, note: '主項，一手撐床', start: '7～9 kg' },
+    { ex: 'kb-row', sets: 2, lo: 12, hi: 15, rest: 60, each: true, note: '8 kg，拉上來停 2 秒' },
+    { ex: 'db-curl', sets: 3, lo: 10, hi: 12, rest: 60, start: '每手 4～6 kg' },
+    { ex: 'hammer', sets: 3, lo: 10, hi: 12, rest: 45, start: '每手 4～6 kg' },
     { ex: 'side-plank', sets: 2, lo: 20, hi: 30, rest: 30, each: true },
   ] },
-  { id: 'E', weekday: 6, name: '全身（手臂多一點）', where: '在家', color: '#c084fc', mins: 40, optional: true, list: [
+  { id: 'E', kind: 'full', name: '全身（手臂多一點）', where: '在家', color: '#c084fc', mins: 40, list: [
     { ex: 'incline-pushup', sets: 3, lo: 8, hi: 15, rest: 60, note: '15 下做得到就換低一點的地方' },
     { ex: 'goblet', sets: 3, lo: 15, hi: 20, rest: 60, note: '8 kg 壺鈴，下去慢慢數 3 秒' },
     { ex: 'kb-row', sets: 3, lo: 12, hi: 15, rest: 60, each: true, note: '一手扶床；8 kg 太輕就拉上來停 2 秒' },
@@ -282,7 +264,34 @@ export const PLAN = [
     { ex: 'hammer', sets: 2, lo: 10, hi: 12, rest: 45, start: '每手 4～6 kg' },
     { ex: 'plank', sets: 2, lo: 30, hi: 45, rest: 45 },
   ] },
+  { id: 'D', kind: 'lower', name: '下半身＋核心', where: '在家', color: '#4ade80', mins: 45, list: [
+    { ex: 'goblet', sets: 3, lo: 15, hi: 20, rest: 60, note: '8 kg 壺鈴，下去數 3 秒、底下停 1 秒' },
+    { ex: 'split-squat', sets: 3, lo: 8, hi: 12, rest: 60, each: true, start: '每手 5～7 kg' },
+    { ex: 'db-rdl', sets: 3, lo: 10, hi: 15, rest: 90, note: '重量先輕，背打直', start: '每手 6～8 kg' },
+    { ex: 'glute-bridge', sets: 3, lo: 12, hi: 15, rest: 60 },
+    { ex: 'deadbug', sets: 2, lo: 10, hi: 10, rest: 45, each: true },
+    { ex: 'side-plank', sets: 2, lo: 20, hi: 30, rest: 30, each: true },
+  ] },
+  { id: 'B', kind: 'gym', name: '有氧＋藥球（腿、背）', where: '學校健身房', color: '#fbbf24', mins: 60, list: [
+    { ex: 'walk', sets: 1, lo: 10, hi: 10, rest: 0, note: '暖身，坡度 5%' },
+    { ex: 'mb-squat', sets: 3, lo: 12, hi: 15, rest: 60 },
+    { ex: 'mb-rdl', sets: 3, lo: 12, hi: 15, rest: 60, note: '球輕一點，背打直' },
+    { ex: 'side-plank', sets: 2, lo: 20, hi: 30, rest: 30, each: true },
+    { ex: 'deadbug', sets: 2, lo: 10, hi: 10, rest: 45, each: true },
+    { ex: 'bike', sets: 1, lo: 20, hi: 30, rest: 0 },
+  ] },
+  { id: 'C', kind: 'gym', name: '有氧＋核心', where: '學校健身房', color: '#2dd4bf', mins: 60, list: [
+    { ex: 'bike', sets: 1, lo: 10, hi: 10, rest: 0, note: '暖身' },
+    { ex: 'mb-crunch', sets: 3, lo: 12, hi: 15, rest: 45 },
+    { ex: 'plank', sets: 3, lo: 30, hi: 45, rest: 45 },
+    { ex: 'side-plank', sets: 2, lo: 20, hi: 30, rest: 30, each: true },
+    { ex: 'glute-bridge', sets: 3, lo: 12, hi: 15, rest: 45, note: '藥球放骨盆上' },
+    { ex: 'walk', sets: 1, lo: 30, hi: 40, rest: 0, note: '坡度快走，微喘還能講話' },
+  ] },
 ];
+export const KINDS = { upper: '上半身', lower: '下半身', full: '全身', gym: '健身房' };
+// 一週目標：練幾次、其中上半身（含全身）幾次
+export const WEEK_GOAL = { total: 4, upper: 3 };
 
 // 每天打勾（一個月挑戰，2026-10-17 開始）
 export const CHALLENGE = { start: '2026-10-17', days: 30 };
