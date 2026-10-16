@@ -67,10 +67,10 @@ function lastSets(exId, before) {
 }
 
 // 加重的方法（依器材）
-const ADD = { db: '啞鈴每邊 +1～2 kg', bb: '槓鈴兩邊各加一片', kb: '壺鈴只有 8 kg：下去放慢到 3 秒、底下停 1 秒，或改用比較重的啞鈴', mb: '換重 1～2 kg 的球，或每組多 3 下' };
+const ADD = { db: '每顆啞鈴加 1 片（約 +2.5～3 kg）；已經 9 kg 了就放慢 3 秒、多停 1 秒', bb: '槓鈴兩邊各加一片', kb: '壺鈴只有 8 kg：下去放慢到 3 秒、底下停 1 秒，或改用比較重的啞鈴', mb: '換重 1～2 kg 的球，或每組多 3 下' };
 function suggest(it, last) {
   const e = exById(it.ex);
-  if (!last) return e.unit === 'kg' ? '第一次：選「做完還能再做 1–2 下」的重量' : '';
+  if (!last) return e.unit === 'kg' ? `第一次：${it.start ? `建議 <b>${it.start}</b>，` : ''}選「做完還能再做 1–2 下」的重量` : '';
   const done = last.sets.filter(Boolean);
   const reps = done.map(s => s.r).join('/');
   const head = `上次 ${fmtDate(last.date, false)}：${e.unit === 'kg' && done[0]?.w ? `${done[0].w} kg × ` : ''}${reps} ${UNIT[e.unit]}`;

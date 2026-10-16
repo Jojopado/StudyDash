@@ -243,12 +243,12 @@ export const exById = id => EX.find(x => x.id === id);
 // sets 組數、lo–hi 次數（sec 秒、min 分）、each＝每邊
 export const PLAN = [
   { id: 'A', weekday: 1, name: '上半身（推＋拉）', where: '在家', color: '#f87171', mins: 45, list: [
-    { ex: 'db-floor', sets: 3, lo: 8, hi: 12, rest: 90, note: '主項' },
-    { ex: 'db-row', sets: 3, lo: 10, hi: 12, rest: 60, each: true, note: '一手撐床' },
-    { ex: 'lateral', sets: 3, lo: 12, hi: 15, rest: 60 },
+    { ex: 'db-floor', sets: 3, lo: 8, hi: 12, rest: 90, note: '主項', start: '每手 6～7 kg' },
+    { ex: 'db-row', sets: 3, lo: 10, hi: 12, rest: 60, each: true, note: '一手撐床', start: '7～9 kg' },
+    { ex: 'lateral', sets: 3, lo: 12, hi: 15, rest: 60, start: '每手 2.5～4 kg（只裝 1 片或空把手）' },
     { ex: 'incline-pushup', sets: 2, lo: 8, hi: 15, rest: 60, note: '先從桌子或床沿開始' },
-    { ex: 'db-curl', sets: 2, lo: 10, hi: 12, rest: 60 },
-    { ex: 'oh-ext', sets: 2, lo: 10, hi: 12, rest: 60, note: '坐在床沿做' },
+    { ex: 'db-curl', sets: 2, lo: 10, hi: 12, rest: 60, start: '每手 4～6 kg' },
+    { ex: 'oh-ext', sets: 2, lo: 10, hi: 12, rest: 60, note: '坐在床沿做', start: '雙手捧 1 顆 6～8 kg' },
   ] },
   { id: 'B', weekday: 2, name: '有氧＋藥球（腿、背）', where: '健身房', color: '#fbbf24', mins: 60, list: [
     { ex: 'walk', sets: 1, lo: 10, hi: 10, rest: 0, note: '暖身，坡度 5%' },
@@ -268,8 +268,8 @@ export const PLAN = [
   ] },
   { id: 'D', weekday: 4, name: '下半身＋核心', where: '在家', color: '#4ade80', mins: 45, list: [
     { ex: 'goblet', sets: 3, lo: 15, hi: 20, rest: 60, note: '8 kg 壺鈴，下去數 3 秒、底下停 1 秒' },
-    { ex: 'split-squat', sets: 3, lo: 8, hi: 10, rest: 60, each: true },
-    { ex: 'db-rdl', sets: 3, lo: 10, hi: 12, rest: 90, note: '重量先輕' },
+    { ex: 'split-squat', sets: 3, lo: 8, hi: 12, rest: 60, each: true, start: '每手 5～7 kg' },
+    { ex: 'db-rdl', sets: 3, lo: 10, hi: 15, rest: 90, note: '重量先輕，背打直', start: '每手 6～8 kg' },
     { ex: 'glute-bridge', sets: 3, lo: 12, hi: 15, rest: 60 },
     { ex: 'deadbug', sets: 2, lo: 10, hi: 10, rest: 45, each: true },
     { ex: 'side-plank', sets: 2, lo: 20, hi: 30, rest: 30, each: true },
@@ -278,8 +278,8 @@ export const PLAN = [
     { ex: 'incline-pushup', sets: 3, lo: 8, hi: 15, rest: 60, note: '15 下做得到就換低一點的地方' },
     { ex: 'goblet', sets: 3, lo: 15, hi: 20, rest: 60, note: '8 kg 壺鈴，下去慢慢數 3 秒' },
     { ex: 'kb-row', sets: 3, lo: 12, hi: 15, rest: 60, each: true, note: '一手扶床；8 kg 太輕就拉上來停 2 秒' },
-    { ex: 'bb-curl', sets: 3, lo: 10, hi: 12, rest: 60 },
-    { ex: 'hammer', sets: 2, lo: 10, hi: 12, rest: 45 },
+    { ex: 'bb-curl', sets: 3, lo: 10, hi: 12, rest: 60, start: '槓鈴總重 8～10 kg' },
+    { ex: 'hammer', sets: 2, lo: 10, hi: 12, rest: 45, start: '每手 4～6 kg' },
     { ex: 'plank', sets: 2, lo: 30, hi: 45, rest: 45 },
   ] },
 ];
