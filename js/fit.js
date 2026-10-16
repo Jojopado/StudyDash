@@ -1,18 +1,20 @@
 // 🏋️ 健身（#fit）：今天要練什麼＋每組記重量次數、一週課表、動作庫（動圖＋練哪裡＋怎麼做）、InBody 身體數據。
 // 資料：workouts 集合 { id: 'w-日期-課表', date, day: 'A'..'D', sets: { 動作id: [{ w, r }|null, …] }, done, doneAt }
 //       body 集合 { id, date, weight, smm, pbf, fat, visceral, score, note }
+//       habits 集合 { id: 'h-日期', date, items: { protein: true, … } }＝每天打勾
 // 第一次打開時把 2026-08-31 的 InBody 放進 body（prefs.fitSeeded）。
 import { store, saveDoc, removeDoc, savePrefs } from './store.js';
 import { esc, today, addDays, parseYmd, fmtDate, WEEKDAYS } from './util.js';
-import { PARTS, KITS, EX, exById, PLAN, FIRST_BODY, GOAL } from './fit-data.js';
+import { PARTS, KITS, EX, exById, PLAN, FIRST_BODY, GOAL, CHALLENGE, HABITS } from './fit-data.js';
 
 let ctx = null; // { openSheet, closeSheet, toast, render }
 export function initFit(c) { ctx = c; }
 
 // tab: today | plan | lib | body；day: 今天看哪一份課表（'' = 依星期自動）
-export const fitUi = { tab: 'today', day: '', part: 'all', kit: 'mine' };
+export const fitUi = { tab: 'today', day: '', part: 'all', kit: 'mine', hday: '' };
 
 const workouts = () => store.state.workouts || [];
+const habitOf = date => (store.state.habits || []).find(h => h.id === `h-${date}`);
 const bodies = () => [...(store.state.body || [])].sort((a, b) => (a.date < b.date ? -1 : 1));
 const planOf = id => PLAN.find(p => p.id === id);
 const planOn = date => PLAN.find(p => p.weekday === parseYmd(date).getDay());
@@ -40,6 +42,10 @@ function anim(e, cls = '') {
 const muscleChips = e => `${e.prim.map(m => `<span class="fx-m prim">${esc(m)}</span>`).join('')}${e.sec.map(m => `<span class="fx-m">${esc(m)}</span>`).join('')}`;
 const kitTag = e => `<span class="fx-tag kit-${e.kit}">${KITS.find(k => k.id === e.kit)?.label || ''}${e.kit === 'gym' ? '（以後再說）' : ''}</span>`;
 const imgNote = e => (e.imgNote ? `<div class="sub fx-imgnote">📷 ${esc(e.imgNote)}</div>` : '');
+// 脊椎側彎標記
+const SPINE = { avoid: '⛔ 側彎不建議', care: '⚠️ 側彎要小心', good: '🦴 對側彎好' };
+const spineTag = e => (e.spine ? `<span class="fx-tag spine-${e.spine}">${SPINE[e.spine]}</span>` : '');
+const spineLine = e => (e.spine && e.spine !== 'good' ? `<div class="fx-spine spine-${e.spine}">${SPINE[e.spine]}：${esc(e.spineNote)}</div>` : '');
 const range = it => {
   const u = exById(it.ex).unit;
   const r = it.lo === it.hi ? `${it.lo}` : `${it.lo}–${it.hi}`;
@@ -71,6 +77,53 @@ function suggest(it, last) {
   const allTop = done.length >= it.sets && done.every(s => +s.r >= it.hi);
   if (e.unit === 'kg') return `${head}　👉 ${allTop ? `<b>每組都到 ${it.hi} 下了，這次加重</b>（${ADD[e.kit] || '+1～2 kg'}）` : '同重量，試著多做 1 下'}`;
   return `${head}　👉 ${allTop ? '<b>到上限了，下次加難度或加時間</b>' : '試著多 1 下／多 5 秒'}`;
+}
+
+// ---------- 每天打勾 ----------
+const dayNo = d => Math.round((parseYmd(d) - parseYmd(CHALLENGE.start)) / 86400000) + 1;
+const habitScore = date => { const h = habitOf(date); return HABITS.filter(x => h?.items?.[x.id]).length; };
+
+function habitCard(compact = false) {
+  const t = today();
+  const d = !compact && fitUi.hday && fitUi.hday <= t ? fitUi.hday : t;
+  const h = habitOf(d);
+  const n = habitScore(d);
+  const no = dayNo(d);
+  const p = planOn(d);
+  const w = p && workouts().find(x => x.id === wid(d, p.id));
+  const rows = HABITS.map(x => {
+    const on = !!h?.items?.[x.id];
+    return `<button type="button" class="hb${on ? ' on' : ''}" data-action="fit-habit" data-date="${d}" data-h="${x.id}">
+      <span class="box">${on ? '✓' : ''}</span><span class="ic">${x.icon}</span><span class="t">${esc(x.label)}${!compact && x.hint ? `<small>${esc(x.hint)}</small>` : ''}</span></button>`;
+  }).join('');
+  const train = p ? `<div class="hb-train">${w?.done ? '✅' : '🏋️'} ${p.id} ${esc(p.name)}${w?.done ? ' 練完了' : '（練完在最下面按「完成」）'}</div>` : '<div class="hb-train">🛌 今天沒排訓練，走路就好</div>';
+  return `<section class="card fit-habits">
+    <h2>✅ ${d === t ? '今天' : fmtDate(d)}打勾 <span class="sub" style="font-weight:400">${no >= 1 && no <= CHALLENGE.days ? `30 天挑戰第 ${no} 天 · ` : ''}${n}/${HABITS.length}</span>${
+      compact ? ' <a href="#fit" data-action="fit-go" class="sub" style="font-weight:400">健身 ›</a>' : ''}</h2>
+    <div class="prog-bar"><div style="width:${n / HABITS.length * 100}%;background:var(--ok)"></div></div>
+    <div class="hb-list${compact ? ' compact' : ''}">${rows}</div>
+    ${compact ? '' : train}
+    ${d !== t ? '<div style="margin-top:8px"><button type="button" class="btn small" data-action="fit-hday" data-date="">回到今天</button></div>' : ''}
+  </section>`;
+}
+
+function challengeCard() {
+  const t = today();
+  const days = Array.from({ length: CHALLENGE.days }, (_, i) => addDays(CHALLENGE.start, i));
+  const cells = days.map((d, i) => {
+    const n = habitScore(d);
+    const p = planOn(d);
+    const trained = p && workouts().some(x => x.id === wid(d, p.id) && x.done);
+    const future = d > t;
+    const lv = future ? 'f' : n === 0 ? 0 : n >= HABITS.length ? 4 : n >= 5 ? 3 : n >= 3 ? 2 : 1;
+    const sel = d === (fitUi.hday || t);
+    return `<button type="button" class="cg lv${lv}${d === t ? ' today' : ''}${sel ? ' sel' : ''}" ${future ? 'disabled' : `data-action="fit-hday" data-date="${d}"`} title="${fmtDate(d)} ${n}/${HABITS.length}"><span>${i + 1}</span>${trained ? '<i>💪</i>' : ''}</button>`;
+  }).join('');
+  const full = days.filter(d => d <= t && habitScore(d) >= HABITS.length).length;
+  const end = days[days.length - 1];
+  return `<section class="card"><h2>📅 30 天挑戰 <span class="sub" style="font-weight:400">${fmtDate(CHALLENGE.start, false)}～${fmtDate(end, false)} · 全勾 ${full} 天</span></h2>
+    <div class="cg-grid">${cells}</div>
+    <div class="sub" style="margin-top:8px">顏色越深＝勾越多，💪＝那天有練完。點格子可以補勾之前的日子。${t >= end ? '<b>挑戰結束了！去量一次 InBody，填在「身體」。</b>' : `最後一天（${fmtDate(end, false)}）再量一次 InBody 對照。`}</div></section>`;
 }
 
 // ---------- 今天 ----------
@@ -113,6 +166,7 @@ function exBlock(p, date, it, n) {
         ${imgNote(e)}
       </div>
     </div>
+    ${spineLine(e)}
     ${suggest(it, last) ? `<div class="fx-last">${suggest(it, last)}</div>` : ''}
     <div class="fx-sets">${Array.from({ length: sets }, (_, i) => setRow(p.id, date, it, i, cur, last)).join('')}</div>
   </section>`;
@@ -141,13 +195,13 @@ function todayTab() {
   const t = today();
   const auto = planOn(t);
   const p = planOf(fitUi.day) || auto;
-  const head = `${weekStrip()}`;
+  const head = `${weekStrip()}${habitCard()}`;
   if (!p) {
     const nx = nextPlan();
     return `${head}<section class="card fit-restday"><h2>🛌 今天休息</h2>
       <div>休息也是訓練的一部分，肌肉是在休息時長出來的。今天走路 <b>8000 步</b>就好。</div>
       ${nx ? `<div class="sub" style="margin-top:6px">下一次：${fmtDate(nx.d)} <b>${nx.p.id} ${esc(nx.p.name)}</b>（${esc(nx.p.where)}）</div>` : ''}
-      <div class="sub" style="margin-top:10px">想多練或補練？點上面那排的 A／B／C／D。</div></section>`;
+      <div class="sub" style="margin-top:10px">想多練或補練？點上面那排的 A～E。</div></section>${challengeCard()}`;
   }
   const w = workouts().find(x => x.id === wid(t, p.id));
   const total = p.list.length;
@@ -159,11 +213,13 @@ function todayTab() {
         <div class="sub">${esc(p.where)} · 約 ${p.mins} 分鐘${p.optional ? ' · 沒時間可以跳過' : ''}${notToday ? ` · 原本是週${WEEKDAYS[p.weekday]}` : ''}</div></div>
         <div class="fit-count"><b>${fin}</b>/${total}</div></div>
       <div class="prog-bar" style="margin-top:8px"><div style="width:${fin / total * 100}%;background:${p.color}"></div></div>
-      <div class="fit-warm">🔥 先熱身：開合跳／原地踏步 3 分鐘 → 手臂繞圈、深蹲 10 下 → 第一個動作先用輕重量做 1–2 組</div>
+      <div class="fit-warm">🔥 先熱身：開合跳／原地踏步 3 分鐘 → 貓牛式 10 下、手臂繞圈 → 第一個動作先用輕重量做 1–2 組</div>
+      <div class="fit-warm" style="margin-top:6px">🦴 脊椎側彎：動作慢、背打直、左右做一樣多。<b>刺痛、麻、背痛變嚴重就停</b>，酸是正常的。</div>
     </section>
     <div id="fit-rest" class="fit-rest" hidden></div>
     ${p.list.map((it, i) => exBlock(p, t, it, i + 1)).join('')}
     ${noteCard(t, p.id, w)}
+    ${challengeCard()}
     <section class="card"><div class="row">
       ${w?.done ? `<span>✅ 今天練完了！${w.doneAt ? `<span class="sub">（${new Date(w.doneAt).toTimeString().slice(0, 5)}）</span>` : ''}</span><span class="spacer"></span><button type="button" class="btn small" data-action="fit-finish" data-day="${p.id}">取消完成</button>`
         : `<span class="sub">做完後記得補充蛋白質（乳清、雞胸、豆漿、茶葉蛋）</span><span class="spacer"></span><button type="button" class="btn primary" data-action="fit-finish" data-day="${p.id}">完成今天的訓練</button>`}
@@ -256,9 +312,19 @@ function planTab() {
         <tr><td>休息</td><td>主項 2 分鐘、其他 60–90 秒（按 ✓ 會自動倒數）</td></tr>
         <tr><td>熱身</td><td>動態伸展 5 分鐘＋輕重量暖身 1–2 組</td></tr>
       </table></section>
+    <section class="card"><h2>🦴 脊椎側彎注意事項</h2>
+      <ul class="fit-ul"><li><b>先給復健科或物理治療師看一次</b>，問自己的側彎角度、哪些動作要避免。角度超過 20 度或常常背痛，一定要先問。</li>
+        <li><b>不要讓重量直接往下壓脊椎</b>：槓鈴不扛背上深蹲、過頭推用輕重量。課表已經換成高腳杯深蹲（重量在胸前）。</li>
+        <li><b>不要負重轉身</b>：俄羅斯轉體已經拿掉。</li>
+        <li><b>彎腰的動作要有支撐</b>：划船改成一手撐床的單手划船。</li>
+        <li><b>左右做一樣多</b>；有一邊明顯比較弱，弱的那邊多做一組。</li>
+        <li><b>多練核心</b>：側棒式、死蟲式、棒式、臀橋都不壓脊椎，對側彎很好。</li>
+        <li>每天做 <b>5 分鐘脊椎伸展</b>（打勾清單裡有）：貓牛式、嬰兒式。</li>
+        <li><b>酸是正常的；刺痛、麻、背痛變嚴重就停</b>，去看醫生。</li>
+        <li>動作庫裡每個動作都有標：⛔ 不建議、⚠️ 要小心、🦴 對側彎好。</li></ul></section>
     <section class="card"><h2>⚠️ 在家練的安全</h2>
       <ul class="fit-ul"><li>槓鈴<b>不要扛上肩深蹲</b>（沒有架子很危險），練腿用壺鈴高腳杯深蹲和啞鈴分腿蹲。</li>
-        <li>沒有臥推椅就做<b>地板臥推</b>，安全又不傷肩。</li>
+        <li>沒有健身椅：胸做<b>地板臥推</b>，划船和三頭伸展用<b>床沿</b>撐或坐。</li>
         <li>啞鈴片插上槓之後，兩邊的螺帽一定要<b>鎖緊</b>，每組做之前檢查一下。</li>
         <li>壺鈴擺盪前，確認前後<b>沒有東西和人</b>。</li>
         <li>划船、硬舉時<b>背一拱起來就停</b>，代表太重了。</li></ul></section>
@@ -287,7 +353,7 @@ function libTab() {
       <div class="fx-card-b"><div class="fx-name"><span class="fx-pdot" style="background:${pt.color}"></span>${esc(e.name)}</div>
         <div class="sub">${esc(e.en)} · ${esc(e.equip)}</div>
         <div class="fx-muscles">${muscleChips(e)}</div>
-        <div class="fx-tags">${kitTag(e)}</div></div></button>`;
+        <div class="fx-tags">${kitTag(e)}${spineTag(e)}</div></div></button>`;
   };
   return `<div class="chips fit-parts">${chip('all', '全部')}${PARTS.map(p => chip(p.id, p.label, p.color)).join('')}</div>
     <div class="chips fit-kits">${[{ id: 'mine', label: '✅ 我有的器材' }, ...KITS, { id: 'all', label: '全部' }].map(k =>
@@ -373,6 +439,9 @@ export function renderFit() {
     ${chooser}${body}`;
 }
 
+// 首頁：每天打勾（每天都出現）
+export const homeHabitCard = () => habitCard(true);
+
 // 首頁：有排課的那天才出現
 export function homeFitCard() {
   const t = today();
@@ -395,6 +464,7 @@ function openEx(id) {
     ${anim(e, 'big')}${imgNote(e)}
     <div class="fx-detail">
       <div class="row" style="flex-wrap:wrap;gap:6px"><span class="fx-tag" style="background:${pt.color}33;color:${pt.color}">${pt.label}</span>${kitTag(e)}<span class="fx-tag">🧰 ${esc(e.equip)}</span></div>
+      ${e.spine ? `<div class="pu-sec">脊椎側彎</div><div class="fx-spine spine-${e.spine}">${SPINE[e.spine]}：${esc(e.spineNote)}</div>` : ''}
       <div class="pu-sec">練到哪裡</div><div class="fx-muscles">${muscleChips(e)}</div><div class="sub">紅色＝主要、灰色＝次要</div>
       <div class="pu-sec">怎麼做</div><ol class="fit-ol">${e.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
       <div class="pu-sec">注意</div><ul class="fit-ul">${e.tips.map(s => `<li>${esc(s)}</li>`).join('')}</ul>
@@ -480,6 +550,19 @@ export const fitActions = {
   'fit-part': el => { fitUi.part = el.dataset.part; ctx.render(); },
   'fit-kit': el => { fitUi.kit = el.dataset.kit; ctx.render(); },
   'fit-ex': el => openEx(el.dataset.ex),
+  'fit-habit': el => {
+    const { date, h: k } = el.dataset;
+    const h = habitOf(date) || { id: `h-${date}`, date, items: {}, createdAt: Date.now() };
+    const items = { ...h.items, [k]: !h.items?.[k] };
+    saveDoc('habits', { ...h, items });
+    if (items[k] && HABITS.every(x => items[x.id])) ctx.toast('🎉 全部打勾了！');
+  },
+  'fit-hday': el => {
+    fitUi.hday = el.dataset.date === today() ? '' : el.dataset.date;
+    fitUi.tab = 'today';
+    ctx.render();
+    if (el.dataset.date) document.querySelector('.fit-habits')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  },
   'fit-rest-skip': () => { restEnd = 0; const el = document.getElementById('fit-rest'); if (el) el.hidden = true; },
   'fit-unset': el => {
     const [date, day, k] = el.dataset.id.split('|');

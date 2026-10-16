@@ -7,7 +7,7 @@ import { timer, leftMs, fmtClock } from './timer.js';
 import { monthSpent, currentFunds } from './money.js';
 import { homeMemoCard } from './memo.js';
 import { homeProgressCard } from './progress.js';
-import { homeFitCard } from './fit.js';
+import { homeFitCard, homeHabitCard } from './fit.js';
 import { saveTodo } from './store.js';
 import { handle, onDrop, between } from './drag.js';
 
@@ -167,6 +167,7 @@ export function renderHome(s) {
     <section class="card"><h2>✅ 待辦 <a href="#todo" class="sub" style="font-weight:400">（${todos.length} 件）全部 ›</a></h2>${
       todos.length ? todos.slice(0, 6).map(x => todoRow(x)).join('') : '<div class="empty">沒有待辦事項</div>'}</section>
     <section class="card"><h2>🗓️ 接下來 7 天</h2>${list(week, {}, '這週沒有其他事')}</section>
+    ${homeHabitCard()}
     ${homeFitCard()}
     ${homeProgressCard()}
     <section class="card log"><h2>📒 今天讀了什麼 <a href="#study" class="sub" style="font-weight:400">共 ${fmtMin(minutesOn(t))} · 7 天 ${fmtMin(weekMinutes())} ›</a></h2>${
