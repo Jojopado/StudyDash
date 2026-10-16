@@ -67,11 +67,9 @@ function seed() {
 }
 
 // ---------- 小元件 ----------
-// 兩張圖交替＝動圖
+// 動圖：img/ex/anim/<img>.webp（兩張照片用關節補間做出 8 格、來回播放；變形太怪的動作是快速淡入淡出）
 function anim(e, cls = '') {
-  const src = i => `img/ex/${e.img}-${i}.jpg`;
-  return `<div class="fx-anim ${cls}"><img src="${src(0)}" alt="${esc(e.name)}" loading="lazy"><img class="b" src="${src(1)}" alt="" loading="lazy">${
-    cls === 'mini' ? '' : '<span class="fx-lbl a">① 起始</span><span class="fx-lbl b">② 到底</span>'}</div>`;
+  return `<div class="fx-anim ${cls}"><img src="img/ex/anim/${e.img}.webp" alt="${esc(e.name)}" loading="lazy"></div>`;
 }
 // 說明頁：兩張並排，點了放大
 function frames(e) {
