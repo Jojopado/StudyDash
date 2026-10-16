@@ -899,4 +899,4 @@ div.prog-here-line { cursor: default; color: var(--muted); }
 .fit-pk .r { color: var(--muted); font-size: 13px; flex: none; }
 .fit-week .fw { cursor: default; }
 .fit-week .fw .dot { width: auto; min-width: 26px; padding: 0 4px; border-radius: 13px; }
-.fit-week .fw .nm:empty::before { content: " a0"; }
+.fit-week .fw .nm:empty::before { content: "\00a0"; }
