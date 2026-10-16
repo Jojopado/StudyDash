@@ -43,7 +43,7 @@ function recommend() {
     const ld = lastDate(p.id);
     const ago = ld ? daysAgo(ld) : 8;
     let s = Math.min(ago, 8);
-    if (ago < 2) s -= 10;
+    if (ago < (p.kind === 'belly' ? 1 : 2)) s -= 10;
     if (isUpper(p)) s += 2;
     if ((p.kind === 'gym') !== atSchool) s -= 20;
     if (p.kind === 'lower' && yest.some(y => y?.kind === 'lower' || y?.kind === 'full')) s -= 6;
@@ -70,7 +70,19 @@ function seed() {
 // 兩張圖交替＝動圖
 function anim(e, cls = '') {
   const src = i => `img/ex/${e.img}-${i}.jpg`;
-  return `<div class="fx-anim ${cls}"><img src="${src(0)}" alt="${esc(e.name)}" loading="lazy"><img class="b" src="${src(1)}" alt="" loading="lazy"></div>`;
+  return `<div class="fx-anim ${cls}"><img src="${src(0)}" alt="${esc(e.name)}" loading="lazy"><img class="b" src="${src(1)}" alt="" loading="lazy">${
+    cls === 'mini' ? '' : '<span class="fx-lbl a">① 起始</span><span class="fx-lbl b">② 到底</span>'}</div>`;
+}
+// 說明頁：兩張並排，點了放大
+function frames(e) {
+  const src = i => `img/ex/${e.img}-${i}.jpg`;
+  return `<div class="fx-frames">${[0, 1].map(i => `<button type="button" class="fx-frame" data-action="fit-zoom" data-src="${src(i)}" data-cap="${esc(e.name)}｜${i ? '② 動作到底' : '① 起始姿勢'}">
+    <img src="${src(i)}" alt="${esc(e.name)} ${i ? '到底' : '起始'}"><span>${i ? '② 動作到底' : '① 起始姿勢'}</span></button>`).join('')}</div>
+    <div class="sub" style="text-align:center;margin:-2px 0 6px">點圖可以放大</div>`;
+}
+const videoUrl = e => `https://www.youtube.com/results?search_query=${encodeURIComponent(`${e.name} 教學 正確姿勢`)}`;
+function videoBtn(e, small = false) {
+  return `<a class="btn${small ? ' small' : ''} fx-video" href="${videoUrl(e)}" target="_blank" rel="noopener">▶ 看影片教學</a>`;
 }
 const muscleChips = e => `${e.prim.map(m => `<span class="fx-m prim">${esc(m)}</span>`).join('')}${e.sec.map(m => `<span class="fx-m">${esc(m)}</span>`).join('')}`;
 const kitTag = e => `<span class="fx-tag kit-${e.kit}">${KITS.find(k => k.id === e.kit)?.label || ''}${e.kit === 'gym' ? '（以後再說）' : ''}</span>`;
@@ -195,6 +207,7 @@ function exBlock(p, date, it, n) {
         <div class="fx-muscles">${muscleChips(e)}</div>
         <div class="fx-goal"><b>${range(it)}</b>${it.rest ? ` · 休息 ${restText(it.rest)}` : ''}${it.note ? ` · ${esc(it.note)}` : ''}</div>
         ${imgNote(e)}
+        <div style="margin-top:6px">${videoBtn(e, true)}</div>
       </div>
     </div>
     ${spineLine(e)}
@@ -331,7 +344,15 @@ function planTab() {
         <li><b>同一份隔一天</b>（肌肉需要 48 小時恢復）；A 推和 F 拉練不同肌肉，<b>可以連兩天</b></li>
         <li><b>腿（D）不要連兩天</b></li>
         <li>週二、三在學校就做 B／C（健身房）；不想去就回家練 A、F</li>
+        <li><b>G 瘦肚子</b>不太累肌肉，每週 2～3 次，可以單獨做，也可以接在 A、F 後面</li>
         <li>「今天」頁會照多久沒練幫你排 ⭐，點一下就開始</li></ul></section>
+    <section class="card"><h2>🔥 肚子大怎麼辦</h2>
+      <ul class="fit-ul"><li><b>沒辦法只瘦肚子</b>：脂肪是全身一起減的，做再多捲腹，肚子上面那層油也不會只從肚子消。</li>
+        <li>你的 InBody：<b>軀幹脂肪 11.3 kg（標準的 271%）、內臟脂肪 9（上限）</b>。好消息是內臟脂肪對運動和飲食反應最快，通常比皮下脂肪先掉。</li>
+        <li><b>最有效的三件事</b>（打勾清單都有）：① 戒含糖飲料和宵夜 ② 每天走 8000 步以上 ③ 蛋白質吃夠、睡滿 7 小時（睡不夠會更容易囤肚子）。</li>
+        <li><b>G 瘦肚子</b>每週加 2～3 次：登階抬膝和登山者負責燒脂，反向捲腹、腹式真空讓肚子變緊、看起來比較平。可以接在 A、F 後面，或休息日在家做。</li>
+        <li>重訓也在幫你瘦肚子：肌肉越多，每天消耗越多。</li>
+        <li><b>每週量一次腰圍</b>（肚臍那圈、早上空腹、放鬆不憋氣），填在「身體」。男生目標 <b>90 cm 以下</b>。體重沒動但腰圍在變小，就代表有在瘦肚子。</li></ul></section>
     <section class="card"><h2>📅 排法參考 <span class="sub" style="font-weight:400">不用照著做</span></h2>
       <table class="fit-table"><tr><th>星期</th><th>內容</th><th>地點</th></tr>${eg}</table>
       <div class="sub" style="margin-top:8px">這樣一週上半身 3 次（A、F、E）。想再多練上半身，休息日加一次 A 或 F 也可以，只要跟上一次同一份隔一天。</div></section>
@@ -428,7 +449,7 @@ function bodyTab() {
       return ` <small style="color:${good ? 'var(--ok)' : 'var(--danger)'}">${x > 0 ? '▲' : '▼'}${Math.abs(x)}</small>`;
     };
     return `<tr><td>${b.date.slice(5).replace('-', '/')}<br><small class="sub">${b.date.slice(0, 4)}</small></td>
-      <td>${b.weight ?? '—'}${d('weight', 'down')}</td><td>${b.smm ?? '—'}${d('smm', 'up')}</td><td>${b.pbf ?? '—'}${d('pbf', 'down')}</td>
+      <td>${b.weight ?? '—'}${d('weight', 'down')}</td><td>${b.smm ?? '—'}${d('smm', 'up')}</td><td>${b.pbf ?? '—'}${d('pbf', 'down')}</td><td>${b.waist ?? '—'}${d('waist', 'down')}</td>
       <td>${b.visceral ?? '—'}${d('visceral', 'down')}</td><td>${b.score ?? '—'}</td>
       <td><button type="button" class="del" data-action="fit-body-del" data-id="${esc(b.id)}" aria-label="刪除">✕</button></td></tr>`;
   };
@@ -439,7 +460,7 @@ function bodyTab() {
       ${meter('內臟脂肪等級', 'visceral', '', GOAL.visceral)}
       <div class="sub" style="margin-top:6px">重點不是體重，是<b>骨骼肌往上、體脂往下</b>。下次建議 ${fmtDate(nextDate)} 左右再量（${nextDate <= today() ? '<b>已經可以量了！</b>' : `還有 ${Math.round((parseYmd(nextDate) - parseYmd(today())) / 86400000)} 天`}），同一台機器、同一時段、空腹、運動前。</div></section>
     <section class="card"><h2>📋 每次的紀錄</h2>
-      <div class="fit-scroll"><table class="fit-table fit-hist"><tr><th>日期</th><th>體重</th><th>骨骼肌</th><th>體脂%</th><th>內臟</th><th>分數</th><th></th></tr>
+      <div class="fit-scroll"><table class="fit-table fit-hist"><tr><th>日期</th><th>體重</th><th>骨骼肌</th><th>體脂%</th><th>腰圍</th><th>內臟</th><th>分數</th><th></th></tr>
       ${list.map(row).reverse().join('')}</table></div>
       ${first.note ? `<div class="sub" style="margin-top:6px">${esc(first.note)}</div>` : ''}</section>
     ${bodyForm()}
@@ -457,7 +478,7 @@ function bodyForm() {
   return `<section class="card"><h2>＋ 新增一次量測</h2>
     <form data-form="fit-body" class="fit-body-form">
       <label class="field"><span>日期</span><input type="date" name="date" value="${today()}" required></label>
-      ${f('weight', '體重 kg')}${f('smm', '骨骼肌 kg')}${f('pbf', '體脂率 %')}${f('fat', '體脂肪 kg')}${f('visceral', '內臟脂肪等級', '1')}${f('score', 'InBody 分數', '1')}
+      ${f('weight', '體重 kg')}${f('waist', '腰圍 cm（肚臍那圈）')}${f('smm', '骨骼肌 kg')}${f('pbf', '體脂率 %')}${f('fat', '體脂肪 kg')}${f('visceral', '內臟脂肪等級', '1')}${f('score', 'InBody 分數', '1')}
       <div class="actions" style="grid-column:1/-1"><span class="spacer"></span><button type="submit" class="btn primary">存</button></div>
     </form></section>`;
 }
@@ -501,7 +522,8 @@ function openEx(id) {
   const pt = partOf(e.part);
   const inPlan = PLAN.filter(p => p.list.some(it => it.ex === id)).map(p => { const it = p.list.find(x => x.ex === id); return `<b style="color:${p.color}">${p.id}</b> ${esc(p.name)}：${range(it)}`; });
   ctx.openSheet(`<h2>${esc(e.name)} <span class="sub" style="font-weight:400">${esc(e.en)}</span></h2>
-    ${anim(e, 'big')}${imgNote(e)}
+    ${frames(e)}${imgNote(e)}
+    <div style="text-align:center;margin:4px 0 10px">${videoBtn(e)}</div>
     <div class="fx-detail">
       <div class="row" style="flex-wrap:wrap;gap:6px"><span class="fx-tag" style="background:${pt.color}33;color:${pt.color}">${pt.label}</span>${kitTag(e)}<span class="fx-tag">🧰 ${esc(e.equip)}</span></div>
       ${e.spine ? `<div class="pu-sec">脊椎側彎</div><div class="fx-spine spine-${e.spine}">${SPINE[e.spine]}：${esc(e.spineNote)}</div>` : ''}
@@ -577,7 +599,7 @@ export const fitForms = {
     const num = k => (f[k] === '' || f[k] == null ? null : +f[k]);
     if (!f.date || num('weight') == null) { ctx.toast('至少填日期和體重'); return; }
     const id = `ib-${f.date.replaceAll('-', '')}`;
-    saveDoc('body', { id, date: f.date, weight: num('weight'), smm: num('smm'), pbf: num('pbf'), fat: num('fat'), visceral: num('visceral'), score: num('score'), createdAt: Date.now() });
+    saveDoc('body', { id, date: f.date, weight: num('weight'), waist: num('waist'), smm: num('smm'), pbf: num('pbf'), fat: num('fat'), visceral: num('visceral'), score: num('score'), createdAt: Date.now() });
     form.reset();
     ctx.toast('已記錄 📈');
   },
@@ -595,6 +617,13 @@ export const fitActions = {
   'fit-part': el => { fitUi.part = el.dataset.part; ctx.render(); },
   'fit-kit': el => { fitUi.kit = el.dataset.kit; ctx.render(); },
   'fit-ex': el => openEx(el.dataset.ex),
+  'fit-zoom': el => {
+    const box = document.createElement('div');
+    box.className = 'fx-lightbox';
+    box.innerHTML = `<img src="${el.dataset.src}" alt=""><div class="cap">${el.dataset.cap || ''}<br><small>點任何地方關閉</small></div>`;
+    box.addEventListener('click', () => box.remove());
+    document.body.appendChild(box);
+  },
   'fit-habit': el => {
     const { date, h: k } = el.dataset;
     const h = habitOf(date) || { id: `h-${date}`, date, items: {}, createdAt: Date.now() };

@@ -225,6 +225,32 @@ export const EX = [
     steps: ['趴著，雙手往前伸直', '同時把手和腳抬離地面', '停 2 秒再放下'],
     tips: ['久坐的人可以強化下背，減少腰痠'] },
 
+  // ---------- 瘦肚子（核心＋燃脂，都不壓脊椎） ----------
+  { id: 'vacuum', spine: 'good', spineNote: '只是收肚子呼吸，脊椎完全沒壓力', kit: 'bw', part: 'core', name: '腹式真空', en: 'Stomach Vacuum', img: 'Stomach_Vacuum', where: ['home', 'gym'], equip: '徒手', unit: 'sec',
+    prim: ['腹橫肌'], sec: [],
+    steps: ['站著或四足跪姿，先把氣全部吐光', '吐完後把肚臍用力往背後吸進去，像要穿很緊的褲子', '憋住（不用吸氣）撐 15–20 秒，放鬆、正常呼吸再來一次'],
+    tips: ['練的是最裡面那層「天然束腹」，肚子看起來會比較平', '早上起床空腹做最容易', '頭暈就停，不要硬撐'] },
+  { id: 'reverse-crunch', spine: 'good', spineNote: '躺著做、下背貼地，比仰臥起坐安全很多', kit: 'bw', part: 'core', name: '反向捲腹', en: 'Reverse Crunch', img: 'Reverse_Crunch', where: ['home', 'gym'], equip: '徒手＋墊子', unit: 'bw',
+    prim: ['下腹（腹直肌下段）'], sec: ['腹橫肌'],
+    steps: ['躺著，雙手放身體兩側，膝蓋彎 90 度抬起', '用下腹的力量把屁股捲離地面，膝蓋往胸口靠', '慢慢放回去，腳不要碰地'],
+    tips: ['是「捲」起來不是「甩」起來', '對「小腹」最有感的動作', '脖子放鬆，不用出力'] },
+  { id: 'leg-pullin', kit: 'bw', part: 'core', name: '仰臥收腿', en: 'Leg Pull-In', img: 'Leg_Pull-In', where: ['home', 'gym'], equip: '徒手＋墊子', unit: 'bw',
+    prim: ['下腹'], sec: ['髖屈肌'],
+    steps: ['躺著，手放屁股兩側，雙腳伸直微微離地', '膝蓋彎起來往胸口收', '再把腳伸直出去，腳跟不碰地'],
+    tips: ['下背離開地板就是伸太遠，腳抬高一點', '太難就單腳輪流做'] },
+  { id: 'flutter', spine: 'care', spineNote: '下背一定要貼地，拱起來就把腳抬高一點', kit: 'bw', part: 'core', name: '交替踢腿', en: 'Flutter Kicks', img: 'Flutter_Kicks', where: ['home', 'gym'], equip: '徒手＋墊子', unit: 'sec',
+    prim: ['下腹'], sec: ['髖屈肌'],
+    steps: ['躺著，手放屁股下面，雙腳伸直抬離地面', '兩腳上下小幅度交替踢，像在游自由式', '全程肚子收緊'],
+    tips: ['腳越低越難，先抬高一點', '計時做，30 秒開始'] },
+  { id: 'mountain', kit: 'bw', part: 'cardio', name: '登山者', en: 'Mountain Climbers', img: 'Mountain_Climbers', where: ['home', 'gym'], equip: '徒手', unit: 'sec',
+    prim: ['心肺', '燃脂'], sec: ['核心', '肩'],
+    steps: ['伏地挺身的姿勢撐好，手在肩膀正下方', '右膝往胸口提，放回去換左膝', '節奏穩定交替，像在原地跑步'],
+    tips: ['屁股不要翹高', '太喘就放慢，用「走」的一腳一腳收', '撐不住可以手撐在床沿或椅子上做（比較簡單）'] },
+  { id: 'step-knee', kit: 'bw', part: 'cardio', name: '登階抬膝', en: 'Step-up with Knee Raise', img: 'Step-up_with_Knee_Raise', where: ['home'], equip: '樓梯第一階', unit: 'min',
+    prim: ['心肺', '燃脂'], sec: ['臀', '股四頭肌'],
+    steps: ['面對樓梯，一腳踩上第一階', '站上去時另一腳膝蓋往上抬到腰的高度', '退下來換腳，左右輪流'],
+    tips: ['在家的有氧，膝蓋和脊椎都沒衝擊，不會吵到樓下', '微喘、還能講話的速度就對了'] },
+
   // ---------- 有氧 ----------
   { id: 'bike', kit: 'cardio', part: 'cardio', name: '健身車', en: 'Stationary Bike', img: 'Bicycling_Stationary', where: ['gym'], equip: '健身車', unit: 'min',
     prim: ['心肺', '燃脂'], sec: ['股四頭肌', '臀'],
@@ -239,7 +265,7 @@ export const EX = [
 export const exById = id => EX.find(x => x.id === id);
 
 // 課表：不綁星期，每天自己選一份（今天頁會依上次練的時間推薦）
-// kind：upper 上半身、lower 下半身、full 全身、gym 學校健身房（週二、三在學校）
+// kind：upper 上半身、lower 下半身、full 全身、gym 學校健身房（週二、三在學校）、belly 瘦肚子（不累肌肉，可以接在別天後面）
 // sets 組數、lo–hi 次數（sec 秒、min 分）、each＝每邊、start＝第一次建議重量
 export const PLAN = [
   { id: 'A', kind: 'upper', name: '上半身・推（胸、肩、三頭）', where: '在家', color: '#f87171', mins: 40, list: [
@@ -272,6 +298,15 @@ export const PLAN = [
     { ex: 'deadbug', sets: 2, lo: 10, hi: 10, rest: 45, each: true },
     { ex: 'side-plank', sets: 2, lo: 20, hi: 30, rest: 30, each: true },
   ] },
+  { id: 'G', kind: 'belly', name: '瘦肚子：燃脂＋核心', where: '在家', color: '#fb923c', mins: 35, list: [
+    { ex: 'step-knee', sets: 1, lo: 8, hi: 10, rest: 0, note: '暖身兼燃脂' },
+    { ex: 'mountain', sets: 3, lo: 20, hi: 40, rest: 30, note: '撐不住就手撐床沿' },
+    { ex: 'reverse-crunch', sets: 3, lo: 10, hi: 15, rest: 45 },
+    { ex: 'leg-pullin', sets: 2, lo: 10, hi: 15, rest: 45 },
+    { ex: 'side-plank', sets: 2, lo: 20, hi: 30, rest: 30, each: true },
+    { ex: 'vacuum', sets: 3, lo: 15, hi: 20, rest: 20, note: '吐光氣再收肚子' },
+    { ex: 'step-knee', sets: 1, lo: 10, hi: 15, rest: 0, note: '最後再燒一下' },
+  ] },
   { id: 'B', kind: 'gym', name: '有氧＋藥球（腿、背）', where: '學校健身房', color: '#fbbf24', mins: 60, list: [
     { ex: 'walk', sets: 1, lo: 10, hi: 10, rest: 0, note: '暖身，坡度 5%' },
     { ex: 'mb-squat', sets: 3, lo: 12, hi: 15, rest: 60 },
@@ -289,7 +324,7 @@ export const PLAN = [
     { ex: 'walk', sets: 1, lo: 30, hi: 40, rest: 0, note: '坡度快走，微喘還能講話' },
   ] },
 ];
-export const KINDS = { upper: '上半身', lower: '下半身', full: '全身', gym: '健身房' };
+export const KINDS = { upper: '上半身', lower: '下半身', full: '全身', gym: '健身房', belly: '瘦肚子' };
 // 一週目標：練幾次、其中上半身（含全身）幾次
 export const WEEK_GOAL = { total: 4, upper: 3 };
 
