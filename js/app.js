@@ -131,9 +131,12 @@ function openEventSheet(ev) {
 }
 
 function stepsHtml(steps) {
-  return steps.map(z => `<div class="step ${z.done ? 'done' : ''}">
+  return steps.map(z => z.sec
+    ? `<div class="step sec"><span>${esc(z.text)}</span><span class="spacer"></span>
+    <button type="button" class="del" data-action="sheet-step-del" data-step="${z.id}" aria-label="刪除">✕</button></div>`
+    : `<div class="step ${z.done ? 'done' : ''}">
     <button type="button" class="check small ${z.done ? 'on' : ''}" data-action="sheet-step-toggle" data-step="${z.id}">${z.done ? '✓' : ''}</button>
-    <span>${esc(z.text)}</span><span class="spacer"></span>
+    <span class="st-txt">${esc(z.text)}${z.hint ? `<small class="step-hint">${esc(z.hint)}</small>` : ''}</span><span class="spacer"></span>
     <button type="button" class="del" data-action="sheet-step-del" data-step="${z.id}" aria-label="刪除">✕</button></div>`).join('');
 }
 
@@ -147,9 +150,9 @@ function openTodoSheet(td) {
       <div class="field"><span>類型</span><div class="chips" id="type-chips">${typeChips(x.type)}</div></div>
       ${courseField(x.courseId)}
       <label class="field"><span>期限（可不填）</span><input type="date" name="due" value="${x.due || ''}"></label>
-      <div class="field"><span>小步驟（可不填，例如：讀題 → 寫程式 → 寫報告）</span>
+      <div class="field"><span>小步驟（可不填，例如：讀題 → 寫程式 → 寫報告；# 開頭會變成分段標題）</span>
         <div id="steps">${stepsHtml(x.steps)}</div>
-        <div class="add-goal"><input type="text" id="step-input" placeholder="新增一個步驟，按 Enter 加入" autocomplete="off">
+        <div class="add-goal"><input type="text" id="step-input" placeholder="新增一個步驟，按 Enter 加入（# 第一段 = 分段）" autocomplete="off">
           <button type="button" class="btn" data-action="sheet-step-add">加入</button></div>
       </div>
       <label class="field"><span>預計時間（分鐘，可不填；讀書類直接打勾會用這個算讀書時數）</span><input type="text" inputmode="numeric" name="estMin" value="${x.estMin || ''}" autocomplete="off"></label>
@@ -170,7 +173,10 @@ function addSheetStep() {
   const input = sheet.querySelector('#step-input');
   const text = input?.value.trim();
   if (!text) return;
-  sheetCtx.data.steps.push({ id: newId(), text, done: false });
+  // # 開頭 = 分段標題
+  sheetCtx.data.steps.push(text.startsWith('#')
+    ? { id: newId(), text: text.replace(/^#+\s*/, ''), sec: true }
+    : { id: newId(), text, done: false });
   sheet.querySelector('#steps').innerHTML = stepsHtml(sheetCtx.data.steps);
   input.value = '';
   input.focus();
@@ -401,10 +407,18 @@ const actions = {
   'toggle-step': el => {
     const x = findTodo(el.dataset.id); if (!x) return;
     const steps = (x.steps || []).map(z => z.id === el.dataset.step ? { ...z, done: !z.done } : z);
-    // 步驟全部打勾就順便把待辦完成
-    const all = steps.length && steps.every(z => z.done);
-    if (all && !x.done) toast(setDone({ ...x, steps }, true) || '全部步驟完成，待辦打勾了 🎉');
-    else saveTodo({ ...x, steps });
+    // 步驟全部打勾就順便把待辦完成（分段標題不算）
+    const real = steps.filter(z => !z.sec);
+    const all = real.length && real.every(z => z.done);
+    if (all && !x.done) { toast(setDone({ ...x, steps }, true) || '全部步驟完成，待辦打勾了 🎉'); return; }
+    saveTodo({ ...x, steps });
+    // 剛好做完一整段 → 提醒休息
+    const i = steps.findIndex(z => z.id === el.dataset.step);
+    if (!steps[i]?.done) return;
+    let s = i; while (s >= 0 && !steps[s].sec) s--;
+    if (s < 0) return;
+    let e = s + 1; while (e < steps.length && !steps[e].sec) e++;
+    if (steps.slice(s + 1, e).every(z => z.done)) toast(`「${steps[s].text}」完成 🎉 休息一下再繼續`);
   },
   'new-todo': el => openTodoSheet({ due: el.dataset.date || '' }),
   'todo-filter': el => { ui.todoFilter = el.dataset.key; render(); },

@@ -276,6 +276,12 @@ input[type=color] { width: 40px; height: 30px; padding: 0; border: 1px solid var
 .step.done span { color: var(--muted); text-decoration: line-through; }
 .step .del { border: 0; background: transparent; color: var(--muted); cursor: pointer; }
 .check.small { width: 18px; height: 18px; font-size: 11px; }
+.step.sec { padding-top: 10px; font-size: 13px; font-weight: 700; color: var(--accent); }
+.step.sec.done { color: var(--muted); }
+.step.sec .sec-n { margin-left: auto; font-weight: 400; color: var(--muted); }
+.step.next .st-txt { font-weight: 600; }
+.step-hint { display: block; margin-top: 2px; font-size: 12px; font-weight: 400; line-height: 1.5; color: var(--muted); white-space: pre-line; }
+.step.sec.done span { text-decoration: none; }
 
 .quote-mini {
   display: block; margin: -6px 0 14px; padding: 9px 14px; border-radius: 12px; font-size: 14px;

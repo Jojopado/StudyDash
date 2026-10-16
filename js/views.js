@@ -269,18 +269,40 @@ export function shiftMonth(dir) {
 const byDue = (a, b) =>
   (a.due ? 0 : 1) - (b.due ? 0 : 1) || (a.due || '').localeCompare(b.due || '') || (a.createdAt || 0) - (b.createdAt || 0);
 
+// 分段式步驟：段落標題顯示 已完成/總數，整段做完就收起來；只有「下一步」顯示提示，其他的保持簡潔
+function stepRowsHtml(x, all) {
+  const nextId = all.find(z => !z.sec && !z.done)?.id;
+  const out = [];
+  let hide = false;
+  all.forEach((z, i) => {
+    if (z.sec) {
+      const end = all.findIndex((y, j) => j > i && y.sec);
+      const items = all.slice(i + 1, end < 0 ? all.length : end);
+      const d = items.filter(y => y.done).length;
+      hide = items.length > 0 && d === items.length;
+      out.push(`<div class="step sec ${hide ? 'done' : ''}"><span>${hide ? '✅ ' : ''}${esc(z.text)}</span><span class="sec-n">${d}/${items.length}</span></div>`);
+      return;
+    }
+    if (hide) return;
+    const next = z.id === nextId;
+    out.push(`<div class="step ${z.done ? 'done' : ''} ${next ? 'next' : ''}">
+      <button class="check small ${z.done ? 'on' : ''}" data-action="toggle-step" data-id="${x.id}" data-step="${z.id}" aria-label="完成">${z.done ? '✓' : ''}</button>
+      <span class="st-txt">${next ? '👉 ' : ''}${esc(z.text)}${next && z.hint ? `<small class="step-hint">${esc(z.hint)}</small>` : ''}</span></div>`);
+  });
+  return out.join('');
+}
+
 function todoRow(x, { showDate = true, steps = false, drag = false } = {}) {
   const ty = TYPES[x.type] || TYPES.other;
   const cd = x.due && !x.done ? countdown(x.due) : null;
-  const st = x.steps || [];
+  const all = x.steps || [];
+  const st = all.filter(z => !z.sec);   // sec = 分段標題，不算步驟
   const stDone = st.filter(z => z.done).length;
   const working = !!x.workingSince && !x.done;
   const spentMin = Math.floor((x.spentMs || 0) / 60000);
   const meta = [working ? '<b class="run-tag">⏱ 執行中</b>' : '待辦', courseTag(x.courseId), ty.label, x.due && showDate ? fmtDate(x.due) : '',
     st.length ? `☑ ${stDone}/${st.length}` : '', !working && spentMin ? `⏱ ${fmtMin(spentMin)}` : '', !x.done && !spentMin && x.estMin ? `預計 ${fmtMin(x.estMin)}` : '', x.note ? '📝' : ''].filter(Boolean).join(' · ');
-  const stepRows = steps && !x.done ? st.map(z => `<div class="step ${z.done ? 'done' : ''}">
-      <button class="check small ${z.done ? 'on' : ''}" data-action="toggle-step" data-id="${x.id}" data-step="${z.id}" aria-label="完成">${z.done ? '✓' : ''}</button>
-      <span>${esc(z.text)}</span></div>`).join('') : '';
+  const stepRows = steps && !x.done ? stepRowsHtml(x, all) : '';
   const workBtn = x.done ? ''
     : working ? `<button class="work-btn on" data-action="todo-pause" data-id="${x.id}" aria-label="暫停">⏸</button>`
     : `<button class="work-btn" data-action="todo-start" data-id="${x.id}" aria-label="開始做" title="開始做這件（計時）">▶</button>`;
