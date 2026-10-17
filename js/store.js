@@ -2,7 +2,7 @@
 import { firebaseConfig } from './firebase-config.js';
 
 const LS_KEY = 'studydash.v1';
-const COLS = ['events', 'topics', 'todos', 'courses', 'sessions', 'inv_meta', 'inv_orders', 'inv_divs', 'inv_snaps', 'rw_redeems', 'expenses', 'decks', 'cards', 'memos', 'docs', 'doc_folders', 'units', 'workouts', 'body', 'habits'];
+const COLS = ['events', 'topics', 'todos', 'courses', 'sessions', 'rw_redeems', 'expenses', 'decks', 'cards', 'memos', 'docs', 'doc_folders', 'units', 'workouts', 'body', 'habits'];
 const PREFS_KEY = 'studydash.prefs';
 const EMPTY = () => Object.fromEntries(COLS.map(c => [c, []]));
 const pick = data => Object.fromEntries(COLS.map(c => [c, data[c] || []]));
@@ -107,7 +107,7 @@ function cloudBackend(uid) {
     async replaceAll(next) {
       // Firestore 一個 batch 上限 500 筆，分批寫
       const ops = [];
-      // 備份檔裡沒有的資料（例如舊備份沒有模擬投資）就不動
+      // 備份檔裡沒有的資料（例如舊備份沒有字卡）就不動
       for (const col of COLS.filter(c => Array.isArray(next[c]))) {
         const existing = await getDocs(colRef(col));
         existing.forEach(s => ops.push(['del', col, s.id]));

@@ -321,7 +321,7 @@ input[type=color] { width: 40px; height: 30px; padding: 0; border: 1px solid var
 .work-card .work-title { font-size: 20px; font-weight: 700; margin: 6px 0 2px; cursor: pointer; }
 .work-card .clock { font-size: 48px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: 1px; margin: 4px 0 10px; color: var(--accent); }
 
-/* ---------- 模擬投資 ---------- */
+/* ---------- 圖表、漲跌色（原模擬投資，部分共用） ---------- */
 :root { --up: #f05252; --down: #22b55e; --s1: #3987e5; --s2: #d95926; }
 :root.light { --up: #d93636; --down: #128a3c; --s1: #2a78d6; --s2: #eb6834; }
 .up { color: var(--up); }
@@ -549,28 +549,6 @@ input.money-date { width: auto; padding: 4px 8px; }
 .quiz-ex.bad { border-left-color: var(--danger); }
 .quiz-ex b { display: block; margin-bottom: 4px; }
 .quiz-ex div { white-space: pre-wrap; overflow-wrap: anywhere; }
-
-/* ---------- 投資入門 ---------- */
-.lesson { border-top: 1px solid var(--line); padding: 8px 0; }
-.lesson summary { display: flex; align-items: center; gap: 8px; cursor: pointer; list-style: none; }
-.lesson summary::-webkit-details-marker { display: none; }
-.lesson-title { flex: 1; }
-.lesson.read .lesson-title { color: var(--muted); }
-.lesson-ok { color: var(--ok); font-weight: 700; }
-.lesson .md { font-size: 14px; margin-top: 8px; }
-.lesson .md-table table { min-width: 0; width: 100%; }
-
-/* ---------- 新聞 ---------- */
-.news-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; padding: 8px 0; border-top: 1px solid var(--line); }
-.news-row:first-of-type { border-top: 0; }
-.news-row .news-title { flex: 1 1 100%; order: 1; }
-.news-row .sub { order: 2; font-size: 12px; }
-.news-tag { order: 0; font-size: 11px; padding: 1px 7px; border-radius: 999px; background: var(--card2); color: var(--muted); }
-a.news-row:hover .news-title { text-decoration: underline; }
-.news-row.ann { display: block; }
-.news-row.ann summary { display: flex; flex-wrap: wrap; gap: 2px 8px; cursor: pointer; list-style: none; }
-.news-row.ann summary::-webkit-details-marker { display: none; }
-.news-body { white-space: pre-wrap; font-size: 13px; color: var(--muted); margin-top: 6px; }
 
 /* ---------- 隨手記 ---------- */
 .memo-layout { display: grid; gap: 14px; }
@@ -923,3 +901,49 @@ div.prog-here-line { cursor: default; color: var(--muted); }
 .fx-lightbox .cap { color: #fff; text-align: center; margin-top: 10px; font-weight: 600; }
 .fx-lightbox .cap small { color: #aaa; font-weight: 400; }
 .fx-video { text-decoration: none; }
+
+/* ---------- 未來規劃 ---------- */
+.gl-hero .gl-line { font-size: 22px; font-weight: 700; margin: 4px 0 2px; color: var(--accent); }
+.gl-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0 4px; text-align: center; }
+.gl-stats > div { background: var(--card2); border-radius: 10px; padding: 8px 4px; display: flex; flex-direction: column; gap: 2px; }
+.gl-stats b { font-size: 17px; font-variant-numeric: tabular-nums; }
+.gl-stats span { font-size: 12px; color: var(--muted); }
+.gl-next { font-size: 14px; }
+.gl-special { background: var(--card2); border-left: 3px solid var(--accent); border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; font-size: 14px; }
+.gl-today { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border-radius: 10px; border: 2px solid var(--accent); margin-bottom: 10px; }
+.gl-today b { font-size: 17px; }
+.gl-today.rest { border-color: var(--line); }
+.gl-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.gl-day { display: flex; flex-direction: column; gap: 4px; align-items: stretch; text-align: left; background: var(--card2); border: 1px solid var(--line); border-radius: 8px; padding: 6px; cursor: pointer; color: inherit; font: inherit; min-width: 0; }
+.gl-day.today { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.gl-day.rest { opacity: .55; }
+.gl-dow { font-weight: 700; text-align: center; font-size: 13px; }
+.gl-dt { font-size: 11px; line-height: 1.35; color: var(--muted); overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .gl-week { grid-template-columns: 1fr; }
+  .gl-day { flex-direction: row; align-items: baseline; gap: 10px; }
+  .gl-dow { min-width: 2em; }
+  .gl-dt { font-size: 13px; }
+}
+.gl-stage { border-top: 1px solid var(--line); }
+.gl-stage:first-of-type { border-top: 0; }
+.gl-stage-head { display: flex; align-items: center; gap: 10px; width: 100%; background: none; border: 0; padding: 10px 0; cursor: pointer; color: inherit; font: inherit; text-align: left; }
+.gl-num { font-size: 20px; color: var(--muted); }
+.gl-stage.now .gl-num { color: var(--accent); }
+.gl-stage.past .gl-name b { color: var(--muted); }
+.gl-name { flex: 1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.gl-name small { width: 100%; }
+.gl-arrow { color: var(--muted); width: 1em; text-align: center; }
+.gl-tag { font-size: 11px; padding: 1px 7px; border-radius: 99px; background: var(--card2); }
+.gl-tag.now { background: var(--accent); color: #0b0d12; font-weight: 600; }
+.gl-tag.ok { background: var(--ok); color: #0b0d12; font-weight: 600; }
+.gl-stage-body { padding: 0 0 12px 30px; }
+.gl-goal { margin-bottom: 2px; }
+.gl-item { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
+.gl-item .text { flex: 1; }
+.gl-item.done .text { color: var(--muted); text-decoration: line-through; }
+.gl-rules { margin: 0 0 12px; padding-left: 20px; line-height: 1.6; }
+.gl-rules li { margin-bottom: 6px; }
+.gl-ask { margin: 6px 0 4px; line-height: 1.5; }
+.gl-home { color: var(--text); border-style: solid; border-color: var(--accent); }
+.gl-item .del { border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 16px; opacity: .6; }

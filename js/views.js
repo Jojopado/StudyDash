@@ -8,6 +8,7 @@ import { monthSpent, currentFunds } from './money.js';
 import { homeMemoCard } from './memo.js';
 import { homeProgressCard } from './progress.js';
 import { homeFitCard, homeHabitCard } from './fit.js';
+import { homeGoalCard } from './goals.js';
 import { saveTodo } from './store.js';
 import { handle, onDrop, between } from './drag.js';
 
@@ -159,6 +160,7 @@ export function renderHome(s) {
     <h1>${d.getMonth() + 1} 月 ${d.getDate()} 日 星期${WEEKDAYS[d.getDay()]}</h1>
   </div></div>
   <a href="#money" class="quote-mini">${funds != null ? `💳 目前資金 ${funds < 0 ? '−' : ''}$${Math.abs(funds).toLocaleString()} · ` : ''}💰 這個月花了 $${spent.toLocaleString()}${s.prefs.moneyBudget ? ` · 預算還剩 $${Math.max(0, s.prefs.moneyBudget - spent).toLocaleString()}` : ''} ›</a>
+  ${homeGoalCard()}
   ${homeMemoCard()}
   <div class="grid two">
     <section class="card"><h2>☀️ 今天</h2>${classes.map(classRow).join('')}${

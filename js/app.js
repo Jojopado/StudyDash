@@ -9,8 +9,6 @@ import {
 } from './views.js';
 import { parseSlots, fmtSlots, PERIODS } from './courses.js';
 import * as T from './timer.js';
-import { renderInvest, initInvest, invActions, submitOrder, submitNote } from './invest-view.js';
-import { learnActions } from './invest-learn.js';
 import { renderMoney, initMoney, moneyActions, moneyForms } from './money.js';
 import { renderCards, initCards, cardActions, cardForms, cardsKey } from './cards.js';
 import { renderMemo, initMemo, memoActions, memoForms, memoKey } from './memo.js';
@@ -18,6 +16,7 @@ import { renderDocs, initDocs, docActions, docForms } from './docs.js';
 import { renderQuiz, initQuiz, quizActions, quizKey, quizTick } from './quiz.js';
 import { renderProgress, initProgress, progressActions, progressForms } from './progress.js';
 import { renderFit, initFit, fitActions, fitForms } from './fit.js';
+import { renderGoals, initGoals, goalsActions, goalsForms } from './goals.js';
 import { isDragging } from './drag.js';
 
 const $ = sel => document.querySelector(sel);
@@ -28,11 +27,11 @@ const sheet = $('#sheet');
 
 const ROUTES = {
   home: renderHome, calendar: renderCalendar, todo: renderTodo, study: renderStudy, cards: renderCards, money: renderMoney, memo: renderMemo, docs: renderDocs, quiz: renderQuiz, progress: renderProgress, fit: renderFit,
-  invest: renderInvest, settings: renderSettings,
+  goals: renderGoals, settings: renderSettings,
 };
 // 手機底部放不下的，收在「更多」裡（電腦版側邊欄全部列出）
-const MORE = ['memo', 'progress', 'docs', 'quiz', 'invest', 'fit', 'settings'];
-const NO_FAB = ['settings', 'invest', 'money', 'cards', 'memo', 'docs', 'quiz', 'progress', 'fit'];
+const MORE = ['goals', 'memo', 'progress', 'docs', 'quiz', 'fit', 'settings'];
+const NO_FAB = ['settings', 'goals', 'money', 'cards', 'memo', 'docs', 'quiz', 'progress', 'fit'];
 const route = () => (location.hash.slice(1) in ROUTES ? location.hash.slice(1) : 'home');
 
 // ---------- 畫面 ----------
@@ -536,8 +535,8 @@ const actions = {
   logout: async () => { if (confirm('確定登出？登出後這台裝置看不到雲端資料。')) { await logout(); toast('已登出'); } },
 };
 
-Object.assign(actions, invActions, learnActions, moneyActions, cardActions, memoActions, docActions, quizActions, progressActions, fitActions);
-const moduleForms = { ...moneyForms, ...cardForms, ...memoForms, ...docForms, ...progressForms, ...fitForms };
+Object.assign(actions, goalsActions, moneyActions, cardActions, memoActions, docActions, quizActions, progressActions, fitActions);
+const moduleForms = { ...moneyForms, ...cardForms, ...memoForms, ...docForms, ...progressForms, ...fitForms, ...goalsForms };
 
 document.addEventListener('click', ev => {
   if (ev.target === backdrop) { closeSheet(); return; }
@@ -636,8 +635,6 @@ document.addEventListener('submit', async ev => {
     toast('已儲存');
   } else if (kind === 'timer-note') {
     document.activeElement?.blur();
-  } else if (kind === 'inv-order') {
-    await submitOrder(form);
   } else if (kind === 'tag') {
     const name = (f.name || '').trim().slice(0, 20);
     if (!name) return;
@@ -649,9 +646,7 @@ document.addEventListener('submit', async ev => {
     form.querySelector('[name=name]').focus();
     toast(`加入標籤「${name}」`);
   } else if (moduleForms[kind]) {
-    moduleForms[kind](form, f, sheetCtx?.data);
-  } else if (kind === 'inv-note') {
-    await submitNote(form);
+    moduleForms[kind](form, f, sheetCtx?.data, ev.submitter);
   } else if (kind === 'login') {
     const mode = ev.submitter?.value || 'login';
     try {
@@ -723,7 +718,7 @@ subscribe(render);
 window.addEventListener('drag-end', () => { if (renderLater) { renderLater = false; render(); } });
 render();
 initStore();
-initInvest({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
+initGoals({ openSheet, closeSheet, toast, render });
 initMoney({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
 initCards({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
 initMemo({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
