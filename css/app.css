@@ -899,6 +899,11 @@ div.prog-here-line { cursor: default; color: var(--muted); }
 .fit-pk { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); border-left: 4px solid var(--c); background: var(--card2); color: var(--text); text-align: left; cursor: pointer; }
 .fit-pk .t { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .fit-pk .r { color: var(--muted); font-size: 13px; flex: none; }
+.fit-pk.started { background: color-mix(in srgb, var(--c) 12%, var(--card2)); }
+.fit-st { font-size: 12px; margin-top: 2px; }
+.fit-st.on { color: var(--c); font-weight: 600; }
+.fit-st.done { color: var(--ok); }
+.fit-back { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; flex-wrap: wrap; }
 .fit-week .fw { cursor: default; }
 .fit-week .fw .dot { width: auto; min-width: 26px; padding: 0 4px; border-radius: 13px; }
 .fit-week .fw .nm:empty::before { content: "\00a0"; }

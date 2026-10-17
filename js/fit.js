@@ -168,7 +168,27 @@ function challengeCard() {
 }
 
 // ---------- 今天 ----------
-const draft = {}; // 還沒按 ✓ 的輸入（重畫時不要不見）
+// 還沒按 ✓ 的輸入：重畫、返回、關掉 App 都不要不見（存這台裝置，只留今天的）
+const DRAFT_KEY = 'studydash.fitDraft';
+const draft = (() => {
+  try {
+    const o = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
+    const t = today();
+    return Object.fromEntries(Object.entries(o).filter(([k]) => k.startsWith(`${t}:`)));
+  } catch { return {}; }
+})();
+let draftTimer = 0;
+function saveDraft() {
+  clearTimeout(draftTimer);
+  draftTimer = setTimeout(() => { try { localStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); } catch { /* 私密模式 */ } }, 300);
+}
+// 這份今天做到哪：{ fin, total, sets }（sets＝打勾的組數）
+function progressOf(p, date = today()) {
+  const w = workouts().find(x => x.id === wid(date, p.id));
+  const fin = p.list.filter(it => ((w?.sets?.[it.ex]) || []).filter(Boolean).length >= (it.ex === 'walk' ? 1 : it.sets)).length;
+  const sets = Object.values(w?.sets || {}).reduce((n, a) => n + (a || []).filter(Boolean).length, 0);
+  return { w, fin, total: p.list.length, sets, done: !!w?.done };
+}
 
 function setRow(day, date, it, i, cur, last) {
   const e = exById(it.ex);
@@ -232,11 +252,23 @@ function weekStrip() {
 
 function pickCard() {
   const rec = recommend();
+  const star = rec[0]?.id;
+  // 今天已經動過的那幾份排最前面（進行中 → 練完），其他照推薦
+  const prog = Object.fromEntries(PLAN.map(p => [p.id, progressOf(p)]));
+  const started = p => prog[p.id].sets > 0 || prog[p.id].done;
+  const list = [...rec.filter(p => started(p) && !prog[p.id].done), ...rec.filter(p => prog[p.id].done), ...rec.filter(p => !started(p))];
+  const anyStarted = list.some(started);
+  const row = p => {
+    const g = prog[p.id];
+    const st = g.done ? `<span class="fit-st done">✅ 今天練完了 · 點進去可以看或改</span>`
+      : started(p) ? `<span class="fit-st on">⏳ 今天做到 ${g.fin}/${g.total} 個動作（${g.sets} 組），紀錄都在</span>` : '';
+    return `<button type="button" class="fit-pk${started(p) ? ' started' : ''}" data-action="fit-day" data-day="${p.id}" style="--c:${p.color}">
+      <span class="fit-badge">${p.id}</span><span class="t"><b>${p.id === star && !started(p) ? '⭐ ' : ''}${esc(p.name)}</b>
+      <span class="sub">${esc(p.where)} · ${p.mins} 分 · ${agoText(lastDate(p.id))}</span>${st}</span><span class="r">${g.done ? '看 ›' : started(p) ? '繼續 ›' : '›'}</span></button>`;
+  };
   return `<section class="card"><h2>🏋️ 今天想練哪一份？</h2>
-    <div class="sub">沒有固定星期，想練什麼就選什麼。⭐ 是照「多久沒練」幫你挑的，上半身會優先。</div>
-    <div class="fit-pick">${rec.map((p, i) => `<button type="button" class="fit-pk" data-action="fit-day" data-day="${p.id}" style="--c:${p.color}">
-      <span class="fit-badge">${p.id}</span><span class="t"><b>${i === 0 ? '⭐ ' : ''}${esc(p.name)}</b>
-      <span class="sub">${esc(p.where)} · ${p.mins} 分 · ${agoText(lastDate(p.id))}</span></span><span class="r">›</span></button>`).join('')}</div>
+    <div class="sub">沒有固定星期，想練什麼就選什麼。⭐ 是照「多久沒練」幫你挑的，上半身會優先。${anyStarted ? '<br>今天做到一半的放在最上面，點進去就從剛剛的地方繼續。' : ''}</div>
+    <div class="fit-pick">${list.map(row).join('')}</div>
     <div class="sub" style="margin-top:8px">同一份最好隔一天；上半身「推」和「拉」練不同肌肉，可以連兩天。想休息就走路＋做脊椎伸展。</div></section>`;
 }
 
@@ -245,16 +277,16 @@ function todayTab() {
   const p = curPlan();
   const head = `${weekStrip()}${habitCard()}`;
   if (!p) return `${head}${pickCard()}${challengeCard()}`;
-  const w = workouts().find(x => x.id === wid(t, p.id));
-  const total = p.list.length;
-  const fin = p.list.filter(it => ((w?.sets?.[it.ex]) || []).filter(Boolean).length >= (it.ex === 'walk' ? 1 : it.sets)).length;
-  return `${head}
+  const { w, fin, total, sets } = progressOf(p, t);
+  const back = `<div class="fit-back"><button type="button" class="btn small" data-action="fit-back">‹ 返回選課表</button>
+    <span class="sub">${sets ? `已打勾 ${sets} 組，返回也會保留` : '還沒開始，返回不會留下紀錄'}</span></div>`;
+  return `${back}${head}
     <section class="card fit-dayhead" style="--c:${p.color}">
       <div class="row"><span class="fit-badge">${p.id}</span><div style="flex:1"><b>${esc(p.name)}</b>
         <div class="sub">${esc(p.where)} · 約 ${p.mins} 分鐘 · ${agoText(lastDate(p.id))}</div></div>
         <div class="fit-count"><b>${fin}</b>/${total}</div></div>
       <div class="prog-bar" style="margin-top:8px"><div style="width:${fin / total * 100}%;background:${p.color}"></div></div>
-      <div class="row" style="margin-top:8px"><span class="spacer"></span><button type="button" class="btn small" data-action="fit-day" data-day="?">↺ 換一份</button></div>
+      <div class="row" style="margin-top:8px"><span class="spacer"></span><button type="button" class="btn small" data-action="fit-back">↺ 換一份</button></div>
       <div class="fit-warm">🔥 先熱身：開合跳／原地踏步 3 分鐘 → 貓牛式 10 下、手臂繞圈 → 第一個動作先用輕重量做 1–2 組</div>
       <div class="fit-warm" style="margin-top:6px">🦴 脊椎側彎：動作慢、背打直、左右做一樣多。<b>刺痛、麻、背痛變嚴重就停</b>，酸是正常的。</div>
     </section>
@@ -264,7 +296,9 @@ function todayTab() {
     <section class="card"><div class="row">
       ${w?.done ? `<span>✅ 練完了！${w.doneAt ? `<span class="sub">（${new Date(w.doneAt).toTimeString().slice(0, 5)}）</span>` : ''}</span><span class="spacer"></span><button type="button" class="btn small" data-action="fit-finish" data-day="${p.id}">取消完成</button>`
         : `<span class="sub">做完後記得補充蛋白質（乳清、雞胸、豆漿、茶葉蛋）</span><span class="spacer"></span><button type="button" class="btn primary" data-action="fit-finish" data-day="${p.id}">完成這次訓練</button>`}
-    </div></section>
+    </div>
+    ${w?.done ? '' : `<div class="row" style="margin-top:8px"><span class="sub">${sets ? '今天不想練完？先回去也沒關係，做過的組都會留著，回來點同一份就能繼續。' : '選錯了？直接返回就好。'}</span><span class="spacer"></span><button type="button" class="btn small" data-action="fit-back">‹ 先不練這份</button></div>`}
+    </section>
     ${challengeCard()}`;
 }
 
@@ -553,7 +587,7 @@ setInterval(() => {
 // 沒按 ✓ 的數字先記著
 document.addEventListener('input', ev => {
   const k = ev.target.dataset?.fitDraft;
-  if (k) draft[k] = { ...(draft[k] || {}), [ev.target.name]: ev.target.value };
+  if (k) { draft[k] = { ...(draft[k] || {}), [ev.target.name]: ev.target.value }; saveDraft(); }
 });
 
 function getW(date, day) {
@@ -584,6 +618,7 @@ export const fitForms = {
     // 下一組先帶入同樣的數字
     const nk = `${date}:${ex}:${+i + 1}`;
     if (!draft[nk]) draft[nk] = e.unit === 'kg' ? { w, r } : { r };
+    saveDraft();
     document.activeElement?.blur();
     saveDoc('workouts', { ...doc, sets: { ...doc.sets, [ex]: arr } });
     const p = planOf(day);
@@ -611,6 +646,16 @@ export const fitActions = {
     fitUi.day = el.dataset.day;
     if (location.hash !== '#fit') location.hash = '#fit'; else ctx.render();
     window.scrollTo(0, 0);
+  },
+  // 返回選課表：只換畫面，今天打勾的組、還沒按 ✓ 的數字、心得都留著
+  'fit-back': () => {
+    const p = curPlan();
+    const g = p && progressOf(p);
+    restEnd = 0;
+    fitUi.day = '?';
+    ctx.render();
+    window.scrollTo(0, 0);
+    if (g?.sets && !g.done) ctx.toast(`${p.id} 做到的 ${g.sets} 組都保留了，點同一份就能繼續`);
   },
   'fit-part': el => { fitUi.part = el.dataset.part; ctx.render(); },
   'fit-kit': el => { fitUi.kit = el.dataset.kit; ctx.render(); },
@@ -642,7 +687,7 @@ export const fitActions = {
     const doc = workouts().find(x => x.id === wid(date, day));
     if (!doc) return;
     const arr = [...(doc.sets[ex] || [])];
-    if (arr[+i]) draft[`${date}:${k}`] = { ...arr[+i] };
+    if (arr[+i]) { draft[`${date}:${k}`] = { ...arr[+i] }; saveDraft(); }
     arr[+i] = null;
     saveDoc('workouts', { ...doc, sets: { ...doc.sets, [ex]: arr } });
   },
