@@ -281,16 +281,18 @@ function saveTags(list) {
 
 // ---------- 手機的「更多」 ----------
 function openMoreSheet() {
-  const item = (href, ico, label, sub) => `<a class="more-item" href="${href}"><span class="ico">${ico}</span><span><b>${label}</b><span class="sub">${sub}</span></span></a>`;
-  openSheet(`<h2>更多</h2><div class="more-list">
-    ${item('#memo', '📝', '隨手記', '怕忘記的事先記下來，用標籤分類')}
-    ${item('#progress', '📍', '各科進度', '每科讀到哪、哪裡不熟')}
-    ${item('#docs', '📄', '文件', 'PDF 放上來，手機電腦都能看')}
-    ${item('#quiz', '🎯', '測驗', '證照考古題選擇題、錯題本、模擬考')}
-    ${item('#invest', '📈', '模擬投資', '台股真實報價、投資入門')}
-    ${item('#fit', '🏋️', '健身', '今天練什麼、記重量、動作教學、InBody')}
-    ${item('#settings', '⚙️', '設定', '同步、課表、背景、備份')}
-  </div>`, { kind: 'more' });
+  // 跟電腦版側邊欄同樣的分類
+  const groups = [...document.querySelectorAll('#nav > a:not(.nav-more), #nav > .nav-group')]
+    .reduce((acc, el) => {
+      if (el.classList.contains('nav-group')) acc.push({ name: el.textContent, items: [] });
+      else if (el.dataset.tab === 'home') return acc;
+      else (el.dataset.tab === 'settings' ? acc.tail : acc[acc.length - 1].items).push(el);
+      return acc;
+    }, Object.assign([], { tail: [] }));
+  const tile = (a) => `<a class="more-tile${a.dataset.tab === route() ? ' active' : ''}" href="${a.getAttribute('href')}">${a.innerHTML}</a>`;
+  openSheet(`<h2>更多</h2>
+    ${groups.map((g) => `<div class="more-group">${g.name}</div><div class="more-grid">${g.items.map(tile).join('')}</div>`).join('')}
+    <div class="more-grid more-tail">${groups.tail.map(tile).join('')}</div>`, { kind: 'more' });
 }
 
 // ---------- 待辦計時 ----------

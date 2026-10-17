@@ -451,10 +451,13 @@ input[type=color] { width: 40px; height: 30px; padding: 0; border: 1px solid var
 .nav-more { display: flex; }
 @media (max-width: 899px) { .nav .nav-extra { display: none; } }
 @media (min-width: 900px) { .nav .nav-more { display: none; } }
-.more-list { display: grid; gap: 8px; }
-.more-item { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 12px; background: var(--card2); }
-.more-item .ico { font-size: 26px; }
-.more-item b { display: block; }
+.more-group { font-size: 12px; color: var(--muted); letter-spacing: .1em; margin: 14px 2px 6px; }
+.more-group:first-of-type { margin-top: 4px; }
+.more-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.more-tile { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 4px; border-radius: 12px; background: var(--card2); color: var(--text); text-decoration: none; font-size: 13px; }
+.more-tile .ico { font-size: 24px; }
+.more-tile.active { outline: 2px solid var(--accent); }
+.more-tail { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
 
 /* ---------- 讀書標籤 ---------- */
 .timer-subject-row { margin: 10px 0 0; }
