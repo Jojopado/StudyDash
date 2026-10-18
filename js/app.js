@@ -5,7 +5,7 @@ import {
 } from './store.js';
 import { TYPES, TOPIC_COLORS, BG_PRESETS, isLight, today, addDays, ymd, esc } from './util.js';
 import {
-  ui, renderHome, renderCalendar, renderTodo, renderStudy, renderSettings, shiftMonth, tickTimerView, tickWorkView, subjectInfo, logText,
+  ui, renderHome, renderCalendar, renderTodo, renderStudy, renderSettings, shiftMonth, tickTimerView, tickWorkView, subjectInfo, logText, focusHtml,
 } from './views.js';
 import { parseSlots, fmtSlots, PERIODS } from './courses.js';
 import * as T from './timer.js';
@@ -24,6 +24,7 @@ const view = $('#view');
 const fab = $('#fab');
 const backdrop = $('#sheet-backdrop');
 const sheet = $('#sheet');
+const focusEl = $('#focus');
 
 const ROUTES = {
   home: renderHome, calendar: renderCalendar, todo: renderTodo, study: renderStudy, cards: renderCards, money: renderMoney, memo: renderMemo, docs: renderDocs, quiz: renderQuiz, progress: renderProgress, fit: renderFit,
@@ -58,6 +59,7 @@ function render() {
   }
 
   view.innerHTML = store.ready ? ROUTES[r](store) : '<div class="sub">載入中…</div>';
+  renderFocus();
   document.querySelectorAll('#nav a').forEach(a => a.classList.toggle('active', a.dataset.tab === r || (a.dataset.tab === 'more' && MORE.includes(r))));
   fab.hidden = NO_FAB.includes(r);
 
@@ -66,6 +68,17 @@ function render() {
     const el = keep.form ? view.querySelector(sel) : null;
     if (el) { el.value = keep.value; el.focus(); }
   }
+}
+
+// 讀書計時的全螢幕／縮小後的浮動小條：只有開始、停止、換科目、縮放時才重畫
+let focusKey = '';
+function renderFocus(force = false) {
+  const key = store.ready ? `${T.timer.running}|${T.timer.subject}|${ui.focusMini}|${T.timer.remindMin}|${subjectInfo(T.timer.subject).name}` : '';
+  if (key === focusKey && !force) return;
+  focusKey = key;
+  focusEl.innerHTML = store.ready ? focusHtml(store) : '';
+  focusEl.hidden = !focusEl.innerHTML;
+  document.body.classList.toggle('focusing', T.timer.running && !ui.focusMini);
 }
 
 let toastTimer;
@@ -263,8 +276,8 @@ function tagRows() {
     || '<div class="empty">還沒有標籤</div>';
 }
 function openTagSheet() {
-  openSheet(`<h2>🏷️ 讀書標籤</h2>
-    <div class="sub" style="margin-bottom:8px">番茄鐘和補記錄可以選標籤，讀書時數會分開統計。點名字改名、點色點換顏色。</div>
+  openSheet(`<h2>🏷️ 讀書科目</h2>
+    <div class="sub" style="margin-bottom:8px">每個標籤會變成讀書頁的一列科目，點一下就開始計時（課程會自動列出來，不用另外加）。點名字改名、點色點換顏色。</div>
     <div id="tag-list">${tagRows()}</div>
     <form class="add-goal" data-form="tag"><input type="text" name="name" placeholder="新標籤，例如：Meeting、論文、面試" autocomplete="off">
       <button class="btn primary" type="submit">加入</button></form>
@@ -342,27 +355,42 @@ function startWork(x) {
   toast(`開始做：${x.title}`);
 }
 
-// ---------- 番茄鐘 ----------
-// 讀書紀錄存起來
-function recordFocus(minutes, endedAt = Date.now()) {
-  if (minutes < 1) return;
-  const ss = { id: newId(), date: ymd(new Date(endedAt)), minutes, subject: T.timer.subject, note: (T.timer.note || '').trim(), createdAt: endedAt };
-  saveSession(ss);
+// ---------- 讀書碼表 ----------
+// 停止時記成讀書紀錄；跨過半夜的拆成兩天各一筆
+function recordSeg(seg) {
+  let total = 0;
+  for (let from = seg.startAt; from < seg.endAt;) {
+    const mid = new Date(from); mid.setHours(24, 0, 0, 0);
+    const to = Math.min(seg.endAt, mid.getTime());
+    const minutes = Math.round((to - from) / 60000);
+    if (minutes >= 1) {
+      saveSession({ id: newId(), date: ymd(new Date(from)), minutes, subject: seg.subject, note: seg.note, startAt: from, endAt: to, createdAt: to });
+      total += minutes;
+    }
+    from = to;
+  }
+  return total;
+}
+function stopStudy() {
+  const seg = T.stop();
+  if (!seg) return;
+  const m = recordSeg(seg);
+  toast(m ? `記錄了 ${m} 分鐘・${subjectInfo(seg.subject).name}` : '不到 1 分鐘，沒有記錄');
+}
+function startStudy(subject) {
+  if (T.timer.running) {
+    if (T.timer.subject === subject) { stopStudy(); render(); return; }
+    stopStudy();   // 換科目：上一科先記起來
+  }
+  ui.focusMini = false;
+  T.start(subject);
+  render();
 }
 
 function timerTick() {
-  const r = T.check();
-  if (r) {
-    if (r.done === 'focus') {
-      recordFocus(r.minutes, r.endedAt);
-      toast(`🍅 完成 ${r.minutes} 分鐘，休息一下`);
-    } else {
-      toast('☕ 休息結束，再來一輪？');
-    }
-    render();
-  } else if (route() === 'study') {
-    tickTimerView();
-  }
+  const m = T.check();
+  if (m) toast(`已經讀 ${m} 分鐘了，站起來動一動、喝口水 💧`);
+  if (T.timer.running) tickTimerView(store);
   tickWorkView();
 }
 setInterval(timerTick, 1000);
@@ -445,19 +473,11 @@ const actions = {
   },
   'pick-bg': el => savePrefs({ bg: el.dataset.color }),
 
-  'timer-start': () => { T.start(); render(); },
-  'timer-pause': () => { T.pause(); render(); },
-  'timer-reset': () => { T.reset(); render(); },
-  'timer-skip': () => { T.reset('focus'); render(); },
-  'timer-finish': () => {
-    const m = T.focusedMinutes();
-    if (m < 1) { toast('還不到 1 分鐘，先不記錄'); T.reset('focus'); render(); return; }
-    recordFocus(m);
-    T.reset('break');
-    toast(`記錄了 ${m} 分鐘`);
-    render();
-  },
-  'timer-len': el => { const [f, b] = el.dataset.len.split('/').map(Number); T.setLengths(f, b); render(); },
+  'study-go': el => startStudy(el.dataset.subj),
+  'study-stop': () => { stopStudy(); render(); },
+  'focus-min': () => { ui.focusMini = true; renderFocus(); },
+  'focus-open': () => { ui.focusMini = false; renderFocus(); },
+  'timer-remind': el => { T.setRemind(+el.dataset.m); render(); },
   'new-session': openSessionSheet,
   'edit-log': el => openLogSheet(el.dataset.ids.split(',')),
   'delete-log': () => {
@@ -512,7 +532,6 @@ const actions = {
   'tag-del': el => {
     const g = tags().find(x => x.id === el.dataset.id);
     if (!g || !confirm(`刪除標籤「${g.name}」？`)) return;
-    if (T.timer.subject === `g:${g.id}`) T.setSubject('');
     saveTags(tags().filter(x => x.id !== g.id));
   },
   'nav-more': openMoreSheet,
@@ -640,7 +659,6 @@ document.addEventListener('submit', async ev => {
     if (!name) return;
     if (tags().some(g => g.name === name)) { toast('已經有這個標籤了'); return; }
     const g = { id: newId(), name, color: TOPIC_COLORS[tags().length % TOPIC_COLORS.length] };
-    if (!T.timer.running) T.setSubject(`g:${g.id}`);   // 新標籤直接選起來（先選再存，重畫時下拉選單才會對）
     saveTags([...tags(), g]);
     form.reset();
     form.querySelector('[name=name]').focus();
@@ -659,7 +677,7 @@ document.addEventListener('submit', async ev => {
   }
 });
 
-// 番茄鐘的「這次讀什麼」：打字就存（存在這台裝置，跟番茄鐘一樣）
+// 計時中的「這次讀什麼」：打字就存（存在這台裝置，跟碼表一樣）
 document.addEventListener('input', ev => {
   if (ev.target.dataset?.action === 'timer-note') T.setNote(ev.target.value);
 });
@@ -667,7 +685,6 @@ document.addEventListener('input', ev => {
 document.addEventListener('change', async ev => {
   const el = ev.target;
   if (el.dataset.action === 'custom-bg') { savePrefs({ bg: el.value }); return; }
-  if (el.dataset.action === 'timer-subject') { T.setSubject(el.value); return; }
   if (!['import', 'merge'].includes(el.dataset.action) || !el.files?.[0]) return;
   try {
     const obj = JSON.parse(await el.files[0].text());
@@ -706,7 +723,7 @@ window.addEventListener('resize', () => {
   const w = matchMedia('(min-width: 900px)').matches;
   if (w !== wide) { wide = w; render(); }
 });
-// 隔天打開時「今天」要更新；切回 App 時番茄鐘可能已經到時間
+// 隔天打開時「今天」要更新；切回 App 時碼表數字要馬上更新
 let lastDay = today();
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible') return;

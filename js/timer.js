@@ -1,24 +1,26 @@
-// 番茄鐘：用「結束時間」計時，App 被切到背景再回來也不會算錯。狀態存在這台裝置。
+// 讀書碼表（YPT 風格）：點科目開始往上數，按停止就記一段。只存「開始時間」，App 被切到背景再回來也不會算錯。狀態存在這台裝置。
 const KEY = 'studydash.timer';
 
-const DEFAULTS = { phase: 'focus', running: false, endAt: 0, remaining: 25 * 60000, focusMin: 25, breakMin: 5, subject: '', note: '', startedAt: 0 };
+// remindMin：每讀幾分鐘響一次提醒休息（0 = 不提醒）
+const DEFAULTS = { running: false, startAt: 0, subject: '', note: '', remindMin: 50, reminded: 0 };
 
 export const timer = load();
 
 function load() {
-  try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY)) }; } catch { return { ...DEFAULTS }; }
+  try {
+    const t = { ...DEFAULTS, ...JSON.parse(localStorage.getItem(KEY)) };
+    if (t.phase) { t.running = false; t.startAt = 0; delete t.phase; }   // 舊版番茄鐘狀態不接著算
+    return t;
+  } catch { return { ...DEFAULTS }; }
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(timer)); } catch { /* ignore */ } }
 
-const phaseMs = () => (timer.phase === 'focus' ? timer.focusMin : timer.breakMin) * 60000;
+export const elapsedMs = () => (timer.running ? Math.max(0, Date.now() - timer.startAt) : 0);
 
-export function leftMs() {
-  return Math.max(0, timer.running ? timer.endAt - Date.now() : timer.remaining);
-}
-
-export function fmtClock(ms) {
-  const s = Math.ceil(ms / 1000);
-  return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+const pad = n => String(n).padStart(2, '0');
+export function fmtHMS(ms) {
+  const s = Math.floor(ms / 1000);
+  return `${pad(Math.floor(s / 3600))}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}`;
 }
 
 let audio;
@@ -42,59 +44,49 @@ export function beep() {
   } catch { /* ignore */ }
 }
 
-export function start() {
+// 螢幕保持亮著（支援的瀏覽器才有用）
+let lock = null;
+async function keepAwake(on) {
+  try {
+    if (on && !lock && navigator.wakeLock) { lock = await navigator.wakeLock.request('screen'); lock.addEventListener('release', () => { lock = null; }); }
+    if (!on && lock) { await lock.release(); lock = null; }
+  } catch { lock = null; }
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && timer.running) keepAwake(true); });
+
+export function start(subject) {
   unlockAudio();
   if (timer.running) return;
-  if (timer.phase === 'focus' && timer.remaining >= phaseMs()) timer.startedAt = Date.now();
-  timer.endAt = Date.now() + timer.remaining;
+  timer.subject = subject;
+  timer.startAt = Date.now();
+  timer.reminded = 0;
   timer.running = true;
   save();
+  keepAwake(true);
 }
 
-export function pause() {
-  if (!timer.running) return;
-  timer.remaining = leftMs();
+// 停止，回傳這段 { subject, note, startAt, endAt }（之後由 app 記成讀書紀錄）
+export function stop() {
+  if (!timer.running) return null;
+  const seg = { subject: timer.subject, note: (timer.note || '').trim(), startAt: timer.startAt, endAt: Date.now() };
   timer.running = false;
+  timer.startAt = 0;
   save();
-}
-
-export function reset(phase = timer.phase) {
-  timer.phase = phase;
-  timer.running = false;
-  timer.remaining = phaseMs();
-  timer.startedAt = 0;
-  save();
-}
-
-export function setLengths(focusMin, breakMin) {
-  timer.focusMin = focusMin;
-  timer.breakMin = breakMin;
-  if (!timer.running) timer.remaining = phaseMs();
-  save();
+  keepAwake(false);
+  return seg;
 }
 
 export function setSubject(s) { timer.subject = s; save(); }
 export function setNote(s) { timer.note = s; save(); }
+export function setRemind(m) { timer.remindMin = m; save(); }
 
-// 這次專注已經過了幾分鐘（提早結束時用）
-export function focusedMinutes() {
-  if (timer.phase !== 'focus') return 0;
-  return Math.floor((phaseMs() - leftMs()) / 60000);
-}
-
-// 每秒檢查一次；時間到回傳 { done: 'focus' | 'break', minutes }
+// 每秒檢查一次；讀滿提醒時間回傳分鐘數（響一次）
 export function check() {
-  if (!timer.running || leftMs() > 0) return null;
-  const done = timer.phase;
-  const minutes = timer.focusMin;
-  const endedAt = timer.endAt;
+  if (!timer.running || !timer.remindMin) return 0;
+  const n = Math.floor(elapsedMs() / (timer.remindMin * 60000));
+  if (n <= timer.reminded) return 0;
+  timer.reminded = n;
+  save();
   beep();
-  if (done === 'focus') {
-    // 專注完自動開始休息
-    reset('break');
-    start();
-  } else {
-    reset('focus');
-  }
-  return { done, minutes, endedAt };
+  return n * timer.remindMin;
 }

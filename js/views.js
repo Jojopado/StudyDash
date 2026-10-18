@@ -3,7 +3,7 @@ import {
   fmtDate, countdown, byDateTime, esc, BG_PRESETS,
 } from './util.js';
 import { classesOn, classRow, courseById, fmtSlotTimes, timetable } from './courses.js';
-import { timer, leftMs, fmtClock } from './timer.js';
+import { timer, elapsedMs, fmtHMS } from './timer.js';
 import { monthSpent, currentFunds } from './money.js';
 import { homeMemoCard } from './memo.js';
 import { homeProgressCard } from './progress.js';
@@ -22,6 +22,7 @@ export const ui = {
   showDoneTodos: false,
   logDay: today(),    // 讀書成果看哪一天
   statRange: 'day',   // 讀書時數：'day' | 'week' | 'month'
+  focusMini: false,   // 讀書計時中把全螢幕縮小成浮動小條
 };
 
 let S; // 這次畫面用的 store（每個 render 一開始設定）
@@ -77,7 +78,7 @@ function sessionLabel(x) {
   const t = x.todoId && S.state.todos.find(y => y.id === x.todoId);
   return t ? t.title : '';
 }
-// 同一天、同科目、同內容的合成一行（例如連續 4 個番茄鐘都讀 DSP CH8）
+// 同一天、同科目、同內容的合成一行（例如分 4 段都讀 DSP CH8）
 export function dayLog(s, ds) {
   S = s;
   const m = {};
@@ -113,7 +114,7 @@ function logCard() {
       <div class="seg"><button data-action="log-day" data-d="-1" aria-label="前一天">‹</button>${
         ds !== t ? '<button data-action="log-day" data-d="0">今天</button>' : ''}<button data-action="log-day" data-d="1" ${ds >= t ? 'disabled' : ''} aria-label="後一天">›</button></div></div>
     <div class="log-total">${total ? `共 <b>${fmtMin(total)}</b><span class="sub"> · ${groups.length} 項</span>` : ''}</div>
-    ${groups.length ? logRows(groups) : `<div class="empty">${ds === t ? '今天還沒有讀書紀錄，開個番茄鐘吧 💪' : '這天沒有讀書紀錄'}</div>`}
+    ${groups.length ? logRows(groups) : `<div class="empty">${ds === t ? '今天還沒有讀書紀錄，點科目開始計時吧 💪' : '這天沒有讀書紀錄'}</div>`}
     ${groups.length ? '<div class="row" style="margin-top:8px"><span class="spacer"></span><button class="btn small" data-action="log-copy">📋 複製成文字</button></div>' : ''}
   </section>`;
 }
@@ -173,7 +174,7 @@ export function renderHome(s) {
     ${homeFitCard()}
     ${homeProgressCard()}
     <section class="card log"><h2>📒 今天讀了什麼 <a href="#study" class="sub" style="font-weight:400">共 ${fmtMin(minutesOn(t))} · 7 天 ${fmtMin(weekMinutes())} ›</a></h2>${
-      logRows(dayLog(s, t)) || '<div class="empty">今天還沒有讀書紀錄，到「讀書」開個番茄鐘吧</div>'}</section>
+      logRows(dayLog(s, t)) || '<div class="empty">今天還沒有讀書紀錄，到「讀書」點科目開始計時吧</div>'}</section>
   </div>`;
 }
 
@@ -381,38 +382,120 @@ export function renderTodo(s) {
     </section>`;
 }
 
-// ---------- 讀書（番茄鐘＋時數＋自學主題） ----------
-function subjectOptions(cur) {
-  const opt = (v, label) => `<option value="${v}" ${v === cur ? 'selected' : ''}>${esc(label)}</option>`;
-  return opt('', '自由讀書')
-    + (studyTags().length ? `<optgroup label="標籤">${studyTags().map(g => opt(`g:${g.id}`, g.name)).join('')}</optgroup>` : '')
-    + (S.state.courses.length ? `<optgroup label="課程">${S.state.courses.map(c => opt(`c:${c.id}`, c.name)).join('')}</optgroup>` : '');
+// ---------- 讀書（YPT 風格：科目清單點一下開始碼表） ----------
+// 列出來的科目：自己的標籤、還沒結束的課、最後是自由讀書
+export function studySubjects() {
+  const t = today();
+  return [...studyTags().map(g => `g:${g.id}`), ...S.state.courses.filter(c => !(c.end && t > c.end)).map(c => `c:${c.id}`), ''];
+}
+const dayStart = ds => parseYmd(ds).getTime();
+// 正在計時的這段算進今天的部分（跨過半夜的只算今天）
+const liveMs = key => (timer.running && (key === undefined || timer.subject === key) ? Math.min(elapsedMs(), Date.now() - dayStart(today())) : 0);
+// 今天（某科）讀了多久，毫秒，含正在計時的
+function todayMs(key) {
+  const t = today();
+  return S.state.sessions.filter(x => x.date === t && (key === undefined || (x.subject || '') === key)).reduce((n, x) => n + (x.minutes || 0) * 60000, 0) + liveMs(key);
 }
 
-function timerCard() {
-  const focus = timer.phase === 'focus';
-  const total = (focus ? timer.focusMin : timer.breakMin) * 60000;
-  const pct = Math.round((1 - leftMs() / total) * 100);
-  const preset = `${timer.focusMin}/${timer.breakMin}`;
-  return `<section class="card timer ${focus ? '' : 'rest'}">
-    <div class="row"><h2 style="margin:0">${focus ? '🍅 專注' : '☕ 休息'}</h2><span class="spacer"></span>
-      <div class="seg">${['25/5', '50/10', '15/3'].map(p => `<button data-action="timer-len" data-len="${p}" class="${p === preset ? 'on' : ''}">${p}</button>`).join('')}</div></div>
-    <div class="row timer-subject-row">
-      <select data-action="timer-subject" class="timer-subject" ${timer.running && focus ? 'disabled' : ''}>${subjectOptions(timer.subject)}</select>
-      <button class="btn small" data-action="tags-manage" title="新增／修改標籤">🏷️ 標籤</button></div>
-    <form data-form="timer-note" class="timer-note"><input type="text" name="note" data-action="timer-note" maxlength="60" autocomplete="off"
-      placeholder="這次讀什麼？例如：DSP 8.3 DFT（可不填）" value="${esc(timer.note || '')}"></form>
-    <div class="clock" id="timer-clock">${fmtClock(leftMs())}</div>
-    <div class="progress"><div id="timer-bar" style="width:${pct}%;background:${focus ? 'var(--accent)' : 'var(--ok)'}"></div></div>
-    <div class="row wrap" style="margin-top:12px;justify-content:center">
-      ${timer.running
-        ? '<button class="btn primary" data-action="timer-pause">⏸ 暫停</button>'
-        : `<button class="btn primary" data-action="timer-start">▶ ${leftMs() < total ? '繼續' : '開始'}</button>`}
-      <button class="btn" data-action="timer-reset">↺ 重來</button>
-      ${focus ? '<button class="btn" data-action="timer-finish">✓ 提早結束並記錄</button>' : '<button class="btn" data-action="timer-skip">跳過休息</button>'}
+// 一段紀錄在時間軸上的起訖；補記錄和「打勾直接算預計時間」的沒有真正時間，不畫
+function sessSpan(x) {
+  if (x.startAt) return [x.startAt, x.endAt || x.startAt + x.minutes * 60000];
+  if (x.manual || !x.createdAt || S.state.todos.some(t => t.creditId === x.id)) return null;
+  return [x.createdAt - x.minutes * 60000, x.createdAt];
+}
+function daySpans(ds) {
+  const out = [];
+  for (const x of S.state.sessions) {
+    if (x.date !== ds) continue;
+    const sp = sessSpan(x);
+    if (sp) out.push({ subject: x.subject || '', from: sp[0], to: sp[1] });
+  }
+  if (timer.running && ds === today()) out.push({ subject: timer.subject, from: Math.max(timer.startAt, dayStart(ds)), to: Date.now() });
+  return out.sort((a, b) => a.from - b.from);
+}
+const hm = ms => { const d = new Date(ms); return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
+const hmDur = m => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
+
+// 最近的考試（行事曆＋待辦），D-day 用
+function nextExams() {
+  const evs = S.state.events.filter(e => e.type === 'exam' && !e.done && daysUntil(e.date) >= 0).map(e => ({ title: e.title, date: e.date }));
+  const tds = S.state.todos.filter(x => x.type === 'exam' && !x.done && x.due && daysUntil(x.due) >= 0).map(x => ({ title: x.title, date: x.due }));
+  const seen = new Set();
+  return [...evs, ...tds].sort((a, b) => a.date.localeCompare(b.date)).filter(e => !seen.has(e.title) && seen.add(e.title)).slice(0, 2);
+}
+
+function studyHero() {
+  const t = today(), d = new Date();
+  const spans = daySpans(t);
+  const mins = S.state.sessions.filter(x => x.date === t).map(x => x.minutes || 0);
+  if (timer.running) mins.push(Math.floor(liveMs() / 60000));
+  const longest = Math.max(0, ...mins);
+  const reminds = [[0, '不'], [25, '25'], [50, '50'], [90, '90']];
+  return `<section class="card ypt">
+    <div class="ypt-top"><span>${d.getMonth() + 1}/${d.getDate()}（${WEEKDAYS[d.getDay()]}）</span><span class="spacer"></span>${
+      nextExams().map(e => `<span class="dday" title="${esc(e.title)} ${fmtDate(e.date)}">D-${daysUntil(e.date) || 'Day'} ${esc(e.title)}</span>`).join('')}</div>
+    <div class="ypt-total" id="ypt-total">${fmtHMS(todayMs())}</div>
+    <div class="ypt-meta">${spans.length ? `開始 ${hm(spans[0].from)} · ` : ''}最長專注 ${hmDur(longest)} · 7 天平均 ${hmDur(Math.round(weekMinutes() / 7))}</div>
+    <div class="ypt-list">${studySubjects().map(k => {
+      const i = subjectInfo(k), on = timer.running && timer.subject === k;
+      return `<div class="ypt-row${on ? ' on' : ''}" data-action="study-go" data-subj="${k}" style="--c:${esc(i.color)}">
+        <span class="ypt-play">${on ? '■' : '▶'}</span><span class="name">${esc(i.name)}</span>
+        <span class="time" data-subj-time="${k}">${fmtHMS(todayMs(k))}</span></div>`;
+    }).join('')}</div>
+    <div class="row wrap ypt-tools">
+      <button class="btn small" data-action="tags-manage">🏷️ 新增科目</button>
+      <button class="btn small" data-action="new-session">＋ 補記錄</button>
+      <span class="spacer"></span>
+      <span class="ypt-remind"><span class="sub">提醒休息</span><div class="seg">${reminds.map(([m, l]) => `<button data-action="timer-remind" data-m="${m}" class="${m === (timer.remindMin || 0) ? 'on' : ''}">${l}</button>`).join('')}</div><span class="sub">分</span></span>
     </div>
-    <div class="sub" style="text-align:center;margin-top:8px">時間到會響和震動；切到別的 App 回來也會照算。</div>
   </section>`;
+}
+
+// 計畫表：一天 × 每 10 分鐘一格，讀書的格子塗上科目顏色（跟「讀了什麼」看同一天）
+function plannerCard() {
+  const ds = ui.logDay, base = dayStart(ds);
+  const cells = {};   // 格子編號 → { 科目: 毫秒 }
+  for (const sp of daySpans(ds)) {
+    for (let c = Math.max(0, Math.floor((sp.from - base) / 600000)); c < 144 && base + c * 600000 < sp.to; c++) {
+      const a = Math.max(sp.from, base + c * 600000), b = Math.min(sp.to, base + (c + 1) * 600000);
+      if (b > a) { const m = (cells[c] ||= {}); m[sp.subject] = (m[sp.subject] || 0) + (b - a); }
+    }
+  }
+  const hours = Object.keys(cells).map(c => Math.floor(c / 6));
+  const h0 = Math.min(6, ...hours), h1 = Math.max(23, ...hours);
+  const nowCell = ds === today() ? Math.floor((Date.now() - base) / 600000) : -1;
+  const rows = [];
+  for (let h = h0; h <= h1; h++) {
+    rows.push(`<div class="pl-h">${h}</div>${[0, 1, 2, 3, 4, 5].map(j => {
+      const c = h * 6 + j, m = cells[c];
+      if (!m) return `<div class="pl-c${c === nowCell ? ' now' : ''}"></div>`;
+      const [k, ms] = Object.entries(m).sort((a, b) => b[1] - a[1])[0];
+      const i = subjectInfo(k);
+      return `<div class="pl-c" style="background:${esc(i.color)};opacity:${Math.min(1, 0.35 + ms / 600000).toFixed(2)}" title="${h}:${j}0 ${esc(i.name)}"></div>`;
+    }).join('')}`);
+  }
+  const untimed = S.state.sessions.filter(x => x.date === ds && !sessSpan(x)).reduce((n, x) => n + (x.minutes || 0), 0);
+  return `<section class="card planner">
+    <div class="row" style="margin-bottom:6px"><h2 style="margin:0">🗓️ 計畫表</h2><span class="spacer"></span><span class="sub">${fmtDate(ds)} · 每格 10 分鐘</span></div>
+    <div class="pl-grid">${rows.join('')}</div>
+    ${untimed ? `<div class="sub" style="margin-top:6px">另有 ${fmtMin(untimed)} 是補記錄／打勾算的，沒有時間點所以不畫。</div>` : ''}
+  </section>`;
+}
+
+// 這個月每天讀多久（顏色越深越多）
+function monthCal() {
+  const t = today(), d = parseYmd(t);
+  const first = new Date(d.getFullYear(), d.getMonth(), 1), last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+  const byDay = {};
+  for (const x of S.state.sessions) if (x.date.slice(0, 7) === t.slice(0, 7)) byDay[x.date] = (byDay[x.date] || 0) + (x.minutes || 0);
+  const cells = Array(first.getDay()).fill('<div></div>');
+  for (let i = 1; i <= last; i++) {
+    const ds = ymd(new Date(d.getFullYear(), d.getMonth(), i)), m = byDay[ds] || 0;
+    const lv = !m ? 0 : m < 60 ? 1 : m < 180 ? 2 : m < 360 ? 3 : 4;
+    cells.push(`<div class="mc lv${lv}${ds === t ? ' today' : ''}" title="${fmtDate(ds)} ${fmtMin(m)}"><b>${i}</b><span>${shortMin(m)}</span></div>`);
+  }
+  return `<div class="mcal">${WEEKDAYS.map(w => `<div class="mc-w">${w}</div>`).join('')}${cells.join('')}</div>
+    <div class="sub mc-legend">顏色越深讀越久：1 小時內／1–3／3–6／6 小時以上</div>`;
 }
 
 // 讀書時數的區間：日＝最近 7 天、週＝最近 8 週（週一開始）、月＝最近 6 個月；由舊到新，最後一個是現在
@@ -458,13 +541,14 @@ function statsCard() {
   return `<section class="card">
     <div class="row" style="margin-bottom:8px"><h2 style="margin:0">📊 讀書時數</h2><span class="spacer"></span>
       <div class="seg">${Object.entries(RANGES).map(([k, [l]]) => `<button data-action="stat-range" data-r="${k}" class="${k === range ? 'on' : ''}">${l}</button>`).join('')}</div>
-      <button class="btn small" data-action="new-session">＋ 補記錄</button></div>
+      </div>
     <div class="sub">${curName} <b class="big">${fmtMin(cur.m)}</b> · ${prevName} ${fmtMin(prev.m)}${
       diff ? ` <span class="${diff > 0 ? 'up' : 'down'}">${diff > 0 ? '▲' : '▼'} ${fmtMin(Math.abs(diff))}</span>` : ''}${
       range !== 'day' ? ` · 平均每天 ${fmtMin(Math.round(cur.m / days))}` : ''}</div>
     <div class="bars">${ps.map(p => `<div class="bcol ${p === cur ? 'today' : ''}" title="${p.title} ${fmtMin(p.m)}">
       <span class="bval">${shortMin(p.m)}</span><div class="bfill" style="height:${Math.round(p.m / max * 100)}%"></div>
       <span class="blabel">${p.label}</span></div>`).join('')}</div>
+    ${range === 'month' ? monthCal() : ''}
     ${cur.m ? `<div class="sub" style="margin:0 0 2px">${curName}各科</div>${subjBars(cur.from, cur.to)}` : ''}
     ${recent.length ? `<div class="sub" style="margin:10px 0 2px">最近紀錄</div>${recent.map(x => `<div class="goal">
       <div class="text">${fmtDate(x.date, false)} · ${esc(subjectInfo(x.subject).name)}${sessionLabel(x) ? ` · ${esc(sessionLabel(x))}` : ''} · ${x.minutes} 分</div>
@@ -484,21 +568,44 @@ function subjBars(from, to) {
 
 export function renderStudy(s) {
   S = s;
-  return `<div class="page-head"><h1>讀書</h1><span class="sub">用「🏷️ 標籤」自己分類，例如 Meeting、論文、面試準備</span></div>
-    <div class="grid two">${timerCard()}${logCard()}${statsCard()}</div>`;
+  return `<div class="page-head"><h1>讀書</h1><span class="sub">點科目開始計時，停止就記一段</span></div>
+    <div class="grid two">${studyHero()}${plannerCard()}${logCard()}${statsCard()}</div>`;
 }
 
-// 番茄鐘每秒更新：只改數字和進度條，不重畫整頁
-export function tickTimerView() {
-  const el = document.getElementById('timer-clock');
-  if (!el) return;
-  el.textContent = fmtClock(leftMs());
-  const total = (timer.phase === 'focus' ? timer.focusMin : timer.breakMin) * 60000;
-  const bar = document.getElementById('timer-bar');
-  if (bar) bar.style.width = `${Math.round((1 - leftMs() / total) * 100)}%`;
+// 計時中的全螢幕（縮小後變成浮在下面的小條，可以去別頁看文件）
+export function focusHtml(s) {
+  S = s;
+  if (!timer.running) return '';
+  const i = subjectInfo(timer.subject);
+  if (ui.focusMini) {
+    return `<button class="focus-pill" data-action="focus-open" style="--c:${esc(i.color)}"><span class="dot"></span>${esc(i.name)}
+      <b id="focus-pill-time">${fmtHMS(elapsedMs())}</b></button>`;
+  }
+  return `<div class="focus-screen" style="--c:${esc(i.color)}">
+    <div class="row focus-head"><button class="btn small" data-action="focus-min">⌄ 縮小</button><span class="spacer"></span>
+      <span class="sub">${timer.remindMin ? `每 ${timer.remindMin} 分鐘提醒休息` : ''}</span></div>
+    <div class="focus-subj"><span class="dot"></span>${esc(i.name)}</div>
+    <div class="focus-clock" id="focus-clock">${fmtHMS(elapsedMs())}</div>
+    <div class="focus-today">今天總共 <b id="focus-today">${fmtHMS(todayMs())}</b></div>
+    <form data-form="timer-note" class="timer-note"><input type="text" name="note" data-action="timer-note" maxlength="60" autocomplete="off"
+      placeholder="這次讀什麼？例如：DSP 8.3 DFT（可不填）" value="${esc(timer.note || '')}"></form>
+    <button class="focus-stop" data-action="study-stop" aria-label="停止">■</button>
+    <div class="sub">停止就記一段。螢幕會保持亮著，切到別的 App 回來也照算。</div>
+  </div>`;
 }
 
-// 待辦計時每秒更新
+// 每秒更新：只改數字，不重畫整頁
+export function tickTimerView(s) {
+  S = s;
+  const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  set('focus-clock', fmtHMS(elapsedMs()));
+  set('focus-pill-time', fmtHMS(elapsedMs()));
+  set('focus-today', fmtHMS(todayMs()));
+  set('ypt-total', fmtHMS(todayMs()));
+  const el = timer.running && document.querySelector(`[data-subj-time="${timer.subject}"]`);
+  if (el) el.textContent = fmtHMS(todayMs(timer.subject));
+}
+
 export function tickWorkView() {
   for (const el of document.querySelectorAll('.live[data-since]')) {
     el.textContent = fmtElapsed(+el.dataset.base + Math.max(0, Date.now() - +el.dataset.since));

@@ -294,10 +294,6 @@ input[type=color] { width: 40px; height: 30px; padding: 0; border: 1px solid var
 .chips button { color: inherit; }
 .chips button.on:not([style*=background]) { background: var(--accent); border-color: var(--accent); }
 
-.timer .timer-subject { margin: 12px 0 4px; }
-.timer .clock { font-size: 64px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; letter-spacing: 2px; margin: 6px 0 10px; }
-.timer.rest .clock { color: var(--ok); }
-.timer .seg button { padding: 4px 9px; font-size: 13px; }
 .big { color: var(--text); font-size: 15px; }
 .bars { display: flex; gap: 6px; align-items: flex-end; height: 120px; margin: 14px 0 10px; }
 .bcol { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 3px; }
@@ -460,8 +456,6 @@ input[type=color] { width: 40px; height: 30px; padding: 0; border: 1px solid var
 .more-tail { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
 
 /* ---------- 讀書標籤 ---------- */
-.timer-subject-row { margin: 10px 0 0; }
-.timer-subject-row .timer-subject { flex: 1; min-width: 0; margin: 0; }
 .tag-dot { width: 18px; height: 18px; border-radius: 50%; border: 0; cursor: pointer; flex: none; padding: 0; }
 
 /* ---------- 課表 ---------- */
@@ -947,3 +941,65 @@ div.prog-here-line { cursor: default; color: var(--muted); }
 .gl-ask { margin: 6px 0 4px; line-height: 1.5; }
 .gl-home { color: var(--text); border-style: solid; border-color: var(--accent); }
 .gl-item .del { border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 16px; opacity: .6; }
+
+/* ---------- 讀書（YPT 風格） ---------- */
+.ypt-top { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
+.dday { background: color-mix(in srgb, #f87171 18%, transparent); color: #f87171; border-radius: 999px; padding: 2px 10px; font-size: 12px; font-weight: 600; max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ypt-total { font-size: 52px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; letter-spacing: 1px; margin: 10px 0 2px; }
+.ypt-meta { text-align: center; color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+.ypt-row { display: flex; align-items: center; gap: 12px; padding: 9px 4px; border-top: 1px solid var(--line); cursor: pointer; border-radius: 10px; }
+.ypt-row:hover { background: color-mix(in srgb, var(--c) 8%, transparent); }
+.ypt-row.on { background: color-mix(in srgb, var(--c) 16%, transparent); border-top-color: transparent; }
+.ypt-play { flex: none; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: var(--c); color: #0b0d12; font-size: 14px; }
+.ypt-row .name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 15px; }
+.ypt-row .time { flex: none; font-variant-numeric: tabular-nums; color: var(--muted); }
+.ypt-row.on .time { color: var(--text); font-weight: 700; }
+.ypt-tools { margin-top: 10px; gap: 6px; }
+.ypt-tools .seg button { padding: 4px 9px; font-size: 13px; }
+
+.pl-grid { display: grid; grid-template-columns: 22px repeat(6, 1fr); gap: 2px; }
+.pl-h { font-size: 11px; color: var(--muted); text-align: right; padding-right: 4px; line-height: 14px; }
+.pl-c { height: 14px; border-radius: 3px; background: color-mix(in srgb, var(--text) 6%, transparent); }
+.pl-c.now { outline: 1px solid var(--accent); }
+
+.mcal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin: 4px 0 4px; }
+.mc-w { text-align: center; font-size: 11px; color: var(--muted); }
+.mc { border-radius: 6px; padding: 3px 0; text-align: center; min-height: 34px; display: flex; flex-direction: column; justify-content: center; background: color-mix(in srgb, var(--text) 5%, transparent); }
+.mc b { font-size: 12px; font-weight: 600; }
+.mc span { font-size: 10px; color: var(--muted); min-height: 12px; }
+.mc.lv1 { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+.mc.lv2 { background: color-mix(in srgb, var(--accent) 42%, transparent); }
+.mc.lv3 { background: color-mix(in srgb, var(--accent) 65%, transparent); }
+.mc.lv4 { background: var(--accent); }
+.mc.lv3 span, .mc.lv4 span, .mc.lv4 b { color: #0b0d12; }
+.mc.today { outline: 2px solid var(--text); }
+.mc-legend { margin-bottom: 10px; font-size: 11px; }
+
+/* 計時中的全螢幕 */
+#focus[hidden] { display: none; }
+.focus-screen {
+  position: fixed; inset: 0; z-index: 55; background: #050608; color: #e7e9ee;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  padding: calc(var(--safe-top) + 14px) 20px calc(var(--safe-bottom) + 24px); text-align: center;
+}
+.focus-head { position: absolute; top: calc(var(--safe-top) + 12px); left: 16px; right: 16px; }
+.focus-screen .btn { color: #e7e9ee; }
+.focus-subj { font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.focus-subj .dot, .focus-pill .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--c); flex: none; }
+.focus-clock { font-size: clamp(56px, 18vw, 120px); font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: 2px; color: var(--c); line-height: 1; }
+.focus-today { color: #9aa3b2; font-size: 15px; }
+.focus-today b { color: #e7e9ee; font-variant-numeric: tabular-nums; }
+.focus-screen .timer-note { width: 100%; max-width: 420px; }
+.focus-screen .timer-note input { background: #12151c; color: #e7e9ee; border-color: #2b3040; text-align: center; }
+.focus-stop { width: 76px; height: 76px; border-radius: 50%; border: 0; background: var(--c); color: #050608; font-size: 26px; cursor: pointer; margin-top: 8px; }
+.focus-screen .sub { color: #7c8596; font-size: 12px; }
+body.focusing { overflow: hidden; }
+.focus-pill {
+  position: fixed; z-index: 45; left: 50%; transform: translateX(-50%);
+  bottom: calc(var(--nav-h) + var(--safe-bottom) + 20px);
+  display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px; cursor: pointer;
+  background: #12151c; color: #e7e9ee; border: 2px solid var(--c); font-size: 14px; box-shadow: 0 6px 20px rgba(0, 0, 0, .4); max-width: calc(100vw - 110px);
+}
+.focus-pill b { font-variant-numeric: tabular-nums; color: var(--c); }
+@media (min-width: 900px) { .focus-pill { bottom: 30px; } }
+.ypt-remind { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
