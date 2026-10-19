@@ -20,6 +20,7 @@ export const ui = {
   todoFilter: 'all',  // 'all' | TYPES 的 key
   todoCourse: 'all',  // 'all' | course id
   showDoneTodos: false,
+  todoSel: null,      // 選取模式：Set(待辦 id)；null = 沒在選
   logDay: today(),    // 讀書成果看哪一天
   statRange: 'day',   // 讀書時數：'day' | 'week' | 'month'
   focusMini: false,   // 讀書計時中把全螢幕縮小成浮動小條
@@ -321,6 +322,18 @@ function todoRow(x, { showDate = true, steps = false, drag = false } = {}) {
   </div>${stepRows}`;
 }
 
+// 選取模式的一列：整列點一下就選／取消
+function pickRow(x) {
+  const ty = TYPES[x.type] || TYPES.other;
+  const on = ui.todoSel.has(x.id);
+  const meta = [x.done ? '已完成' : '待辦', courseTag(x.courseId), ty.label, x.due ? fmtDate(x.due) : ''].filter(Boolean).join(' · ');
+  return `<div class="ev pick ${on ? 'sel' : ''} ${x.done ? 'done' : ''}" data-action="todo-pick" data-id="${x.id}">
+    <span class="pick-box">${on ? '✓' : ''}</span>
+    <span class="bar" style="background:${ty.color}"></span>
+    <div class="main"><div class="title">${esc(x.title)}</div><div class="meta">${meta}</div></div>
+  </div>`;
+}
+
 // 正在做的那件：大字計時＋暫停／完成
 function workingCard(x) {
   const ty = TYPES[x.type] || TYPES.other;
@@ -363,13 +376,29 @@ export function renderTodo(s) {
   const addType = f === 'all' ? 'homework' : f;
   const courses = s.state.courses;
 
-  return `<div class="page-head"><h1>待辦</h1><span class="sub">按 ▶ 開始做、會自動計時</span></div>
-    ${working.map(workingCard).join('')}
+  const sel = ui.todoSel;
+  if (sel) for (const id of [...sel]) if (!s.state.todos.some(x => x.id === id)) sel.delete(id);
+  const shown = [...open, ...done];
+  const allOn = shown.length && shown.every(x => sel?.has(x.id));
+  const selBar = sel ? `<div class="sel-bar">
+      <b>已選 ${sel.size} 件</b>
+      <button type="button" class="btn small" data-action="todo-sel-all">${allOn ? '全不選' : '全選'}</button>
+      ${done.length ? '<button type="button" class="btn small" data-action="todo-sel-done">選已完成</button>' : ''}
+      <span style="flex:1"></span>
+      <button type="button" class="btn small danger" data-action="todo-sel-delete" ${sel.size ? '' : 'disabled'}>🗑 刪除</button>
+      <button type="button" class="btn small" data-action="todo-sel-exit">取消</button>
+    </div>` : '';
+
+  return `<div class="page-head"><h1>待辦</h1><span class="sub">${sel ? '點一下選取，可以一次刪掉很多件' : '按 ▶ 開始做、會自動計時'}${
+    all.length ? ` · <button type="button" class="linkish" data-action="${sel ? 'todo-sel-exit' : 'todo-sel-start'}">${sel ? '完成選取' : '☑ 選取'}</button>` : ''}</span></div>
+    ${sel ? '' : working.map(workingCard).join('')}
     <div class="chips" style="margin-bottom:8px">${chip('todo-filter', 'all', f, '全部', '', count('all', fc))}${
       Object.entries(TYPES).map(([k, t]) => chip('todo-filter', k, f, t.label, t.color, count(k, fc))).join('')}</div>
     ${courses.length ? `<div class="chips" style="margin-bottom:12px">${chip('todo-course', 'all', fc, '所有課程', '', 0)}${
       courses.map(c => chip('todo-course', c.id, fc, c.name, c.color, count(f, c.id))).join('')}</div>` : ''}
+    ${selBar}
     <section class="card" data-drag-list="todos">
+      ${sel ? `${shown.length ? shown.map(pickRow).join('') : '<div class="empty">這個分類沒有待辦</div>'}</section>` : ''}${sel ? '' : `
       ${open.length > 1 ? `<div class="sub drag-hint" style="margin:0 0 6px">按住 ⋮⋮ 拖曳，重要的拖到上面${
         s.state.todos.some(x => x.order != null) ? ' · <button type="button" class="linkish" data-action="todo-sort-due">改回照期限排</button>' : ''}</div>` : ''}
       <form class="add-goal" data-form="add-todo" style="margin:0 0 8px">
@@ -379,7 +408,7 @@ export function renderTodo(s) {
       ${open.length ? open.map(x => todoRow(x, { steps: true, drag: true })).join('') : '<div class="empty">沒有未完成的待辦 🎉</div>'}
       ${done.length ? `<button class="btn small ghost" data-action="todo-show-done" style="margin-top:8px">${ui.showDoneTodos ? '隱藏' : '顯示'}已完成（${done.length}）</button>
         ${ui.showDoneTodos ? done.map(x => todoRow(x)).join('') : ''}` : ''}
-    </section>`;
+    </section>`}`;
 }
 
 // ---------- 讀書（YPT 風格：科目清單點一下開始碼表） ----------

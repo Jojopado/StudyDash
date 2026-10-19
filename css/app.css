@@ -134,6 +134,18 @@ h2 { font-size: 16px; margin: 0 0 10px; }
   display: grid; place-items: center; font-size: 13px; color: #0b0d12;
 }
 .check.on { background: var(--ok); border-color: var(--ok); }
+/* 待辦選取模式 */
+.pick-box {
+  width: 22px; height: 22px; flex: none; border-radius: 6px; border: 2px solid var(--muted);
+  display: grid; place-items: center; font-size: 13px; color: #fff;
+}
+.ev.pick.sel .pick-box { background: var(--accent); border-color: var(--accent); }
+.ev.pick.sel { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.sel-bar {
+  position: sticky; top: 0; z-index: 15; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 10px 12px; margin-bottom: 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--card);
+}
+.sel-bar .btn[disabled] { opacity: .4; pointer-events: none; }
 .badge {
   flex: none; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 999px;
   background: var(--card2); color: var(--muted); white-space: nowrap;

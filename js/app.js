@@ -458,6 +458,32 @@ const actions = {
     for (const x of store.state.todos) if (x.order != null) { const { order, ...rest } = x; saveTodo(rest); }
     toast('已改回照期限排序');
   },
+  'todo-sel-start': el => { ui.todoSel = new Set(el.dataset.id ? [el.dataset.id] : []); render(); },
+  'todo-sel-exit': () => { ui.todoSel = null; render(); },
+  'todo-pick': el => {
+    const sel = ui.todoSel, id = el.dataset.id;
+    if (sel.has(id)) sel.delete(id); else sel.add(id);
+    render();
+  },
+  // 全選／全不選：只算目前篩選看得到的
+  'todo-sel-all': () => {
+    const ids = [...document.querySelectorAll('[data-action="todo-pick"]')].map(e => e.dataset.id);
+    const allOn = ids.every(id => ui.todoSel.has(id));
+    for (const id of ids) allOn ? ui.todoSel.delete(id) : ui.todoSel.add(id);
+    render();
+  },
+  'todo-sel-done': () => {
+    for (const e of document.querySelectorAll('.ev.pick.done[data-action="todo-pick"]')) ui.todoSel.add(e.dataset.id);
+    render();
+  },
+  'todo-sel-delete': () => {
+    const ids = [...ui.todoSel].filter(findTodo);
+    if (!ids.length || !confirm(`刪除選取的 ${ids.length} 件待辦？刪了就救不回來。`)) return;
+    for (const id of ids) deleteTodo(id);
+    ui.todoSel = null;
+    render();
+    toast(`已刪除 ${ids.length} 件`);
+  },
   noop: () => {},
   'delete-todo': () => {
     if (confirm(`刪除「${sheetCtx.data.title}」？`)) { deleteTodo(sheetCtx.data.id); closeSheet(); toast('已刪除'); }
@@ -717,7 +743,7 @@ document.addEventListener('keydown', ev => {
 });
 
 // ---------- 啟動 ----------
-window.addEventListener('hashchange', () => { if (sheetCtx?.kind === 'more') closeSheet(); render(); window.scrollTo(0, 0); });
+window.addEventListener('hashchange', () => { if (sheetCtx?.kind === 'more') closeSheet(); ui.todoSel = null; render(); window.scrollTo(0, 0); });
 let wide = matchMedia('(min-width: 900px)').matches;
 window.addEventListener('resize', () => {
   const w = matchMedia('(min-width: 900px)').matches;
