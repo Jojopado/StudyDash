@@ -1,7 +1,7 @@
 {
   "name": "碩士生活",
   "short_name": "碩士生活",
-  "start_url": "./#home",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#0f1115",

@@ -18,6 +18,7 @@ import { renderProgress, initProgress, progressActions, progressForms } from './
 import { renderFit, initFit, fitActions, fitForms } from './fit.js';
 import { renderGoals, initGoals, goalsActions, goalsForms } from './goals.js';
 import { renderRemind, initRemind, remindActions, remindForms } from './remind.js';
+import { renderSpringboard } from './springboard.js';
 import { isDragging } from './drag.js';
 
 const $ = sel => document.querySelector(sel);
@@ -26,15 +27,18 @@ const fab = $('#fab');
 const backdrop = $('#sheet-backdrop');
 const sheet = $('#sheet');
 const focusEl = $('#focus');
+const dockEl = $('#dock');
 
 const ROUTES = {
   home: renderHome, calendar: renderCalendar, todo: renderTodo, study: renderStudy, cards: renderCards, money: renderMoney, memo: renderMemo, docs: renderDocs, quiz: renderQuiz, progress: renderProgress, fit: renderFit,
-  goals: renderGoals, remind: renderRemind, settings: renderSettings,
+  goals: renderGoals, remind: renderRemind, settings: renderSettings, apps: renderSpringboard,
 };
 // 手機底部放不下的，收在「更多」裡（電腦版側邊欄全部列出）
 const MORE = ['goals', 'memo', 'progress', 'docs', 'quiz', 'remind', 'fit', 'settings'];
-const NO_FAB = ['settings', 'goals', 'remind', 'money', 'cards', 'memo', 'docs', 'quiz', 'progress', 'fit'];
-const route = () => (location.hash.slice(1) in ROUTES ? location.hash.slice(1) : 'home');
+const NO_FAB = ['apps', 'settings', 'goals', 'remind', 'money', 'cards', 'memo', 'docs', 'quiz', 'progress', 'fit'];
+// 手機像 iPhone 主畫面：沒指定分頁時先到 #apps，每個分頁是一個 App
+const isPhone = () => !matchMedia('(min-width: 900px)').matches;
+const route = () => (location.hash.slice(1) in ROUTES ? location.hash.slice(1) : isPhone() ? 'apps' : 'home');
 
 // ---------- 畫面 ----------
 function applyBg() {
@@ -59,7 +63,14 @@ function render() {
     keep = { form: form?.dataset.form, id: form?.dataset.id, name: active.name, value: active.value };
   }
 
-  view.innerHTML = store.ready ? ROUTES[r](store) : '<div class="sub">載入中…</div>';
+  const appTop = isPhone() && r !== 'apps' ? '<a href="#apps" class="app-top">‹ 主畫面</a>' : '';
+  view.innerHTML = r === 'apps' ? ROUTES.apps(store) : appTop + (store.ready ? ROUTES[r](store) : '<div class="sub">載入中…</div>');
+  document.body.classList.toggle('on-sb', r === 'apps');
+  // Dock 放在 #view 外面，打開／關 App 的縮放動畫才不會帶著它跑
+  const d = view.querySelector('.sb-dock');
+  dockEl.replaceChildren(...(d ? [d] : []));
+  if (lastRoute !== r) playOpen(lastRoute, r);
+  lastRoute = r;
   renderFocus();
   document.querySelectorAll('#nav a').forEach(a => a.classList.toggle('active', a.dataset.tab === r || (a.dataset.tab === 'more' && MORE.includes(r))));
   fab.hidden = NO_FAB.includes(r);
@@ -70,6 +81,39 @@ function render() {
     if (el) { el.value = keep.value; el.focus(); }
   }
 }
+
+// 打開 App：從圖示的位置放大；回主畫面：主畫面從稍大縮回來
+let lastRoute = '';
+let openFrom = null; // 點到的圖示中心 {x, y}
+function playOpen(from, to) {
+  if (!isPhone() || !from) return;
+  const cls = to === 'apps' ? 'sb-return' : from === 'apps' ? 'app-open' : '';
+  if (!cls) return;
+  view.style.transformOrigin = openFrom && cls === 'app-open' ? `${openFrom.x}px ${openFrom.y + window.scrollY}px` : '50% 30%';
+  openFrom = null;
+  view.classList.remove('app-open', 'sb-return');
+  void view.offsetWidth;
+  view.classList.add(cls);
+}
+view.addEventListener('animationend', () => view.classList.remove('app-open', 'sb-return'));
+document.addEventListener('click', ev => {
+  const a = ev.target.closest('.sb-app');
+  if (!a) return;
+  const r = a.querySelector('.sb-ico').getBoundingClientRect();
+  openFrom = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+}, true);
+// 從螢幕左邊緣往右滑＝回主畫面（iPhone 加到主畫面後沒有瀏覽器的返回手勢）
+let edge = null;
+document.addEventListener('touchstart', ev => {
+  const t = ev.touches[0];
+  edge = isPhone() && route() !== 'apps' && t.clientX < 24 && backdrop.hidden ? { x: t.clientX, y: t.clientY } : null;
+}, { passive: true });
+document.addEventListener('touchend', ev => {
+  if (!edge) return;
+  const t = ev.changedTouches[0];
+  if (t.clientX - edge.x > 80 && Math.abs(t.clientY - edge.y) < 60) location.hash = '#apps';
+  edge = null;
+}, { passive: true });
 
 // 讀書計時的全螢幕／縮小後的浮動小條：只有開始、停止、換科目、縮放時才重畫
 let focusKey = '';
@@ -758,6 +802,8 @@ document.addEventListener('visibilitychange', () => {
   if (today() !== lastDay) { lastDay = today(); render(); }
 });
 
+// 已經加到主畫面的 iPhone 會用舊的 start_url（#home）打開，手機一律先到主畫面
+if (isPhone() && ['', '#home'].includes(location.hash)) history.replaceState(null, '', '#apps');
 subscribe(render);
 window.addEventListener('drag-end', () => { if (renderLater) { renderLater = false; render(); } });
 render();
