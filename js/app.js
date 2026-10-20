@@ -17,6 +17,7 @@ import { renderQuiz, initQuiz, quizActions, quizKey, quizTick } from './quiz.js'
 import { renderProgress, initProgress, progressActions, progressForms } from './progress.js';
 import { renderFit, initFit, fitActions, fitForms } from './fit.js';
 import { renderGoals, initGoals, goalsActions, goalsForms } from './goals.js';
+import { renderRemind, initRemind, remindActions, remindForms } from './remind.js';
 import { isDragging } from './drag.js';
 
 const $ = sel => document.querySelector(sel);
@@ -28,11 +29,11 @@ const focusEl = $('#focus');
 
 const ROUTES = {
   home: renderHome, calendar: renderCalendar, todo: renderTodo, study: renderStudy, cards: renderCards, money: renderMoney, memo: renderMemo, docs: renderDocs, quiz: renderQuiz, progress: renderProgress, fit: renderFit,
-  goals: renderGoals, settings: renderSettings,
+  goals: renderGoals, remind: renderRemind, settings: renderSettings,
 };
 // 手機底部放不下的，收在「更多」裡（電腦版側邊欄全部列出）
-const MORE = ['goals', 'memo', 'progress', 'docs', 'quiz', 'fit', 'settings'];
-const NO_FAB = ['settings', 'goals', 'money', 'cards', 'memo', 'docs', 'quiz', 'progress', 'fit'];
+const MORE = ['goals', 'memo', 'progress', 'docs', 'quiz', 'remind', 'fit', 'settings'];
+const NO_FAB = ['settings', 'goals', 'remind', 'money', 'cards', 'memo', 'docs', 'quiz', 'progress', 'fit'];
 const route = () => (location.hash.slice(1) in ROUTES ? location.hash.slice(1) : 'home');
 
 // ---------- 畫面 ----------
@@ -580,8 +581,8 @@ const actions = {
   logout: async () => { if (confirm('確定登出？登出後這台裝置看不到雲端資料。')) { await logout(); toast('已登出'); } },
 };
 
-Object.assign(actions, goalsActions, moneyActions, cardActions, memoActions, docActions, quizActions, progressActions, fitActions);
-const moduleForms = { ...moneyForms, ...cardForms, ...memoForms, ...docForms, ...progressForms, ...fitForms, ...goalsForms };
+Object.assign(actions, goalsActions, moneyActions, cardActions, memoActions, docActions, quizActions, progressActions, fitActions, remindActions);
+const moduleForms = { ...moneyForms, ...cardForms, ...memoForms, ...docForms, ...progressForms, ...fitForms, ...goalsForms, ...remindForms };
 
 document.addEventListener('click', ev => {
   if (ev.target === backdrop) { closeSheet(); return; }
@@ -762,6 +763,7 @@ window.addEventListener('drag-end', () => { if (renderLater) { renderLater = fal
 render();
 initStore();
 initGoals({ openSheet, closeSheet, toast, render });
+initRemind({ openSheet, closeSheet, toast, render });
 initMoney({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
 initCards({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });
 initMemo({ openSheet, closeSheet, toast, render, sheetData: () => sheetCtx?.data || null });

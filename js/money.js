@@ -1,6 +1,7 @@
 // 記帳（#money）：支出／收入、分類、每月統計和預算。資料在 expenses 集合。
 import { store, newId, saveDoc, removeDoc, savePrefs } from './store.js';
 import { esc, today, fmtDate, parseYmd } from './util.js';
+import { foodRemindLine } from './remind.js';
 
 let ctx = null; // { openSheet, closeSheet, toast, render }
 export function initMoney(c) { ctx = c; }
@@ -83,6 +84,7 @@ function addCard() {
   const io = moneyUi.io;
   if (!CATS[io].some(c => c[0] === moneyUi.cat)) moneyUi.cat = CATS[io][0][0];
   return `<section class="card">
+    ${io === 'out' ? foodRemindLine() : ''}
     <form data-form="money-add">
       <div class="row" style="margin-bottom:10px">
         <div class="seg"><button type="button" data-action="money-io" data-io="out" class="${io === 'out' ? 'on' : ''}">支出</button><button type="button" data-action="money-io" data-io="in" class="${io === 'in' ? 'on' : ''}">收入</button></div>

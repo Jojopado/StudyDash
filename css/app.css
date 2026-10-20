@@ -1015,3 +1015,14 @@ body.focusing { overflow: hidden; }
 .focus-pill b { font-variant-numeric: tabular-nums; color: var(--c); }
 @media (min-width: 900px) { .focus-pill { bottom: 30px; } }
 .ypt-remind { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+
+/* ---------- 提醒自己 ---------- */
+.rm-home { color: var(--text); border-style: solid; border-color: #f59e0b; }
+.rm-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+.rm-item:first-child { border-top: 0; padding-top: 0; }
+.rm-emoji { font-size: 26px; line-height: 1.2; }
+.rm-main { flex: 1; cursor: pointer; line-height: 1.5; }
+.rm-main b { font-size: 16px; }
+.rm-item .del { border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 16px; opacity: .6; }
+.rm-inline { background: color-mix(in srgb, #f59e0b 14%, transparent); border-left: 3px solid #f59e0b; border-radius: 8px; padding: 8px 10px; margin-bottom: 12px; font-size: 14px; font-weight: 600; }
+.rm-inline small { display: block; font-weight: 400; color: var(--muted); margin-top: 2px; }
