@@ -4,6 +4,8 @@ import { firebaseConfig } from './firebase-config.js';
 const LS_KEY = 'studydash.v1';
 const COLS = ['events', 'topics', 'todos', 'courses', 'sessions', 'rw_redeems', 'expenses', 'decks', 'cards', 'memos', 'docs', 'doc_folders', 'units', 'workouts', 'body', 'habits'];
 const PREFS_KEY = 'studydash.prefs';
+// 這台裝置上次是登入狀態 → 開啟時先顯示「載入中」，不要先秀出空的本機資料
+const CLOUD_FLAG = 'studydash.cloudUser';
 const EMPTY = () => Object.fromEntries(COLS.map(c => [c, []]));
 const pick = data => Object.fromEntries(COLS.map(c => [c, data[c] || []]));
 const FB_VER = '10.12.2';
@@ -88,22 +90,40 @@ function cloudBackend(uid) {
   const cur = EMPTY();
   const unsubs = [];
   const colRef = col => collection(db, 'users', uid, col);
+  // 每個集合和設定都第一次載入完才顯示，不然先到的集合會讓還沒到的看起來是空的
+  const waiting = new Set([...COLS, 'prefs']);
+  const loaded = key => {
+    if (!waiting.delete(key)) return;
+    if (!waiting.size) setData(cur);
+  };
   return {
     start() {
+      prefsLoaded = false;
+      store.ready = false;
+      emit();
       for (const col of COLS) {
         unsubs.push(onSnapshot(colRef(col), snap => {
           cur[col] = snap.docs.map(d => d.data());
-          setData(cur);
-        }, err => console.error('snapshot', col, err)));
+          if (waiting.size) loaded(col); else setData(cur);
+        }, err => { console.error('snapshot', col, err); loaded(col); }));
       }
       unsubs.push(onSnapshot(doc(db, 'users', uid, 'prefs', 'ui'), snap => {
-        if (snap.exists()) setPrefs(snap.data(), false);
-      }, err => console.error('snapshot prefs', err)));
+        const keys = Object.keys(pendingPrefs);
+        if (!prefsLoaded && keys.length) {
+          // 載入前改過的欄位疊在雲端設定上，再補寫上去
+          setPrefs({ ...(snap.exists() ? snap.data() : {}), ...pendingPrefs }, null);
+          pendingPrefs = {};
+          this.putPrefs(store.prefs, keys);
+        } else if (snap.exists()) setPrefs(snap.data(), null);
+        prefsLoaded = true;
+        loaded('prefs');
+      }, err => { console.error('snapshot prefs', err); prefsLoaded = true; loaded('prefs'); }));
     },
     stop() { unsubs.forEach(u => u()); },
     put(col, d) { setDoc(doc(db, 'users', uid, col, d.id), d).catch(e => console.error(e)); },
     remove(col, id) { deleteDoc(doc(db, 'users', uid, col, id)).catch(e => console.error(e)); },
-    putPrefs(p) { setDoc(doc(db, 'users', uid, 'prefs', 'ui'), p).catch(e => console.error(e)); },
+    // 只寫這次改的欄位：別台裝置的舊設定不會蓋掉雲端其他欄位
+    putPrefs(p, keys) { setDoc(doc(db, 'users', uid, 'prefs', 'ui'), p, { mergeFields: keys }).catch(e => console.error(e)); },
     async replaceAll(next) {
       // Firestore 一個 batch 上限 500 筆，分批寫
       const ops = [];
@@ -132,6 +152,8 @@ function cloudBackend(uid) {
   };
 }
 
+let prefsLoaded = true;
+
 function useBackend(b, mode) {
   if (backend) backend.stop();
   backend = b;
@@ -139,13 +161,28 @@ function useBackend(b, mode) {
   backend.start();
 }
 
+function hadCloudUser() {
+  try { return !!localStorage.getItem(CLOUD_FLAG); } catch { return false; }
+}
+function setCloudFlag(on) {
+  try { on ? localStorage.setItem(CLOUD_FLAG, '1') : localStorage.removeItem(CLOUD_FLAG); } catch { /* ignore */ }
+}
+
 export async function initStore() {
-  useBackend(localBackend(), 'local');
+  if (firebaseConfig && hadCloudUser()) {
+    // 等雲端；10 秒都連不上才先用本機（離線時至少能新增，之後登入會搬上去）
+    backend = localBackend();
+    store.mode = 'local';
+    setTimeout(() => { if (!store.ready && store.mode === 'local') backend.start(); }, 10000);
+  } else {
+    useBackend(localBackend(), 'local');
+  }
   if (!firebaseConfig) return;
   try {
     const { auth, authMod } = await loadFirebase();
     authMod.onAuthStateChanged(auth, async user => {
       if (user) {
+        setCloudFlag(true);
         store.user = { email: user.email, uid: user.uid };
         const cloud = cloudBackend(user.uid);
         // 登入前在本機新增的資料一併搬上雲端，然後清掉本機那份
@@ -156,6 +193,7 @@ export async function initStore() {
         }
         useBackend(cloud, 'cloud');
       } else {
+        setCloudFlag(false);
         store.user = null;
         useBackend(localBackend(), 'local');
       }
@@ -163,6 +201,7 @@ export async function initStore() {
   } catch (e) {
     console.error('Firebase 載入失敗，改用本機模式', e);
     store.cloudAvailable = false;
+    if (!store.ready) backend.start();
     emit();
   }
 }
@@ -243,13 +282,21 @@ export async function deleteChunks(fileId, n) {
 function readPrefs() {
   try { return JSON.parse(localStorage.getItem(PREFS_KEY)) || {}; } catch { return {}; }
 }
-function setPrefs(p, upload) {
+function setPrefs(p, keys) {
   store.prefs = { ...p };
   try { localStorage.setItem(PREFS_KEY, JSON.stringify(store.prefs)); } catch { /* ignore */ }
-  if (upload) backend.putPrefs(store.prefs);
+  if (keys) {
+    // 雲端設定還沒載入就改：先記著，載入後補寫（不然會拿這台的舊設定去蓋）
+    if (store.mode === 'cloud' && !prefsLoaded) for (const k of keys) pendingPrefs[k] = store.prefs[k];
+    else backend.putPrefs(store.prefs, keys);
+  }
   emit();
 }
-export function savePrefs(patch) { setPrefs({ ...store.prefs, ...patch, updatedAt: Date.now() }, true); }
+let pendingPrefs = {};
+export function savePrefs(patch) {
+  const keys = [...Object.keys(patch), 'updatedAt'];
+  setPrefs({ ...store.prefs, ...patch, updatedAt: Date.now() }, keys);
+}
 
 export function exportData() {
   return { app: 'studydash', version: 1, exportedAt: new Date().toISOString(), ...store.state };
