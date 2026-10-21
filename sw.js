@@ -1,6 +1,6 @@
 // 自己的檔案：先抓網路（有更新馬上生效），離線時用快取。
 // Firebase SDK（網址含版本號，不會變）：快取優先。
-const CACHE = 'studydash-v47';
+const CACHE = 'studydash-v48';
 // 閱讀器函式庫（js/vendor，檔名有版本號）和 pdf.js 的中文字型對照檔（CDN）：抓一次就留著，換版也不清
 const LIB_CACHE = 'studydash-lib';
 const SHELL = [

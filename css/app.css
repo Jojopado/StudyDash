@@ -534,6 +534,20 @@ input.money-date { width: auto; padding: 4px 8px; }
 .quiz-group .progress.thin { max-width: 220px; }
 .quiz-group .progress > div { background: var(--accent); }
 .quiz-pos { text-align: center; margin: 6px 0 10px; }
+.quiz-group-btns { flex: none; gap: 6px; }
+.quiz-jump { font: inherit; color: inherit; background: var(--card2); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; cursor: pointer; }
+.quiz-jump:hover { border-color: var(--accent); }
+.quiz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 6px; max-height: 55vh; overflow-y: auto; padding: 2px; }
+.quiz-grid button { font: inherit; font-size: 14px; color: inherit; height: 40px; border-radius: 8px; border: 1px solid var(--line); background: transparent; cursor: pointer; }
+.quiz-grid button.ok { background: color-mix(in srgb, var(--ok) 28%, var(--card2)); border-color: var(--ok); }
+.quiz-grid button.bad { background: color-mix(in srgb, var(--danger) 26%, var(--card2)); border-color: var(--danger); }
+.quiz-grid button.on { background: color-mix(in srgb, var(--accent) 28%, var(--card2)); border-color: var(--accent); }
+.quiz-grid button.cur { outline: 2px solid var(--accent); outline-offset: 1px; font-weight: 700; }
+.quiz-legend { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.quiz-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; border: 1px solid var(--line); margin-left: 6px; }
+.quiz-legend i.ok { background: var(--ok); border-color: var(--ok); }
+.quiz-legend i.bad { background: var(--danger); border-color: var(--danger); }
+.quiz-legend i.on { background: var(--accent); border-color: var(--accent); }
 .quiz-card { max-width: 720px; margin: 0 auto 10px; }
 .quiz-q { font-size: 17px; font-weight: 600; white-space: pre-wrap; overflow-wrap: anywhere; margin: 4px 0 12px; }
 .quiz-opts { display: flex; flex-direction: column; gap: 8px; }

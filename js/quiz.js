@@ -84,13 +84,19 @@ function homeView() {
   const ids = b.questions.map(q => q.id);
   const s = stats(ids);
   const pct = s.done ? Math.round(s.ok / s.done * 100) : 0;
+  const r = rec();
   const groups = b.groups.map(g => {
-    const gs = stats(b.questions.filter(q => q.g === g.id).map(q => q.id));
+    const gq = b.questions.filter(q => q.g === g.id);
+    const gs = stats(gq.map(q => q.id));
+    const resume = gs.done && gs.done < gs.total ? gq.findIndex(q => !r[q.id]) : -1;
     return `<div class="ev quiz-group">
       <div class="main"><div class="title">${esc(g.name)}${g.ref ? ' <span class="badge" title="原卷沒有附答案，答案是講義推定的參考答案">參考答案</span>' : ''}</div>
         <div class="meta">${g.count} 題 · 做過 ${gs.done}${gs.wrong ? ` · <b class="quiz-bad">錯 ${gs.wrong}</b>` : ''}</div>
         <div class="progress thin"><div style="width:${Math.round(gs.done / gs.total * 100)}%"></div></div></div>
-      <button class="btn small" data-action="quiz-group" data-id="${g.id}">▶ 依序做</button></div>`;
+      <div class="row quiz-group-btns">
+        <button class="btn small ghost" data-action="quiz-pickq" data-id="${g.id}" title="選從第幾題開始">＃ 選題</button>
+        ${resume >= 0 ? `<button class="btn small primary" data-action="quiz-group" data-id="${g.id}" data-start="${resume}" title="跳到第一題還沒做的">▶ 繼續第 ${gq[resume].n} 題</button>`
+          : `<button class="btn small" data-action="quiz-group" data-id="${g.id}">▶ 依序做</button>`}</div></div>`;
   }).join('');
   const EXAM_SIZE = bankCfg().exam;
   const tabs = BANKS.map(x => `<button type="button" class="${x.id === quizUi.bank ? 'on' : ''}" style="${x.id === quizUi.bank ? 'background:var(--accent);border-color:var(--accent)' : ''}" data-action="quiz-bank" data-id="${x.id}">${esc(x.short)}${banks[x.id] ? ` · ${banks[x.id].questions.length}` : ''}</button>`).join('');
@@ -139,7 +145,7 @@ function questionView() {
         : `<div class="sub">✓ ${quizUi.right} · ✕ ${quizUi.wrong}</div>`}</div>`;
   return `${head}
     <div class="flash-progress"><div style="width:${Math.round((quizUi.idx + (shown ? 1 : 0)) / n * 100)}%"></div></div>
-    <div class="sub quiz-pos">${quizUi.idx + 1} / ${n}${exam ? ` · 已作答 ${answered}` : ''} · ${esc(g?.name || '')} 第 ${q.n} 題</div>
+    <div class="sub quiz-pos"><button class="quiz-jump" data-action="quiz-jump" title="跳到別題">${quizUi.idx + 1} / ${n} ▾</button>${exam ? ` · 已作答 ${answered}` : ''} · ${esc(g?.name || '')} 第 ${q.n} 題</div>
     <section class="card quiz-card">
       <div class="quiz-q">${esc(q.q)}</div>
       <div class="quiz-opts">${opts}</div>
@@ -188,11 +194,48 @@ function resultView() {
     ${rightList.length ? `<h2 class="quiz-h2">答對的 ${rightList.length} 題（也看一下解析）</h2>${rightList.map(reviewCard).join('')}` : ''}`;
 }
 
+// 題號格子：綠＝最近答對、紅＝最近答錯、空心＝沒做過；cur＝目前這題
+function numGrid(ids, action, cur = -1) {
+  const r = rec();
+  const exam = quizUi.mode === 'exam' && action === 'quiz-goto';
+  return `<div class="quiz-grid">${ids.map((id, i) => {
+    const q = qById(id), x = r[id];
+    const cls = exam ? (quizUi.answers[i] != null ? 'on' : '') : x ? (x[2] ? 'ok' : 'bad') : '';
+    return `<button class="${cls}${i === cur ? ' cur' : ''}" data-action="${action}" data-i="${i}">${exam ? i + 1 : q.n}</button>`;
+  }).join('')}</div>`;
+}
+const gridLegend = exam => exam
+  ? '<div class="sub quiz-legend"><i class="on"></i>已作答 <i></i>沒作答</div>'
+  : '<div class="sub quiz-legend"><i class="ok"></i>答對 <i class="bad"></i>答錯 <i></i>沒做過</div>';
+
+let pickGroup = null;
+function openPicker(gid) {
+  const g = groupOf(gid);
+  pickGroup = g.id;
+  const ids = bank().questions.filter(q => q.g === g.id).map(q => q.id);
+  const r = rec();
+  const first = ids.findIndex(id => !r[id]);
+  ctx.openSheet(`<h2>${esc(g.name)} · 從第幾題開始？</h2>
+    ${gridLegend(false)}
+    ${numGrid(ids, 'quiz-from', first)}
+    <div class="actions">
+      ${first > 0 ? `<button class="btn primary" data-action="quiz-from" data-i="${first}">▶ 從第一題沒做過的（第 ${qById(ids[first]).n} 題）</button>` : ''}
+      <button class="btn ghost" data-action="close-sheet">取消</button></div>`);
+}
+
+function openJump() {
+  const exam = quizUi.mode === 'exam';
+  ctx.openSheet(`<h2>跳到第幾題？</h2>
+    ${gridLegend(exam)}
+    ${numGrid(quizUi.queue, 'quiz-goto', quizUi.idx)}
+    <div class="actions"><button class="btn ghost" data-action="close-sheet">取消</button></div>`);
+}
+
 // ---------- 動作 ----------
-function start(ids, title, mode = 'practice') {
+function start(ids, title, mode = 'practice', idx = 0) {
   if (!ids.length) { ctx.toast('沒有題目'); return; }
   Object.assign(quizUi, {
-    mode, title, queue: ids, idx: 0, picked: null, right: 0, wrong: 0,
+    mode, title, queue: ids, idx: Math.min(Math.max(0, idx), ids.length - 1), picked: null, right: 0, wrong: 0,
     answers: mode === 'exam' ? ids.map(() => null) : [],
     startAt: Date.now(), endAt: mode === 'exam' ? Date.now() + bankCfg().mins * 60000 : 0,
   });
@@ -240,7 +283,21 @@ export const quizActions = {
     try { localStorage.setItem(BANK_KEY, quizUi.bank); } catch {}
     ctx.render();
   },
-  'quiz-group': el => { const g = groupOf(el.dataset.id); start(bank().questions.filter(q => q.g === g.id).map(q => q.id), g.name); },
+  'quiz-group': el => { const g = groupOf(el.dataset.id); start(bank().questions.filter(q => q.g === g.id).map(q => q.id), g.name, 'practice', +el.dataset.start || 0); },
+  'quiz-pickq': el => openPicker(el.dataset.id),
+  'quiz-from': el => {
+    const g = groupOf(pickGroup);
+    ctx.closeSheet();
+    if (g) start(bank().questions.filter(q => q.g === g.id).map(q => q.id), g.name, 'practice', +el.dataset.i);
+  },
+  'quiz-jump': openJump,
+  'quiz-goto': el => {
+    ctx.closeSheet();
+    quizUi.idx = +el.dataset.i;
+    if (quizUi.mode === 'practice') quizUi.picked = null;
+    ctx.render();
+    window.scrollTo(0, 0);
+  },
   'quiz-pick': el => pick(+el.dataset.i),
   'quiz-next': next,
   'quiz-step': el => {
