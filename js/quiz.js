@@ -112,7 +112,7 @@ function homeView() {
       <div class="row wrap">
         <button class="btn primary" data-action="quiz-random">🔀 隨機練習</button>
         <button class="btn" data-action="quiz-new" ${s.done < s.total ? '' : 'disabled'}>🆕 只做沒做過的</button>
-        <button class="btn" data-action="quiz-wrong" ${s.wrong ? '' : 'disabled'}>🔁 錯題本${s.wrong ? ` ${s.wrong}` : ''}</button>
+        <span class="quiz-split"><button class="btn" data-action="quiz-wrong" ${s.wrong ? '' : 'disabled'}>🔁 錯題本${s.wrong ? ` ${s.wrong}` : ''}</button><button class="btn" data-action="quiz-wrong-pick" title="選從第幾題開始" ${s.wrong ? '' : 'disabled'}>＃</button></span>
         <button class="btn" data-action="quiz-exam">📝 模擬考 ${EXAM_SIZE} 題</button>
       </div>
       <div class="sub" style="margin-top:10px">練習：選完馬上看對錯和解析。模擬考：${EXAM_SIZE} 題、${bankCfg().mins} 分鐘，交卷後才看答案。答錯的題目會進錯題本，之後答對就會移出。</div>
@@ -195,24 +195,24 @@ function resultView() {
 }
 
 // 題號格子：綠＝最近答對、紅＝最近答錯、空心＝沒做過；cur＝目前這題
-function numGrid(ids, action, cur = -1) {
+function numGrid(ids, action, cur = -1, seq = false) {
   const r = rec();
   const exam = quizUi.mode === 'exam' && action === 'quiz-goto';
   return `<div class="quiz-grid">${ids.map((id, i) => {
     const q = qById(id), x = r[id];
     const cls = exam ? (quizUi.answers[i] != null ? 'on' : '') : x ? (x[2] ? 'ok' : 'bad') : '';
-    return `<button class="${cls}${i === cur ? ' cur' : ''}" data-action="${action}" data-i="${i}">${exam ? i + 1 : q.n}</button>`;
+    return `<button class="${cls}${i === cur ? ' cur' : ''}" data-action="${action}" data-i="${i}" title="${esc(groupOf(q.g)?.name || '')} 第 ${q.n} 題">${exam || seq ? i + 1 : q.n}</button>`;
   }).join('')}</div>`;
 }
 const gridLegend = exam => exam
   ? '<div class="sub quiz-legend"><i class="on"></i>已作答 <i></i>沒作答</div>'
   : '<div class="sub quiz-legend"><i class="ok"></i>答對 <i class="bad"></i>答錯 <i></i>沒做過</div>';
 
-let pickGroup = null;
+let picking = null; // { ids, title }：選題格子按下去要開始的那一組
 function openPicker(gid) {
   const g = groupOf(gid);
-  pickGroup = g.id;
   const ids = bank().questions.filter(q => q.g === g.id).map(q => q.id);
+  picking = { ids, title: g.name };
   const r = rec();
   const first = ids.findIndex(id => !r[id]);
   ctx.openSheet(`<h2>${esc(g.name)} · 從第幾題開始？</h2>
@@ -221,6 +221,18 @@ function openPicker(gid) {
     <div class="actions">
       ${first > 0 ? `<button class="btn primary" data-action="quiz-from" data-i="${first}">▶ 從第一題沒做過的（第 ${qById(ids[first]).n} 題）</button>` : ''}
       <button class="btn ghost" data-action="close-sheet">取消</button></div>`);
+}
+
+// 錯題本照題庫順序排，編號 1…k（答對就會移出，所以每次剩下的都是還沒訂正的）
+function openWrongPicker() {
+  const r = rec();
+  const ids = bank().questions.filter(q => isWrong(r[q.id])).map(q => q.id);
+  if (!ids.length) return;
+  picking = { ids, title: '錯題本' };
+  ctx.openSheet(`<h2>錯題本 · 從第幾題開始？</h2>
+    <div class="sub" style="margin-bottom:10px">共 ${ids.length} 題，照題庫順序排；答對的會移出錯題本。</div>
+    ${numGrid(ids, 'quiz-from', -1, true)}
+    <div class="actions"><button class="btn ghost" data-action="close-sheet">取消</button></div>`);
 }
 
 function openJump() {
@@ -286,10 +298,10 @@ export const quizActions = {
   'quiz-group': el => { const g = groupOf(el.dataset.id); start(bank().questions.filter(q => q.g === g.id).map(q => q.id), g.name, 'practice', +el.dataset.start || 0); },
   'quiz-pickq': el => openPicker(el.dataset.id),
   'quiz-from': el => {
-    const g = groupOf(pickGroup);
     ctx.closeSheet();
-    if (g) start(bank().questions.filter(q => q.g === g.id).map(q => q.id), g.name, 'practice', +el.dataset.i);
+    if (picking) start(picking.ids, picking.title, 'practice', +el.dataset.i);
   },
+  'quiz-wrong-pick': openWrongPicker,
   'quiz-jump': openJump,
   'quiz-goto': el => {
     ctx.closeSheet();
