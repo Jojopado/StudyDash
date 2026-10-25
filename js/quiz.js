@@ -1,5 +1,6 @@
 // 測驗（#quiz）：證照考古題選擇題（IoT 755 題、RFID／EPC 177 題）。題庫是靜態 JSON（js/quiz-*.json），離線也能做。
-// 作答紀錄存在 prefs.quiz[bankId][questionId] = [答對次數, 答錯次數, 最後一次是否答對(1/0)]，跟著帳號同步。
+// 作答紀錄存在 prefs.quiz[bankId][questionId] = [答對次數, 答錯次數, 最後一次是否答對(1/0), 答錯時選了哪個, 訂正好了(1)]，跟著帳號同步。
+// 錯題訂正（mode 'fix'）：先看答案和解析按「訂正好了」，再重做；重做答對就移出錯題本，又答錯就回到待訂正。
 import { store, savePrefs } from './store.js';
 import { esc } from './util.js';
 
@@ -20,7 +21,9 @@ let loading = null;
 
 export const quizUi = {
   bank: (() => { try { return localStorage.getItem(BANK_KEY) || 'iot'; } catch { return 'iot'; } })(),
-  mode: null,           // null | 'practice' | 'exam' | 'result'
+  mode: null,           // null | 'practice' | 'exam' | 'result' | 'fix'
+  from: null,           // 'fix'：從錯題訂正開始的，結束後回錯題訂正
+  fixTab: 'todo',       // 錯題訂正：'todo' 待訂正 | 'done' 已訂正、待重做
   title: '',
   queue: [], idx: 0,
   picked: null,         // 練習模式：這題選了哪個
@@ -48,12 +51,14 @@ function shuffle(a) {
   return a;
 }
 
-function record(results) { // results: [{id, ok}]
+const isFixed = r => isWrong(r) && r[4] === 1;
+
+function record(results) { // results: [{id, ok, p}]
   const all = { ...(store.prefs.quiz || {}) };
   const r = { ...(all[quizUi.bank] || {}) };
-  for (const { id, ok } of results) {
+  for (const { id, ok, p } of results) {
     const [c, w] = r[id] || [0, 0, 0];
-    r[id] = ok ? [c + 1, w, 1] : [c, w + 1, 0];
+    r[id] = ok ? [c + 1, w, 1] : [c, w + 1, 0, p ?? null];
   }
   all[quizUi.bank] = r;
   savePrefs({ quiz: all });
@@ -64,6 +69,7 @@ export function renderQuiz() {
   if (!bank()) { load(); return '<div class="page-head"><div><h1>測驗</h1><div class="sub">題庫載入中…</div></div></div>'; }
   if (quizUi.mode === 'practice' || quizUi.mode === 'exam') return questionView();
   if (quizUi.mode === 'result') return resultView();
+  if (quizUi.mode === 'fix') return fixView();
   return homeView();
 }
 
@@ -106,16 +112,17 @@ function homeView() {
       <div class="quiz-stats">
         <div><b>${s.done}</b><span>做過 / ${s.total}</span></div>
         <div><b>${pct}%</b><span>最近一次答對率</span></div>
-        <div><b class="${s.wrong ? 'quiz-bad' : ''}">${s.wrong}</b><span>錯題本</span></div>
+        <div class="${s.wrong ? 'quiz-stat-link' : ''}" ${s.wrong ? 'data-action="quiz-fix"' : ''}><b class="${s.wrong ? 'quiz-bad' : ''}">${s.wrong}</b><span>錯題本${s.wrong ? ' ›' : ''}</span></div>
       </div>
       <div class="progress" style="margin:10px 0 14px"><div style="width:${Math.round(s.done / s.total * 100)}%"></div></div>
       <div class="row wrap">
         <button class="btn primary" data-action="quiz-random">🔀 隨機練習</button>
         <button class="btn" data-action="quiz-new" ${s.done < s.total ? '' : 'disabled'}>🆕 只做沒做過的</button>
-        <span class="quiz-split"><button class="btn" data-action="quiz-wrong" ${s.wrong ? '' : 'disabled'}>🔁 錯題本${s.wrong ? ` ${s.wrong}` : ''}</button><button class="btn" data-action="quiz-wrong-pick" title="選從第幾題開始" ${s.wrong ? '' : 'disabled'}>＃</button></span>
+        <button class="btn" data-action="quiz-fix" ${s.wrong ? '' : 'disabled'}>✏️ 錯題訂正${s.wrong ? ` ${s.wrong}` : ''}</button>
+        <span class="quiz-split"><button class="btn" data-action="quiz-wrong" ${s.wrong ? '' : 'disabled'}>🔁 錯題本</button><button class="btn" data-action="quiz-wrong-pick" title="選從第幾題開始" ${s.wrong ? '' : 'disabled'}>＃</button></span>
         <button class="btn" data-action="quiz-exam">📝 模擬考 ${EXAM_SIZE} 題</button>
       </div>
-      <div class="sub" style="margin-top:10px">練習：選完馬上看對錯和解析。模擬考：${EXAM_SIZE} 題、${bankCfg().mins} 分鐘，交卷後才看答案。答錯的題目會進錯題本，之後答對就會移出。</div>
+      <div class="sub" style="margin-top:10px">練習：選完馬上看對錯和解析。模擬考：${EXAM_SIZE} 題、${bankCfg().mins} 分鐘，交卷後才看答案。答錯的題目會進錯題本：到「✏️ 錯題訂正」一題一題看解析訂正，再重做，答對就移出。</div>
     </section>
     <h2 class="quiz-h2">題組</h2>
     <section class="card">${groups}</section>
@@ -139,7 +146,7 @@ function questionView() {
       <span class="quiz-l">${L[i]}</span><span class="quiz-t">${esc(o)}</span>${shown && i === q.a ? '<span class="quiz-mark">✓</span>' : shown && i === picked ? '<span class="quiz-mark">✕</span>' : ''}</button>`;
   }).join('');
   const answered = exam ? quizUi.answers.filter(x => x != null).length : 0;
-  const head = `<div class="page-head"><div><button class="btn ghost small" data-action="quiz-exit">← ${exam ? '放棄考試' : '結束'}</button>
+  const head = `<div class="page-head"><div><button class="btn ghost small" data-action="quiz-exit">← ${exam ? '放棄考試' : quizUi.from === 'fix' ? '返回錯題訂正' : '結束'}</button>
       <h1>${esc(quizUi.title)}</h1></div>
       ${exam ? `<div class="row"><span class="sub" id="quiz-clock">${clock()}</span><button class="btn small primary" data-action="quiz-submit">交卷</button></div>`
         : `<div class="sub">✓ ${quizUi.right} · ✕ ${quizUi.wrong}</div>`}</div>`;
@@ -181,17 +188,83 @@ function resultView() {
       <div class="quiz-opts">${q.o.map((o, i) => (o ? `<div class="quiz-opt ${i === q.a ? 'ok' : i === p ? 'bad' : 'dim'}"><span class="quiz-l">${L[i]}</span><span class="quiz-t">${esc(o)}</span></div>` : '')).join('')}</div>
       <div class="quiz-ex ${p === q.a ? 'good' : 'bad'}"><b>${p === q.a ? `答對了！答案 ${L[q.a]}` : `${p == null ? '沒作答' : `你選 ${L[p]}`}，答案 ${L[q.a]}`}</b><div>${esc(q.e)}</div></div></section>`;
   const mins = Math.round((quizUi.endAt && exam ? Math.min(Date.now(), quizUi.endAt) : Date.now()) - quizUi.startAt) / 60000;
-  return `<div class="page-head"><div><button class="btn ghost small" data-action="quiz-exit">← 回測驗</button><h1>${esc(quizUi.title)}</h1></div></div>
+  const back = quizUi.from === 'fix' ? '回錯題訂正' : '回測驗';
+  return `<div class="page-head"><div><button class="btn ghost small" data-action="quiz-exit">← ${back}</button><h1>${esc(quizUi.title)}</h1></div></div>
     <section class="card flash-done">
       <div style="font-size:44px">${score >= 70 ? '🎉' : '💪'}</div>
       <h2>${right} / ${done} 題答對（${score} 分）</h2>
       <div class="sub">${exam ? `用了 ${Math.max(1, Math.round(mins))} 分鐘` : ''}${score >= 70 ? ' · 及格線一般是 70 分' : ' · 一般及格線是 70 分，再加油'}</div>
       <div class="row wrap" style="justify-content:center;margin-top:14px">
-        ${stats(bank().questions.map(q => q.id)).wrong ? '<button class="btn" data-action="quiz-wrong">🔁 練錯題本</button>' : ''}
-        <button class="btn primary" data-action="quiz-exit">回測驗</button></div>
+        ${quizUi.from !== 'fix' && stats(bank().questions.map(q => q.id)).wrong ? '<button class="btn" data-action="quiz-fix">✏️ 去訂正錯題</button>' : ''}
+        <button class="btn primary" data-action="quiz-exit">${back}</button></div>
     </section>
     ${wrongList.length ? `<h2 class="quiz-h2">答錯的 ${wrongList.length} 題</h2>${wrongList.map(reviewCard).join('')}` : ''}
     ${rightList.length ? `<h2 class="quiz-h2">答對的 ${rightList.length} 題（也看一下解析）</h2>${rightList.map(reviewCard).join('')}` : ''}`;
+}
+
+// 錯題訂正：待訂正＝看答案＋解析後按「訂正好了」；已訂正＝等著重做
+function fixLists() {
+  const r = rec();
+  const wrong = bank().questions.filter(q => isWrong(r[q.id]));
+  return { r, todo: wrong.filter(q => !isFixed(r[q.id])), done: wrong.filter(q => isFixed(r[q.id])) };
+}
+
+function fixView() {
+  const { r, todo, done } = fixLists();
+  const tab = quizUi.fixTab === 'done' ? 'done' : 'todo';
+  const list = tab === 'done' ? done : todo;
+  const card = (q, i) => {
+    const x = r[q.id], p = x[3], g = groupOf(q.g);
+    return `<section class="card quiz-card">
+      <div class="sub">${i + 1}. ${esc(g?.name || '')} 第 ${q.n} 題 · 錯過 ${x[1]} 次</div>
+      <div class="quiz-q">${esc(q.q)}</div>
+      <div class="quiz-opts">${q.o.map((o, k) => (o ? `<div class="quiz-opt ${k === q.a ? 'ok' : k === p ? 'bad' : 'dim'}"><span class="quiz-l">${L[k]}</span><span class="quiz-t">${esc(o)}</span>${k === q.a ? '<span class="quiz-mark">✓</span>' : k === p ? '<span class="quiz-mark">✕ 你選的</span>' : ''}</div>` : '')).join('')}</div>
+      <div class="quiz-ex bad"><b>${p != null ? `你選 ${L[p]}，` : ''}${g?.ref ? '參考' : '正確'}答案是 ${L[q.a]}</b><div>${esc(q.e)}</div></div>
+      <div class="row" style="justify-content:flex-end;margin-top:10px">
+        ${tab === 'todo' ? `<button class="btn primary" data-action="quiz-fix-mark" data-id="${q.id}">✓ 訂正好了</button>`
+          : `<button class="btn small ghost" data-action="quiz-fix-unmark" data-id="${q.id}">↩ 還沒懂，放回待訂正</button>
+             <button class="btn small" data-action="quiz-fix-one" data-id="${q.id}">🔁 重做這題</button>`}</div></section>`;
+  };
+  const empty = tab === 'todo'
+    ? `<section class="card flash-done"><div style="font-size:40px">${done.length ? '✅' : '🎉'}</div><h2>${done.length ? '全部訂正好了' : '沒有錯題'}</h2>
+        <div class="sub">${done.length ? `接著重做這 ${done.length} 題，答對就會移出錯題本。` : '錯題本是空的，繼續保持！'}</div>
+        ${done.length ? `<div class="row" style="justify-content:center;margin-top:12px"><button class="btn primary" data-action="quiz-fix-redo">🔁 重做 ${done.length} 題</button></div>` : ''}</section>`
+    : '<section class="card flash-done"><div class="sub">還沒有訂正好的題目。先到「待訂正」看解析，按「✓ 訂正好了」。</div></section>';
+  return `<div class="page-head"><div><button class="btn ghost small" data-action="quiz-fix-back">← 返回測驗</button>
+      <h1>錯題訂正</h1><div class="sub">${esc(bankCfg().short)} · 待訂正 ${todo.length} · 已訂正 ${done.length}</div></div></div>
+    <section class="card quiz-fix-steps">
+      <div><b>① 訂正</b><span>看正確答案和解析，懂了按「訂正好了」</span></div>
+      <div><b>② 重做</b><span>訂正好的題目再做一次，答對就移出錯題本；又錯就回到待訂正</span></div>
+      <div class="row wrap" style="margin-top:10px">
+        <button class="btn primary" data-action="quiz-fix-redo" ${done.length ? '' : 'disabled'}>🔁 重做已訂正的 ${done.length} 題</button>
+        <button class="btn ghost" data-action="quiz-wrong" ${todo.length + done.length ? '' : 'disabled'}>直接全部重做</button></div>
+    </section>
+    <div class="chips" style="margin:12px 0">
+      <button type="button" class="${tab === 'todo' ? 'on' : ''}" data-action="quiz-fix-tab" data-id="todo">✏️ 待訂正 ${todo.length}</button>
+      <button type="button" class="${tab === 'done' ? 'on' : ''}" data-action="quiz-fix-tab" data-id="done">✅ 已訂正 ${done.length}</button></div>
+    ${list.length ? list.map(card).join('') : empty}
+    ${list.length > 2 ? '<div class="row" style="justify-content:center;margin:10px 0"><button class="btn ghost" data-action="quiz-fix-back">← 返回測驗</button></div>' : ''}`;
+}
+
+function setFixed(id, v) {
+  const all = { ...(store.prefs.quiz || {}) };
+  const r = { ...(all[quizUi.bank] || {}) };
+  const x = r[id];
+  if (!isWrong(x)) return;
+  const y = [x[0], x[1], 0, x[3] ?? null];
+  if (v) y.push(1);
+  r[id] = y;
+  all[quizUi.bank] = r;
+  savePrefs({ quiz: all });   // savePrefs 會觸發重畫
+}
+
+function openFix() {
+  Object.assign(quizUi, { mode: 'fix', from: null, queue: [], answers: [] });
+  const { todo, done } = fixLists();
+  if (!todo.length && done.length) quizUi.fixTab = 'done';
+  else if (todo.length) quizUi.fixTab = 'todo';
+  ctx.render();
+  window.scrollTo(0, 0);
 }
 
 // 題號格子：綠＝最近答對、紅＝最近答錯、空心＝沒做過；cur＝目前這題
@@ -244,10 +317,10 @@ function openJump() {
 }
 
 // ---------- 動作 ----------
-function start(ids, title, mode = 'practice', idx = 0) {
+function start(ids, title, mode = 'practice', idx = 0, from = quizUi.mode === 'fix' ? 'fix' : null) {
   if (!ids.length) { ctx.toast('沒有題目'); return; }
   Object.assign(quizUi, {
-    mode, title, queue: ids, idx: Math.min(Math.max(0, idx), ids.length - 1), picked: null, right: 0, wrong: 0,
+    mode, title, from, queue: ids, idx: Math.min(Math.max(0, idx), ids.length - 1), picked: null, right: 0, wrong: 0,
     answers: mode === 'exam' ? ids.map(() => null) : [],
     startAt: Date.now(), endAt: mode === 'exam' ? Date.now() + bankCfg().mins * 60000 : 0,
   });
@@ -263,7 +336,7 @@ function pick(i) {
   quizUi.picked = i;
   const ok = i === q.a;
   if (ok) quizUi.right++; else quizUi.wrong++;
-  record([{ id: q.id, ok }]);   // savePrefs 會觸發重畫
+  record([{ id: q.id, ok, p: i }]);   // savePrefs 會觸發重畫
 }
 
 function next() {
@@ -278,7 +351,7 @@ function next() {
 function submitExam(auto) {
   const blank = quizUi.answers.filter(x => x == null).length;
   if (!auto && blank && !confirm(`還有 ${blank} 題沒作答，確定交卷？`)) return;
-  record(quizUi.queue.map((id, i) => ({ id, ok: quizUi.answers[i] === qById(id).a })).filter((x, i) => quizUi.answers[i] != null || auto));
+  record(quizUi.queue.map((id, i) => ({ id, ok: quizUi.answers[i] === qById(id).a, p: quizUi.answers[i] })).filter((x, i) => quizUi.answers[i] != null || auto));
   quizUi.mode = 'result';
   ctx.render();
   window.scrollTo(0, 0);
@@ -302,6 +375,13 @@ export const quizActions = {
     if (picking) start(picking.ids, picking.title, 'practice', +el.dataset.i);
   },
   'quiz-wrong-pick': openWrongPicker,
+  'quiz-fix': openFix,
+  'quiz-fix-back': () => { quizUi.mode = null; quizUi.from = null; ctx.render(); window.scrollTo(0, 0); },
+  'quiz-fix-tab': el => { quizUi.fixTab = el.dataset.id; ctx.render(); },
+  'quiz-fix-mark': el => { setFixed(el.dataset.id, true); ctx.toast('訂正好了 ✓ 移到「已訂正」等重做'); },
+  'quiz-fix-unmark': el => setFixed(el.dataset.id, false),
+  'quiz-fix-redo': () => start(fixLists().done.map(q => q.id), '重做訂正過的題目'),
+  'quiz-fix-one': el => start([el.dataset.id], '重做這題'),
   'quiz-jump': openJump,
   'quiz-goto': el => {
     ctx.closeSheet();
@@ -320,6 +400,7 @@ export const quizActions = {
   'quiz-exit': () => {
     if (quizUi.mode === 'exam' && !confirm('放棄這次模擬考？作答不會記錄。')) return;
     if (quizUi.mode === 'practice' && (quizUi.right + quizUi.wrong) > 0) { quizUi.mode = 'result'; quizUi.answers = []; ctx.render(); return; }
+    if (quizUi.from === 'fix') { openFix(); return; }
     quizUi.mode = null;
     ctx.render();
     window.scrollTo(0, 0);

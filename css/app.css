@@ -529,6 +529,11 @@ input.money-date { width: auto; padding: 4px 8px; }
 .quiz-stats b { display: block; font-size: 24px; }
 .quiz-stats span { font-size: 12px; color: var(--muted); }
 .quiz-bad { color: var(--danger); }
+.quiz-stat-link { cursor: pointer; }
+.quiz-stat-link:hover { outline: 1px solid var(--accent); }
+.quiz-fix-steps > div:not(.row) { display: flex; gap: 10px; align-items: baseline; margin: 4px 0; }
+.quiz-fix-steps b { flex: none; }
+.quiz-fix-steps span { color: var(--muted); font-size: 14px; }
 .quiz-h2 { font-size: 16px; margin: 18px 0 8px; }
 .quiz-group { cursor: default; align-items: center; }
 .quiz-group .progress.thin { max-width: 220px; }
