@@ -1121,3 +1121,16 @@ body.focusing { overflow: hidden; }
 .ru-detail-main { flex: 1; min-width: 0; }
 .ru-quiz { text-align: center; padding: 20px 14px; }
 .ru-quiz-letter { font-size: 88px; font-weight: 700; margin: 10px 0; }
+.ru-num { width: 28px; height: 28px; flex: none; border-radius: 50%; background: var(--card2); border: 1px solid var(--line); display: grid; place-items: center; font-weight: 700; font-size: 13px; }
+.ru-sec { margin-bottom: 12px; }
+.ru-h { font-size: 16px; margin: 0 0 8px; }
+.ru-md { font-size: 14px; }
+.ru-md .md-table table { min-width: 0; width: 100%; font-size: 13.5px; }
+.ru-mem { font-size: 13px; color: var(--text); background: var(--card2); border-radius: 8px; padding: 6px 9px; margin-top: 6px; line-height: 1.5; }
+.ru-row { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-top: 1px solid var(--line); }
+.ru-row:first-child { border-top: 0; }
+.ru-big.small { font-size: 28px; min-width: 70px; padding: 6px; border-top: 3px solid var(--line); }
+.ru-big.same { border-top-color: var(--ok); } .ru-big.false { border-top-color: #f59e0b; } .ru-big.new { border-top-color: var(--accent); }
+.ru-row .ru-word { margin-top: 6px; }
+.ru-prac.on { border-color: var(--ok); }
+.ru-ans { color: var(--ok) !important; font-size: 13px !important; margin-top: 2px; }
