@@ -10,6 +10,7 @@ const COLORS = {
   home: ['#fbbf24', '#f97316'], calendar: ['#ffffff', '#e5e7eb'], todo: ['#4ade80', '#16a34a'], goals: ['#38bdf8', '#2563eb'],
   memo: ['#fde68a', '#f59e0b'], study: ['#f87171', '#dc2626'], progress: ['#a78bfa', '#7c3aed'], cards: ['#2dd4bf', '#0d9488'],
   docs: ['#93c5fd', '#3b82f6'], quiz: ['#fb7185', '#e11d48'], money: ['#86efac', '#15803d'], remind: ['#fdba74', '#ea580c'],
+  russian: ['#ffffff', '#2563eb'],
   fit: ['#334155', '#0f172a'], settings: ['#9ca3af', '#4b5563'],
 };
 const LABEL = { home: '今天' };

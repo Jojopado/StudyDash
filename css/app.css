@@ -1093,3 +1093,31 @@ body.focusing { overflow: hidden; }
 }
 .sb-dock .sb-name { display: none; }
 @media (max-width: 360px) { .sb-ico { width: 54px; height: 54px; } .sb-emoji { font-size: 28px; } }
+
+/* ---------- 俄文 ---------- */
+.ru-words { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px; }
+.ru-word { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: var(--card2); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; color: inherit; font: inherit; cursor: pointer; }
+.ru-word:active { transform: scale(.98); }
+.ru-spk { font-size: 15px; }
+.ru-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.ru-main small { color: var(--muted); font-size: 12px; }
+.ru-text { font-size: 17px; font-weight: 600; }
+.ru-zh { color: var(--muted); font-size: 13px; text-align: right; }
+.ru-intro { background: var(--card2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-top: 10px; }
+.ru-intro-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.ru-intro .ru-text { display: block; line-height: 1.6; margin-bottom: 6px; }
+.ru-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 6px; }
+.ru-letter { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px; background: var(--card); border: 1px solid var(--line); border-top: 3px solid var(--line); border-radius: 10px; color: inherit; cursor: pointer; font: inherit; }
+.ru-letter span { font-size: 24px; font-weight: 600; }
+.ru-letter small { color: var(--muted); font-size: 10.5px; text-align: center; line-height: 1.2; }
+.ru-letter.same { border-top-color: var(--ok); }
+.ru-letter.false { border-top-color: #f59e0b; }
+.ru-letter.new { border-top-color: var(--accent); }
+.ru-letter.on { outline: 2px solid var(--accent); }
+.ru-tag { font-size: 11px; padding: 1px 7px; border-radius: 99px; color: #0b0d12; font-weight: 600; }
+.ru-tag.same { background: var(--ok); } .ru-tag.false { background: #f59e0b; } .ru-tag.new { background: var(--accent); }
+.ru-detail { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+.ru-big { font-size: 46px; font-weight: 700; min-width: 96px; padding: 6px 10px; background: var(--card2); border: 1px solid var(--line); border-radius: 14px; color: inherit; cursor: pointer; }
+.ru-detail-main { flex: 1; min-width: 0; }
+.ru-quiz { text-align: center; padding: 20px 14px; }
+.ru-quiz-letter { font-size: 88px; font-weight: 700; margin: 10px 0; }

@@ -2,6 +2,7 @@
 // 資料：decks {id,name,color}、cards {id,deckId,front,back,box,due}
 import { store, newId, saveDoc, removeDoc } from './store.js';
 import { esc, today, addDays, TOPIC_COLORS } from './util.js';
+import { say } from './speak.js';
 
 let ctx = null; // { openSheet, closeSheet, toast, render, sheetData }
 export function initCards(c) { ctx = c; }
@@ -155,6 +156,7 @@ function studyView() {
       <div class="flash-face">${esc(front)}</div>
       ${cardsUi.flipped ? `<div class="flash-line"></div><div class="flash-face back">${esc(back)}</div>` : '<div class="sub flash-hint">點一下看答案</div>'}
     </div>
+    ${d?.lang && (!cardsUi.reverse || cardsUi.flipped) ? `<div style="text-align:center;margin-top:10px"><button class="btn" data-action="card-say" data-id="${c.id}">🔊 念出來</button></div>` : ''}
     ${review
       ? (cardsUi.flipped ? `<div class="flash-grade">
           <button class="btn" data-action="card-grade" data-g="0">😵 不會<span>今天再來</span></button>
@@ -320,6 +322,7 @@ export const cardActions = {
   },
   'card-review': el => startStudy(el.dataset.id, 'review'),
   'card-browse': el => startStudy(el.dataset.id, 'browse'),
+  'card-say': el => { const c = findCard(el.dataset.id), d = c && findDeck(c.deckId); if (c) say(c.front, { lang: d?.lang, slow: !!store.prefs.ruSlow }); },
   'card-flip': () => { cardsUi.flipped = !cardsUi.flipped; ctx.render(); },
   'card-grade': el => grade(+el.dataset.g),
   'card-step': el => {
