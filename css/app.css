@@ -1134,3 +1134,14 @@ body.focusing { overflow: hidden; }
 .ru-row .ru-word { margin-top: 6px; }
 .ru-prac.on { border-color: var(--ok); }
 .ru-ans { color: var(--ok) !important; font-size: 13px !important; margin-top: 2px; }
+.ru-tabs button { padding: 6px 10px; }
+.ru-see { margin-top: 10px; }
+.ru-pick { cursor: default; flex-wrap: wrap; }
+.ru-pick.ok { border-color: var(--ok); }
+.ru-pick.bad { border-color: #f87171; }
+.ru-pick u { text-decoration-color: var(--ok); text-underline-offset: 3px; }
+.ru-blank { color: var(--accent); letter-spacing: 1px; }
+.ru-opts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.ru-opts .btn { font-size: 15px; }
+.ru-opts .btn.ok { background: var(--ok); border-color: var(--ok); color: #0b0d12; }
+.ru-opts .btn.bad { background: #f87171; border-color: #f87171; color: #0b0d12; }
