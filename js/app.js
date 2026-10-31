@@ -1,7 +1,7 @@
 import {
   store, subscribe, initStore, newId, saveEvent, deleteEvent, saveTodo, deleteTodo, savePrefs,
   saveCourse, deleteCourse, saveSession, deleteSession,
-  exportData, importData, mergeData, login, signup, logout,
+  exportData, importData, mergeData, login, signup, logout, resetPassword,
 } from './store.js';
 import { TYPES, TOPIC_COLORS, BG_PRESETS, isLight, today, addDays, ymd, esc } from './util.js';
 import {
@@ -739,6 +739,13 @@ document.addEventListener('submit', async ev => {
     moduleForms[kind](form, f, sheetCtx?.data, ev.submitter);
   } else if (kind === 'login') {
     const mode = ev.submitter?.value || 'login';
+    if (mode === 'reset') {
+      const email = (f.email || '').trim();
+      if (!email) { toast('先在上面填 Email，再按忘記密碼'); return; }
+      try { await resetPassword(email); toast('已寄出重設密碼信，請到信箱（含垃圾郵件）收信'); }
+      catch (e) { toast(AUTH_ERRORS[e.code] || `失敗：${e.message}`); }
+      return;
+    }
     try {
       if (mode === 'signup') await signup(f.email, f.password);
       else await login(f.email, f.password);

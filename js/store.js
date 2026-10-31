@@ -214,6 +214,10 @@ export async function signup(email, password) {
   const { auth, authMod } = await loadFirebase();
   await authMod.createUserWithEmailAndPassword(auth, email, password);
 }
+export async function resetPassword(email) {
+  const { auth, authMod } = await loadFirebase();
+  await authMod.sendPasswordResetEmail(auth, email);
+}
 export async function logout() {
   const { auth, authMod } = await loadFirebase();
   await authMod.signOut(auth);

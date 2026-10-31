@@ -657,7 +657,8 @@ export function renderSettings(s) {
       <label class="field"><span>Email</span><input type="email" name="email" autocomplete="username" required></label>
       <label class="field"><span>密碼（至少 6 碼）</span><input type="password" name="password" autocomplete="current-password" minlength="6" required></label>
       <div class="row"><button class="btn primary" type="submit" name="mode" value="login">登入</button>
-      <button class="btn" type="submit" name="mode" value="signup">第一次用：註冊</button></div>
+      <button class="btn" type="submit" name="mode" value="signup">第一次用：註冊</button>
+      <button class="btn small" type="submit" name="mode" value="reset" formnovalidate>忘記密碼</button></div>
       <div class="sub" style="margin-top:8px">登入後，這台裝置上已有的資料會自動上傳。</div>
     </form>`;
   }
