@@ -685,6 +685,314 @@
 ]
 },
 {
+"preset": "rwst-rev",
+"name": "科技論文寫作：中文→英文術語 60",
+"color": "#14b8a6",
+"desc": "看中文和定義，寫出英文術語（考試要拼英文）",
+"cards": [
+{
+"pid": "r0",
+"front": "學術誠信\nHonest and responsible conduct in research and writing, avoiding plagiarism, fabrication, and cheating.",
+"back": "Academic integrity"
+},
+{
+"pid": "r1",
+"front": "抄襲\nPresenting someone else's words or ideas as your own without proper citation.",
+"back": "Plagiarism"
+},
+{
+"pid": "r2",
+"front": "捏造\nInventing data, results, quotations, or references that do not exist.",
+"back": "Fabrication"
+},
+{
+"pid": "r3",
+"front": "代寫作弊\nHaving another person or service complete academic work that is then submitted as one's own.",
+"back": "Contract cheating"
+},
+{
+"pid": "r4",
+"front": "認知外包\nHanding the thinking work that students should do themselves over to generative AI.",
+"back": "Cognitive offloading / outsourcing"
+},
+{
+"pid": "r5",
+"front": "校對\nChecking a text for errors in grammar, spelling, and formatting before submission.",
+"back": "Proofreading"
+},
+{
+"pid": "r6",
+"front": "3C 原則\nAcademic writing should be Clear, Concise, and Coherent.",
+"back": "3C principle"
+},
+{
+"pid": "r7",
+"front": "清楚\nEasy to understand; uses precise, direct, reader-friendly language.",
+"back": "Clear"
+},
+{
+"pid": "r8",
+"front": "簡潔\nNo unnecessary words; only words that contribute meaning.",
+"back": "Concise"
+},
+{
+"pid": "r9",
+"front": "連貫\nEasy to follow; ideas are logically connected, one main idea per paragraph.",
+"back": "Coherent"
+},
+{
+"pid": "r10",
+"front": "冗長雜亂句\nAn overly long, unfocused sentence with too many conjunctions and too much information.",
+"back": "Rambling sentence"
+},
+{
+"pid": "r11",
+"front": "贅字\nWords that add no meaning, e.g., really, very, actually, basically.",
+"back": "Filler words"
+},
+{
+"pid": "r12",
+"front": "改述\nRestating a source's ideas in your own words, with a citation.",
+"back": "Paraphrasing"
+},
+{
+"pid": "r13",
+"front": "綜合\nCombining ideas from several sources into a new, integrated understanding.",
+"back": "Synthesis"
+},
+{
+"pid": "r14",
+"front": "AI 使用聲明\nA statement disclosing the tool, purpose, process, modification, and verification of AI use.",
+"back": "AI use declaration"
+},
+{
+"pid": "r15",
+"front": "智慧財產\nProtected creations such as unpublished work, data, inventions, and copyrighted material.",
+"back": "Intellectual property (IP)"
+},
+{
+"pid": "r16",
+"front": "投稿\nSending a manuscript to a journal for consideration.",
+"back": "Submission"
+},
+{
+"pid": "r17",
+"front": "稿件\nThe author's version of a paper submitted for publication.",
+"back": "Manuscript"
+},
+{
+"pid": "r18",
+"front": "原創性\nThe quality of offering new ideas, data, or contributions not previously published.",
+"back": "Originality"
+},
+{
+"pid": "r19",
+"front": "引用\nA reference in the text to a source that was used.",
+"back": "Citation"
+},
+{
+"pid": "r20",
+"front": "全球化\nScientific publishing becoming international; Asia now produces nearly half of publications.",
+"back": "Globalization (of publishing)"
+},
+{
+"pid": "r21",
+"front": "合理化\nStandardized, metric-based evaluation of research focusing on quality and impact.",
+"back": "Rationalization"
+},
+{
+"pid": "r22",
+"front": "同儕審查\nEvaluation of a manuscript by experts in the same field before publication.",
+"back": "Peer review"
+},
+{
+"pid": "r23",
+"front": "期刊宗旨與範圍\nThe topics and article types a journal publishes.",
+"back": "Aims and scope"
+},
+{
+"pid": "r24",
+"front": "期刊指標\nQuantitative indicators of a journal's citation influence, visibility, and position in a field.",
+"back": "Journal metrics"
+},
+{
+"pid": "r25",
+"front": "影響係數\nWeb of Science metric: citation rate over a 2-year publication window.",
+"back": "Journal Impact Factor (JIF)"
+},
+{
+"pid": "r26",
+"front": "Web of Science metric: field-normalised citation impact.",
+"back": "Journal Citation Indicator (JCI)"
+},
+{
+"pid": "r27",
+"front": "Scopus metric: citation impact using a 4-year window.",
+"back": "CiteScore"
+},
+{
+"pid": "r28",
+"front": "Scopus metric: citation impact weighted by source prestige.",
+"back": "SJR (SCImago Journal Rank)"
+},
+{
+"pid": "r29",
+"front": "Scopus metric: citation impact adjusted for field differences.",
+"back": "SNIP (Source Normalized Impact per Paper)"
+},
+{
+"pid": "r30",
+"front": "分區\nRanking of journals in a field into four groups (Q1 = top 25%).",
+"back": "Quartile"
+},
+{
+"pid": "r31",
+"front": "作者須知\nA journal's rules on structure, length, style, references, figures, and declarations.",
+"back": "Guide for Authors"
+},
+{
+"pid": "r32",
+"front": "可被搜尋／收錄\nHow easily a paper can be found by readers and included in databases.",
+"back": "Discoverability / Indexing"
+},
+{
+"pid": "r33",
+"front": "服務單位\nThe institution an author belongs to, written with its official name.",
+"back": "Affiliation"
+},
+{
+"pid": "r34",
+"front": "研究者識別碼\nA unique, persistent identifier that distinguishes researchers and links their publications.",
+"back": "ORCID iD"
+},
+{
+"pid": "r35",
+"front": "通訊作者\nThe author responsible for communication with the journal and readers.",
+"back": "Corresponding author"
+},
+{
+"pid": "r36",
+"front": "摘要\nA concise stand-alone summary of the paper's background, purpose, methods, results, and conclusion.",
+"back": "Abstract"
+},
+{
+"pid": "r37",
+"front": "關鍵字\nSpecific, searchable terms that represent the main concepts of a paper.",
+"back": "Keywords"
+},
+{
+"pid": "r38",
+"front": "Introduction, Methods, Results, and Discussion: the standard structure of a research paper.",
+"back": "IMRaD"
+},
+{
+"pid": "r39",
+"front": "研究缺口\nWhat previous research has not yet addressed and the current study aims to fill.",
+"back": "Research gap"
+},
+{
+"pid": "r40",
+"front": "假設\nA testable prediction about the relationship between variables.",
+"back": "Hypothesis"
+},
+{
+"pid": "r41",
+"front": "漏斗結構\nMoving from broad context to previous research, gap, purpose, and contribution.",
+"back": "Introduction funnel"
+},
+{
+"pid": "r42",
+"front": "可重現性\nOthers can repeat the study with the same methods and obtain similar results.",
+"back": "Reproducibility"
+},
+{
+"pid": "r43",
+"front": "基準方法\nA standard method used for comparison with the proposed method.",
+"back": "Baseline"
+},
+{
+"pid": "r44",
+"front": "消融實驗\nRemoving parts of a model to test each part's contribution.",
+"back": "Ablation study"
+},
+{
+"pid": "r45",
+"front": "超參數\nA setting chosen before training, e.g., learning rate or number of epochs.",
+"back": "Hyperparameter"
+},
+{
+"pid": "r46",
+"front": "評估指標\nMeasures of performance, e.g., accuracy, precision, recall, F1-score, latency.",
+"back": "Evaluation metrics"
+},
+{
+"pid": "r47",
+"front": "補充資料\nAdditional data or analyses provided outside the main paper.",
+"back": "Supplementary material"
+},
+{
+"pid": "r48",
+"front": "可推廣性\nThe extent to which results apply beyond the tested data or conditions.",
+"back": "Generalizability"
+},
+{
+"pid": "r49",
+"front": "研究限制\nA weakness of the study that affects interpretation or generalizability.",
+"back": "Limitation"
+},
+{
+"pid": "r50",
+"front": "相關 vs 因果\nTwo variables changing together does not prove that one causes the other.",
+"back": "Correlation vs. causation"
+},
+{
+"pid": "r51",
+"front": "意涵\nWhat the findings mean in technical, practical, or theoretical terms.",
+"back": "Implication"
+},
+{
+"pid": "r52",
+"front": "致謝\nCredit for support that does not qualify for authorship, including funding.",
+"back": "Acknowledgements"
+},
+{
+"pid": "r53",
+"front": "自我引用\nCiting one's own previous work; excessive self-citation should be avoided.",
+"back": "Self-citation"
+},
+{
+"pid": "r54",
+"front": "二手來源\nA source that reports on original research, e.g., a blog or review summary.",
+"back": "Secondary source"
+},
+{
+"pid": "r55",
+"front": "文獻管理工具\nSoftware that formats references; its output must still be checked manually.",
+"back": "Reference manager"
+},
+{
+"pid": "r56",
+"front": "數位物件識別碼\nDigital Object Identifier: a permanent link to a publication.",
+"back": "DOI"
+},
+{
+"pid": "r57",
+"front": "保留語氣\nWords like suggest, indicate, may, can that avoid overstating claims.",
+"back": "Cautious language (hedging)"
+},
+{
+"pid": "r58",
+"front": "情態動詞\nVerbs such as may, might, can, could used for cautious implications.",
+"back": "Modal verbs"
+},
+{
+"pid": "r59",
+"front": "現在完成式\nUsed for previous research still relevant (Several studies have investigated…).",
+"back": "Present perfect"
+}
+]
+},
+{
 "preset": "rwst-fill",
 "name": "科技論文寫作：填空必背",
 "color": "#ec4899",
