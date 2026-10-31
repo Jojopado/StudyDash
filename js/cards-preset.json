@@ -375,6 +375,577 @@
 "back": "That's a good question. The paper doesn't discuss it in detail, but I will check it after class."
 }
 ]
+},
+{
+"preset": "rwst-terms",
+"name": "科技論文寫作：英文術語 60",
+"color": "#8b5cf6",
+"desc": "期中名詞解釋＋填空用，正面英文、背面中文＋英文定義",
+"cards": [
+{
+"pid": "t0",
+"front": "Academic integrity",
+"back": "學術誠信\nHonest and responsible conduct in research and writing, avoiding plagiarism, fabrication, and cheating."
+},
+{
+"pid": "t1",
+"front": "Plagiarism",
+"back": "抄襲\nPresenting someone else's words or ideas as your own without proper citation."
+},
+{
+"pid": "t2",
+"front": "Fabrication",
+"back": "捏造\nInventing data, results, quotations, or references that do not exist."
+},
+{
+"pid": "t3",
+"front": "Contract cheating",
+"back": "代寫作弊\nHaving another person or service complete academic work that is then submitted as one's own."
+},
+{
+"pid": "t4",
+"front": "Cognitive offloading / outsourcing",
+"back": "認知外包\nHanding the thinking work that students should do themselves over to generative AI."
+},
+{
+"pid": "t5",
+"front": "Proofreading",
+"back": "校對\nChecking a text for errors in grammar, spelling, and formatting before submission."
+},
+{
+"pid": "t6",
+"front": "3C principle",
+"back": "3C 原則\nAcademic writing should be Clear, Concise, and Coherent."
+},
+{
+"pid": "t7",
+"front": "Clear",
+"back": "清楚\nEasy to understand; uses precise, direct, reader-friendly language."
+},
+{
+"pid": "t8",
+"front": "Concise",
+"back": "簡潔\nNo unnecessary words; only words that contribute meaning."
+},
+{
+"pid": "t9",
+"front": "Coherent",
+"back": "連貫\nEasy to follow; ideas are logically connected, one main idea per paragraph."
+},
+{
+"pid": "t10",
+"front": "Rambling sentence",
+"back": "冗長雜亂句\nAn overly long, unfocused sentence with too many conjunctions and too much information."
+},
+{
+"pid": "t11",
+"front": "Filler words",
+"back": "贅字\nWords that add no meaning, e.g., really, very, actually, basically."
+},
+{
+"pid": "t12",
+"front": "Paraphrasing",
+"back": "改述\nRestating a source's ideas in your own words, with a citation."
+},
+{
+"pid": "t13",
+"front": "Synthesis",
+"back": "綜合\nCombining ideas from several sources into a new, integrated understanding."
+},
+{
+"pid": "t14",
+"front": "AI use declaration",
+"back": "AI 使用聲明\nA statement disclosing the tool, purpose, process, modification, and verification of AI use."
+},
+{
+"pid": "t15",
+"front": "Intellectual property (IP)",
+"back": "智慧財產\nProtected creations such as unpublished work, data, inventions, and copyrighted material."
+},
+{
+"pid": "t16",
+"front": "Submission",
+"back": "投稿\nSending a manuscript to a journal for consideration."
+},
+{
+"pid": "t17",
+"front": "Manuscript",
+"back": "稿件\nThe author's version of a paper submitted for publication."
+},
+{
+"pid": "t18",
+"front": "Originality",
+"back": "原創性\nThe quality of offering new ideas, data, or contributions not previously published."
+},
+{
+"pid": "t19",
+"front": "Citation",
+"back": "引用\nA reference in the text to a source that was used."
+},
+{
+"pid": "t20",
+"front": "Globalization (of publishing)",
+"back": "全球化\nScientific publishing becoming international; Asia now produces nearly half of publications."
+},
+{
+"pid": "t21",
+"front": "Rationalization",
+"back": "合理化\nStandardized, metric-based evaluation of research focusing on quality and impact."
+},
+{
+"pid": "t22",
+"front": "Peer review",
+"back": "同儕審查\nEvaluation of a manuscript by experts in the same field before publication."
+},
+{
+"pid": "t23",
+"front": "Aims and scope",
+"back": "期刊宗旨與範圍\nThe topics and article types a journal publishes."
+},
+{
+"pid": "t24",
+"front": "Journal metrics",
+"back": "期刊指標\nQuantitative indicators of a journal's citation influence, visibility, and position in a field."
+},
+{
+"pid": "t25",
+"front": "Journal Impact Factor (JIF)",
+"back": "影響係數\nWeb of Science metric: citation rate over a 2-year publication window."
+},
+{
+"pid": "t26",
+"front": "Journal Citation Indicator (JCI)",
+"back": "Web of Science metric: field-normalised citation impact."
+},
+{
+"pid": "t27",
+"front": "CiteScore",
+"back": "Scopus metric: citation impact using a 4-year window."
+},
+{
+"pid": "t28",
+"front": "SJR (SCImago Journal Rank)",
+"back": "Scopus metric: citation impact weighted by source prestige."
+},
+{
+"pid": "t29",
+"front": "SNIP (Source Normalized Impact per Paper)",
+"back": "Scopus metric: citation impact adjusted for field differences."
+},
+{
+"pid": "t30",
+"front": "Quartile",
+"back": "分區\nRanking of journals in a field into four groups (Q1 = top 25%)."
+},
+{
+"pid": "t31",
+"front": "Guide for Authors",
+"back": "作者須知\nA journal's rules on structure, length, style, references, figures, and declarations."
+},
+{
+"pid": "t32",
+"front": "Discoverability / Indexing",
+"back": "可被搜尋／收錄\nHow easily a paper can be found by readers and included in databases."
+},
+{
+"pid": "t33",
+"front": "Affiliation",
+"back": "服務單位\nThe institution an author belongs to, written with its official name."
+},
+{
+"pid": "t34",
+"front": "ORCID iD",
+"back": "研究者識別碼\nA unique, persistent identifier that distinguishes researchers and links their publications."
+},
+{
+"pid": "t35",
+"front": "Corresponding author",
+"back": "通訊作者\nThe author responsible for communication with the journal and readers."
+},
+{
+"pid": "t36",
+"front": "Abstract",
+"back": "摘要\nA concise stand-alone summary of the paper's background, purpose, methods, results, and conclusion."
+},
+{
+"pid": "t37",
+"front": "Keywords",
+"back": "關鍵字\nSpecific, searchable terms that represent the main concepts of a paper."
+},
+{
+"pid": "t38",
+"front": "IMRaD",
+"back": "Introduction, Methods, Results, and Discussion: the standard structure of a research paper."
+},
+{
+"pid": "t39",
+"front": "Research gap",
+"back": "研究缺口\nWhat previous research has not yet addressed and the current study aims to fill."
+},
+{
+"pid": "t40",
+"front": "Hypothesis",
+"back": "假設\nA testable prediction about the relationship between variables."
+},
+{
+"pid": "t41",
+"front": "Introduction funnel",
+"back": "漏斗結構\nMoving from broad context to previous research, gap, purpose, and contribution."
+},
+{
+"pid": "t42",
+"front": "Reproducibility",
+"back": "可重現性\nOthers can repeat the study with the same methods and obtain similar results."
+},
+{
+"pid": "t43",
+"front": "Baseline",
+"back": "基準方法\nA standard method used for comparison with the proposed method."
+},
+{
+"pid": "t44",
+"front": "Ablation study",
+"back": "消融實驗\nRemoving parts of a model to test each part's contribution."
+},
+{
+"pid": "t45",
+"front": "Hyperparameter",
+"back": "超參數\nA setting chosen before training, e.g., learning rate or number of epochs."
+},
+{
+"pid": "t46",
+"front": "Evaluation metrics",
+"back": "評估指標\nMeasures of performance, e.g., accuracy, precision, recall, F1-score, latency."
+},
+{
+"pid": "t47",
+"front": "Supplementary material",
+"back": "補充資料\nAdditional data or analyses provided outside the main paper."
+},
+{
+"pid": "t48",
+"front": "Generalizability",
+"back": "可推廣性\nThe extent to which results apply beyond the tested data or conditions."
+},
+{
+"pid": "t49",
+"front": "Limitation",
+"back": "研究限制\nA weakness of the study that affects interpretation or generalizability."
+},
+{
+"pid": "t50",
+"front": "Correlation vs. causation",
+"back": "相關 vs 因果\nTwo variables changing together does not prove that one causes the other."
+},
+{
+"pid": "t51",
+"front": "Implication",
+"back": "意涵\nWhat the findings mean in technical, practical, or theoretical terms."
+},
+{
+"pid": "t52",
+"front": "Acknowledgements",
+"back": "致謝\nCredit for support that does not qualify for authorship, including funding."
+},
+{
+"pid": "t53",
+"front": "Self-citation",
+"back": "自我引用\nCiting one's own previous work; excessive self-citation should be avoided."
+},
+{
+"pid": "t54",
+"front": "Secondary source",
+"back": "二手來源\nA source that reports on original research, e.g., a blog or review summary."
+},
+{
+"pid": "t55",
+"front": "Reference manager",
+"back": "文獻管理工具\nSoftware that formats references; its output must still be checked manually."
+},
+{
+"pid": "t56",
+"front": "DOI",
+"back": "數位物件識別碼\nDigital Object Identifier: a permanent link to a publication."
+},
+{
+"pid": "t57",
+"front": "Cautious language (hedging)",
+"back": "保留語氣\nWords like suggest, indicate, may, can that avoid overstating claims."
+},
+{
+"pid": "t58",
+"front": "Modal verbs",
+"back": "情態動詞\nVerbs such as may, might, can, could used for cautious implications."
+},
+{
+"pid": "t59",
+"front": "Present perfect",
+"back": "現在完成式\nUsed for previous research still relevant (Several studies have investigated…)."
+}
+]
+},
+{
+"preset": "rwst-fill",
+"name": "科技論文寫作：填空必背",
+"color": "#ec4899",
+"desc": "填空題原句，背面是英文答案＋說明",
+"cards": [
+{
+"pid": "f0",
+"front": "The 3C principle: Clear, Concise, and ______.",
+"back": "coherent\nClear / Concise / Coherent。"
+},
+{
+"pid": "f1",
+"front": "Clear, ______, and Coherent. (\"no unnecessary words\")",
+"back": "concise\nConcise = no unnecessary words。"
+},
+{
+"pid": "f2",
+"front": "\"In order to\" can usually be shortened to \"______\".",
+"back": "to\nIn order to → to。"
+},
+{
+"pid": "f3",
+"front": "\"Due to the fact that\" → \"______\".",
+"back": "because\nDue to the fact that → because。"
+},
+{
+"pid": "f4",
+"front": "Introduction: Context → What we know → What is ______ → What this study does.",
+"back": "missing\nWhat is missing = gap。"
+},
+{
+"pid": "f5",
+"front": "In the Introduction funnel, the step before \"Purpose, question, or hypothesis\" is the research ______.",
+"back": "gap\n…Problem → Research gap → Purpose → Contribution。"
+},
+{
+"pid": "f6",
+"front": "A good title = maximum ______ with no unnecessary words.",
+"back": "clarity\nMaximum clarity with no unnecessary words."
+},
+{
+"pid": "f7",
+"front": "A unique persistent identifier for researchers is the ______ iD.",
+"back": "orcid\nORCID iD。"
+},
+{
+"pid": "f8",
+"front": "The ______ author is responsible for communication with the journal.",
+"back": "corresponding\nCorresponding author（通訊作者）。"
+},
+{
+"pid": "f9",
+"front": "The standard main-text structure of a research paper is abbreviated ______ (Introduction, Methods, Results, and Discussion).",
+"back": "imrad\nIMRaD。"
+},
+{
+"pid": "f10",
+"front": "Title, Abstract, and Keywords affect discoverability and ______.",
+"back": "indexing\ndiscoverability and indexing。"
+},
+{
+"pid": "f11",
+"front": "JIF and JCI come from the ______ database.",
+"back": "web of science\nWeb of Science。"
+},
+{
+"pid": "f12",
+"front": "CiteScore, SJR, and SNIP come from the ______ database.",
+"back": "scopus\nScopus。"
+},
+{
+"pid": "f13",
+"front": "SNIP stands for Source Normalized Impact per ______.",
+"back": "paper\nSource Normalized Impact per Paper。"
+},
+{
+"pid": "f14",
+"front": "JIF stands for Journal ______ Factor.",
+"back": "impact\nJournal Impact Factor。"
+},
+{
+"pid": "f15",
+"front": "JCI stands for Journal Citation ______.",
+"back": "indicator\nJournal Citation Indicator。"
+},
+{
+"pid": "f16",
+"front": "JIF uses a ______-year publication window. (number)",
+"back": "2\nJIF 2 年。"
+},
+{
+"pid": "f17",
+"front": "CiteScore uses a ______-year window. (number)",
+"back": "4\nCiteScore 4 年。"
+},
+{
+"pid": "f18",
+"front": "Best journal = strong ______ between your paper, the journal, and its readers.",
+"back": "fit\nFit first. Metrics second."
+},
+{
+"pid": "f19",
+"front": "Journals are ranked into four groups called ______ (Q1–Q4).",
+"back": "quartiles\nQuartile and percentile ranking。"
+},
+{
+"pid": "f20",
+"front": "Two trends: ______ of scientific publishing, and Rationalization in standardization and research evaluation.",
+"back": "globalization\nGlobalization。"
+},
+{
+"pid": "f21",
+"front": "Discussion: Finding → Interpretation → Comparison with previous research → ______ → Limitation.",
+"back": "implication\nImplication。"
+},
+{
+"pid": "f22",
+"front": "Use figures for ______ and tables for exact values.",
+"back": "trends\nfigures for trends。"
+},
+{
+"pid": "f23",
+"front": "Removing parts of a model to test each part's contribution is called an ______ study.",
+"back": "ablation\nAblation study（消融實驗）。"
+},
+{
+"pid": "f24",
+"front": "A standard method used for comparison with the proposed method is a ______.",
+"back": "baseline\nBaseline。"
+},
+{
+"pid": "f25",
+"front": "Methods must give enough detail for others to understand, evaluate, and ______ the study.",
+"back": "reproduce\nreproduce → reproducibility。"
+},
+{
+"pid": "f26",
+"front": "Two variables changing together does not prove causation; this is the difference between correlation and ______.",
+"back": "causation\nDon't confuse correlation with causation。"
+},
+{
+"pid": "f27",
+"front": "The extent to which results apply beyond the tested data is called ______.",
+"back": "generalizability\nGeneralizability。"
+},
+{
+"pid": "f28",
+"front": "Results = What did we find? Discussion = What do the findings ______?",
+"back": "mean\nDiscussion = What do the findings mean, why do they matter…"
+},
+{
+"pid": "f29",
+"front": "The ______ section has the highest use of passive voice and the fewest citations.",
+"back": "methods\nMethods：passive high、citations low。"
+},
+{
+"pid": "f30",
+"front": "When acknowledging funding, include the funding agency and ______ number.",
+"back": "grant\nfunding agency and grant number。"
+},
+{
+"pid": "f31",
+"front": "A permanent link to a publication is its ______ (Digital Object Identifier).",
+"back": "doi\nDOI。"
+},
+{
+"pid": "f32",
+"front": "Citing one's own previous work too often is called excessive ______.",
+"back": "self-citation\nExcessive self-citation → balance references。"
+},
+{
+"pid": "f33",
+"front": "Always check Originality, ______, and Coherence.",
+"back": "readability\nOriginality, Readability, Coherence。"
+},
+{
+"pid": "f34",
+"front": "Academic integrity violations: Plagiarism, ______, and Contract cheating.",
+"back": "fabrication\nFabrication = 捏造。"
+},
+{
+"pid": "f35",
+"front": "AI use disclosure: Tool, Purpose, ______, Modification, Verification.",
+"back": "process\n五要素第三個是 Process。"
+},
+{
+"pid": "f36",
+"front": "AI use disclosure: Tool, Purpose, Process, Modification, ______.",
+"back": "verification\nVerification：你怎麼查證。"
+},
+{
+"pid": "f37",
+"front": "Summarising: Read → Interpret → Summarise → Use AI to Check → Return to the ______.",
+"back": "source\nReturn to the Source。"
+},
+{
+"pid": "f38",
+"front": "Use AI to support the writing process, not to ______ the writing process.",
+"back": "outsource\nnot to outsource。"
+},
+{
+"pid": "f39",
+"front": "Rambling sentences → Apply the ______ principle.",
+"back": "3c\nRambling → 3C。"
+},
+{
+"pid": "f40",
+"front": "Overloaded tables/figures → Use ______ charts.",
+"back": "summary\nUse summary charts。"
+},
+{
+"pid": "f41",
+"front": "GenAI should be used in a responsible, transparent, and ______ way.",
+"back": "critical\nresponsible, transparent, and critical。"
+},
+{
+"pid": "f42",
+"front": "Present ______ tense is used for previous research that remains relevant (\"Several studies have investigated…\").",
+"back": "perfect\nPresent perfect。"
+},
+{
+"pid": "f43",
+"front": "______ verbs (e.g., may) are used for cautious implications in the conclusion.",
+"back": "modal\nModal verbs。"
+},
+{
+"pid": "f44",
+"front": "A good abstract must be able to ______ alone.",
+"back": "stand\nstand alone。"
+},
+{
+"pid": "f45",
+"front": "Abstract element order: B → P → ______ → R → C. (letter)",
+"back": "m\nM = Methods。"
+},
+{
+"pid": "f46",
+"front": "Choose tense according to ______ and level of generality, not section alone.",
+"back": "function\nfunction and level of generality。"
+},
+{
+"pid": "f47",
+"front": "Fix the verb: \"The results ______ improved efficiency.\" (shows → ?, past tense)",
+"back": "showed\nresults 複數＋R 用過去式 → showed。"
+},
+{
+"pid": "f48",
+"front": "Fix the verb: \"Participants ______ to the system under different conditions.\" (speak → past)",
+"back": "spoke\nM：做過的步驟用過去式。"
+},
+{
+"pid": "f49",
+"front": "Fix the verb: \"This study ______ whether an imperfect system was useful.\" (tests → past)",
+"back": "tested\nP：已完成研究的目的用過去式。"
+},
+{
+"pid": "f50",
+"front": "Fix the verb: \"These findings ______ practical applications.\" (suggesting → ?)",
+"back": "suggest\nC：現在式 suggest。"
+}
+]
 }
 ]
 }

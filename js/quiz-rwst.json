@@ -1,0 +1,2817 @@
+{
+"id": "rwst",
+"name": "科技論文寫作 期中",
+"label": "期中練習",
+"groups": [
+{
+"id": "M0",
+"name": "M0 倫理與 AI",
+"ref": false,
+"count": 37
+},
+{
+"id": "J",
+"name": "M1 期刊與指標",
+"ref": false,
+"count": 38
+},
+{
+"id": "S",
+"name": "M1 Title～Intro／3C",
+"ref": false,
+"count": 42
+},
+{
+"id": "R",
+"name": "M1 Methods～Conclusion",
+"ref": false,
+"count": 37
+},
+{
+"id": "A",
+"name": "M1 致謝與文獻",
+"ref": false,
+"count": 19
+},
+{
+"id": "B",
+"name": "M2 Abstract 時態",
+"ref": false,
+"count": 32
+}
+],
+"questions": [
+{
+"id": "J-1",
+"g": "J",
+"n": 1,
+"q": "【是非】The best journal for a paper is always the one with the highest impact factor.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "Best journal = strong fit between your paper, the journal, and its readers. Fit first, metrics second."
+},
+{
+"id": "J-2",
+"g": "J",
+"n": 2,
+"q": "【是非】JIF measures citation rate over a 2-year publication window.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "JIF（Web of Science）＝2 年；CiteScore（Scopus）＝4 年。"
+},
+{
+"id": "J-3",
+"g": "J",
+"n": 3,
+"q": "【是非】CiteScore is a metric provided by Web of Science.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "CiteScore 是 Scopus 的。WoS 只有 JIF、JCI。"
+},
+{
+"id": "J-4",
+"g": "J",
+"n": 4,
+"q": "【是非】SJR, SNIP, and CiteScore are all Scopus-based metrics.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "Scopus 三個：CiteScore、SJR、SNIP。"
+},
+{
+"id": "J-5",
+"g": "J",
+"n": 5,
+"q": "【是非】Raw JIFs can be compared directly across unrelated disciplines.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "DO NOT compare raw JIFs across unrelated disciplines."
+},
+{
+"id": "J-6",
+"g": "J",
+"n": 6,
+"q": "【是非】JIF should not be treated as a measure of an individual paper's quality.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "Metrics describe journals, not individual papers."
+},
+{
+"id": "J-7",
+"g": "J",
+"n": 7,
+"q": "【是非】Between 2005 and 2024, Asia's share of global scientific publishing increased from 23% to 49%.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "Asia +26 pp；North America 32%→16%；Europe 39%→26%。"
+},
+{
+"id": "J-8",
+"g": "J",
+"n": 8,
+"q": "【是非】Europe's share of scientific articles increased between 2005 and 2024.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "Europe 39% → 26%（−13 pp）。"
+},
+{
+"id": "J-9",
+"g": "J",
+"n": 9,
+"q": "【是非】According to Marv Bauer, 27% of papers in a journal were not cited within 5 years.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "Elsevier 編輯 Marv Bauer：27% 五年內零引用，令人 disconcerting。"
+},
+{
+"id": "J-10",
+"g": "J",
+"n": 10,
+"q": "【是非】Citation counts are the only indicator of a paper's impact.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "Citation counts are only ONE indicator of impact."
+},
+{
+"id": "J-11",
+"g": "J",
+"n": 11,
+"q": "【是非】Same research presented to a different audience may need a different presentation.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "Same research, different audience → different presentation."
+},
+{
+"id": "S-1",
+"g": "S",
+"n": 1,
+"q": "【是非】\"A Study of…\" is a recommended way to begin a research paper title.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "\"A Study of…\" 是 words that add little value，要刪掉。"
+},
+{
+"id": "S-2",
+"g": "S",
+"n": 2,
+"q": "【是非】A good abstract should be able to stand alone.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "Abstract can stand alone，讀者不看全文也懂。"
+},
+{
+"id": "S-3",
+"g": "S",
+"n": 3,
+"q": "【是非】Using uncommon abbreviations in keywords helps make a paper unique and easier to find.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "Avoid uncommon abbreviations；要 specific, searchable, standard terminology。"
+},
+{
+"id": "S-4",
+"g": "S",
+"n": 4,
+"q": "【是非】The Introduction should include a broad literature review of the entire field.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "Don't write a broad literature review of the entire field；只放最相關的前人研究。"
+},
+{
+"id": "S-5",
+"g": "S",
+"n": 5,
+"q": "【是非】\"This is the first study…\" is an example of an unsupported claim of novelty that should be avoided.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "Introduction 的 Don't：unsupported novelty / priority claims。"
+},
+{
+"id": "S-6",
+"g": "S",
+"n": 6,
+"q": "【是非】Coherent means \"no unnecessary words\".",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "Concise = no unnecessary words；Coherent = easy to follow。"
+},
+{
+"id": "S-7",
+"g": "S",
+"n": 7,
+"q": "【是非】\"Due to the fact that\" can usually be replaced with \"because\".",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "Due to the fact that → because；In order to → to。"
+},
+{
+"id": "S-8",
+"g": "S",
+"n": 8,
+"q": "【是非】Researchers should use their name consistently across publications (e.g., always \"David Chen\").",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "Use your name consistently；用 ORCID iD 把著作連在一起。"
+},
+{
+"id": "R-1",
+"g": "R",
+"n": 1,
+"q": "【是非】The Results section should interpret the meaning of findings extensively.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "Present the evidence clearly; interpret its meaning in the Discussion."
+},
+{
+"id": "R-2",
+"g": "R",
+"n": 2,
+"q": "【是非】Figures are best for exact values, while tables are best for trends.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "反過來：figures for trends, tables for exact values。"
+},
+{
+"id": "R-3",
+"g": "R",
+"n": 3,
+"q": "【是非】You should report only significant or favourable results.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "Results 的 Avoid：reporting only significant or favourable results。"
+},
+{
+"id": "R-4",
+"g": "R",
+"n": 4,
+"q": "【是非】Every figure and table should be referred to in the text.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "Refer to every figure and table in the text."
+},
+{
+"id": "R-5",
+"g": "R",
+"n": 5,
+"q": "【是非】New datasets or methods may be introduced in the Discussion if they support the argument.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "Discussion 和 Conclusion 都不可以引入新方法、新資料、新結果。"
+},
+{
+"id": "R-6",
+"g": "R",
+"n": 6,
+"q": "【是非】Treating correlation as causation should be avoided in the Discussion.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "Avoid confusing correlation with causation."
+},
+{
+"id": "R-7",
+"g": "R",
+"n": 7,
+"q": "【是非】\"More research is needed.\" is a good, specific statement of future work.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "太模糊。要具體，例如 \"Future research should explore model compression techniques to reduce computational cost.\""
+},
+{
+"id": "R-8",
+"g": "R",
+"n": 8,
+"q": "【是非】In Methods, past tense is usually used for procedures actually performed.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "做過的步驟用過去式；已確立的方法、公式、系統特性用現在式。"
+},
+{
+"id": "R-9",
+"g": "R",
+"n": 9,
+"q": "【是非】Data should be displayed simply because you have them.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "Do not display data simply because you have them."
+},
+{
+"id": "R-10",
+"g": "R",
+"n": 10,
+"q": "【是非】The Conclusion synthesizes the overall message, while the Discussion interprets individual findings.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "Discussion：interprets individual findings；Conclusion：synthesizes the overall message。"
+},
+{
+"id": "A-1",
+"g": "A",
+"n": 1,
+"q": "【是非】A technician who only configured the GPU cluster should be acknowledged rather than listed as an author.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "沒有參與設計、分析、改稿 → Acknowledgement，不是作者。"
+},
+{
+"id": "A-2",
+"g": "A",
+"n": 2,
+"q": "【是非】You do not need permission before naming individuals in the Acknowledgements.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "Obtain permission before naming individuals."
+},
+{
+"id": "A-3",
+"g": "A",
+"n": 3,
+"q": "【是非】Output from a reference manager can be used without manual checking.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "可以用 reference manager，但要 check the output manually。"
+},
+{
+"id": "A-4",
+"g": "A",
+"n": 4,
+"q": "【是非】If an original study is available, you should cite it instead of a blog that summarizes it.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "Avoid citing secondary sources when the original source is available."
+},
+{
+"id": "A-5",
+"g": "A",
+"n": 5,
+"q": "【是非】Every in-text citation must have a matching entry in the reference list.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "Every in-text citation has a matching reference."
+},
+{
+"id": "M0-1",
+"g": "M0",
+"n": 1,
+"q": "【是非】Asking AI to \"paraphrase this so Turnitin cannot detect it\" is an appropriate use.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "用 AI 躲抄襲偵測是 inappropriate。"
+},
+{
+"id": "M0-2",
+"g": "M0",
+"n": 2,
+"q": "【是非】Asking AI to explain academic vocabulary is normally acceptable.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "屬於 Use GAI According to Its Purpose（一般可接受）。"
+},
+{
+"id": "M0-3",
+"g": "M0",
+"n": 3,
+"q": "【是非】Translating an entire paper into academic English with AI is normally acceptable.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "\"Translate this entire paper into academic English.\" 通常不行；查單字、比較說法可以。"
+},
+{
+"id": "M0-4",
+"g": "M0",
+"n": 4,
+"q": "【是非】You may cite a source that AI summarized for you even if you have not read it yourself.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "Do not cite a source that you have not checked yourself. AI is not a substitute for the original source."
+},
+{
+"id": "M0-5",
+"g": "M0",
+"n": 5,
+"q": "【是非】Brainstorming and suggesting outlines with AI are allowed with acknowledgement.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "Use AI-Assisted Writing Carefully：Allowed with Acknowledgement。"
+},
+{
+"id": "M0-6",
+"g": "M0",
+"n": 6,
+"q": "【是非】Uploading unpublished manuscripts to a generative AI tool is acceptable as long as you cite the tool.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "Protect Research Data and IP：unpublished manuscripts 不可上傳。"
+},
+{
+"id": "M0-7",
+"g": "M0",
+"n": 7,
+"q": "【是非】The student remains responsible for every sentence, claim, citation, and reference submitted.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "12. The Student Remains Responsible。"
+},
+{
+"id": "M0-8",
+"g": "M0",
+"n": 8,
+"q": "【是非】Contract cheating means having another person complete your academic work for you.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "Academic integrity 三種違規：Plagiarism、Fabrication、Contract cheating。"
+},
+{
+"id": "B-1",
+"g": "B",
+"n": 1,
+"q": "【是非】For very short abstracts, Purpose and Methods may be combined.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "Abstract Reduction → P+M。"
+},
+{
+"id": "B-2",
+"g": "B",
+"n": 2,
+"q": "【是非】Tense in an abstract should be chosen by section alone, not by sentence function.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "Choose tense according to function and level of generality, not section alone."
+},
+{
+"id": "B-3",
+"g": "B",
+"n": 3,
+"q": "【是非】\"The algorithm uses an attention mechanism.\" correctly uses present tense to describe how an established model works.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "M 的現在式用法：how the model works。"
+},
+{
+"id": "B-4",
+"g": "B",
+"n": 4,
+"q": "【是非】\"Accuracy increases as the amount of training data increases.\" uses present tense because it states a general pattern.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "R 的現在式：general facts / patterns。"
+},
+{
+"id": "B-5",
+"g": "B",
+"n": 5,
+"q": "【是非】In \"The results shows improved efficiency.\", the verb agrees correctly with the subject.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 1,
+"e": "results 是複數，要 showed（或 show）。"
+},
+{
+"id": "B-6",
+"g": "B",
+"n": 6,
+"q": "【是非】Background sentences in an abstract typically use present or present perfect tense.",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "B：Present（established facts）／Present perfect（previous research still relevant）。"
+},
+{
+"id": "B-7",
+"g": "B",
+"n": 7,
+"q": "【是非】The Conclusion element of an abstract answers the question \"so what?\".",
+"o": [
+"True（對）",
+"False（錯）"
+],
+"a": 0,
+"e": "C = What do the findings mean? Why do they matter?（so what?）"
+},
+{
+"id": "S-9",
+"g": "S",
+"n": 9,
+"q": "【單選】In the 3C principle, which one means \"no unnecessary words\"?",
+"o": [
+"Concise",
+"Correct",
+"Clear",
+"Coherent"
+],
+"a": 0,
+"e": "Clear = easy to understand；Concise = no unnecessary words；Coherent = easy to follow。"
+},
+{
+"id": "S-10",
+"g": "S",
+"n": 10,
+"q": "【單選】Coherent means:",
+"o": [
+"Easy to cite",
+"No unnecessary words",
+"Easy to understand",
+"Easy to follow"
+],
+"a": 3,
+"e": "Coherent：one main idea per paragraph、句子間有邏輯推進。"
+},
+{
+"id": "S-11",
+"g": "S",
+"n": 11,
+"q": "【單選】Writing \"blockchain ledger\" instead of \"system\" improves which C?",
+"o": [
+"Creative",
+"Coherent",
+"Concise",
+"Clear"
+],
+"a": 3,
+"e": "Clear：用具體詞代替模糊詞。"
+},
+{
+"id": "S-12",
+"g": "S",
+"n": 12,
+"q": "【單選】\"Due to the fact that\" should be replaced with:",
+"o": [
+"basically",
+"because",
+"in order to",
+"therefore"
+],
+"a": 1,
+"e": "Due to the fact that → because。"
+},
+{
+"id": "S-13",
+"g": "S",
+"n": 13,
+"q": "【單選】What should replace \"I think / I believe\" in academic writing?",
+"o": [
+"\"Basically\"",
+"\"It is important to note\"",
+"Evidence or passive voice",
+"\"I strongly feel\""
+],
+"a": 2,
+"e": "I think / I believe → 用證據或被動語態。"
+},
+{
+"id": "S-14",
+"g": "S",
+"n": 14,
+"q": "【單選】How should a sentence beginning with \"There is / There are\" be revised?",
+"o": [
+"Add \"really\"",
+"Keep it unchanged",
+"Start with the real subject",
+"Use \"It is important to note\""
+],
+"a": 2,
+"e": "There is / There are → 用真正的主詞開頭。"
+},
+{
+"id": "S-15",
+"g": "S",
+"n": 15,
+"q": "【單選】Which advice matches the filler \"a little / a bit\"?",
+"o": [
+"Replace with because",
+"Be direct",
+"Use specific quantifiers",
+"Replace with a stronger adjective"
+],
+"a": 2,
+"e": "A little / A bit → specific quantifiers；Kind of / Sort of → be direct；Very → stronger adjective。"
+},
+{
+"id": "S-16",
+"g": "S",
+"n": 16,
+"q": "【單選】Which title is the best?",
+"o": [
+"Machine Learning Approaches for Real-Time Cyberattack Detection",
+"Some Thoughts on Computers",
+"A Study on Different Aspects of Cybersecurity",
+"An Investigation into Some Aspects of Artificial Intelligence"
+],
+"a": 0,
+"e": "A good title = maximum clarity with no unnecessary words。"
+},
+{
+"id": "S-17",
+"g": "S",
+"n": 17,
+"q": "【單選】Why is \"An Investigation into Some Aspects of Artificial Intelligence\" a weak title?",
+"o": [
+"It is phrased as a question",
+"It is too specific",
+"It is vague and contains words that add little value",
+"It states the main finding"
+],
+"a": 2,
+"e": "\"An Investigation into\"、\"Some Aspects\" 都是空話。"
+},
+{
+"id": "S-18",
+"g": "S",
+"n": 18,
+"q": "【單選】What does an ORCID iD help with?",
+"o": [
+"Measuring a journal's impact",
+"Distinguishing researchers with similar names and linking their publications",
+"Formatting references",
+"Checking plagiarism"
+],
+"a": 1,
+"e": "ORCID iD：區分同名研究者，換名字或單位後還能把著作連在一起。"
+},
+{
+"id": "S-19",
+"g": "S",
+"n": 19,
+"q": "【單選】Accurate author information ensures correct attribution, discoverability, and ___.",
+"o": [
+"impact factor",
+"novelty",
+"readability",
+"accountability"
+],
+"a": 3,
+"e": "…correct attribution, discoverability, and accountability."
+},
+{
+"id": "S-20",
+"g": "S",
+"n": 20,
+"q": "【單選】Which abstract sentence is better?",
+"o": [
+"This paper presents a new algorithm for data mining which is very powerful and useful for many applications.",
+"This paper talks about some algorithms.",
+"This paper is very important for data mining.",
+"This paper proposes a graph-based clustering algorithm for large-scale social network analysis, achieving a 15% improvement in runtime compared with k-means."
+],
+"a": 3,
+"e": "具體方法＋量化結果＋比較基準。"
+},
+{
+"id": "S-21",
+"g": "S",
+"n": 21,
+"q": "【單選】Which keyword set is the most effective?",
+"o": [
+"System, Method, Result, Paper",
+"A novel and efficient approach for secure distributed systems",
+"Blockchain consensus, Proof-of-stake, Distributed ledger, Cryptocurrency security",
+"Technology, Computer, Internet, Data"
+],
+"a": 2,
+"e": "Technology / Computer… 太廣；最後一個是過長片語。"
+},
+{
+"id": "S-22",
+"g": "S",
+"n": 22,
+"q": "【單選】In the Introduction funnel, what comes right after \"Problem, limitation, or inconsistency\"?",
+"o": [
+"What previous research tells us",
+"Research gap",
+"Study contribution",
+"Broad research context"
+],
+"a": 1,
+"e": "Broad context → Previous research → Problem → Gap → Purpose → Contribution。"
+},
+{
+"id": "S-23",
+"g": "S",
+"n": 23,
+"q": "【單選】What is the LAST step of the Introduction funnel?",
+"o": [
+"Purpose, question, or hypothesis",
+"Broad research context",
+"Study contribution",
+"Research gap"
+],
+"a": 2,
+"e": "漏斗由廣到窄，最後是 Study contribution。"
+},
+{
+"id": "S-24",
+"g": "S",
+"n": 24,
+"q": "【單選】\"However, resource allocation remains a major challenge due to dynamic workloads.\" In the cloud example, this sentence states the:",
+"o": [
+"Contribution",
+"Broad context",
+"Purpose",
+"Problem"
+],
+"a": 3,
+"e": "However 開頭 → problem，從 what we know 轉到 what we still need to know。"
+},
+{
+"id": "S-25",
+"g": "S",
+"n": 25,
+"q": "【單選】Which should NOT appear in the Introduction?",
+"o": [
+"The research gap",
+"Detailed methods, results, or conclusions",
+"Definitions of unfamiliar abbreviations",
+"The research question or hypothesis"
+],
+"a": 1,
+"e": "Don't present detailed methods, results, or conclusions。"
+},
+{
+"id": "S-26",
+"g": "S",
+"n": 26,
+"q": "【單選】Title, Abstract, and Keywords must be clear and accurate mainly because they affect:",
+"o": [
+"The impact factor",
+"Discoverability and indexing",
+"Peer review time",
+"Reproducibility"
+],
+"a": 1,
+"e": "攸關 discoverability and indexing。"
+},
+{
+"id": "S-27",
+"g": "S",
+"n": 27,
+"q": "【單選】In the article structure, what comes right after Keywords?",
+"o": [
+"Main text (Introduction…)",
+"Acknowledgements",
+"Abstract",
+"References"
+],
+"a": 0,
+"e": "Title → Authors → Abstract → Keywords → Main text → Acknowledgements → References → Supplementary material。"
+},
+{
+"id": "S-28",
+"g": "S",
+"n": 28,
+"q": "【單選】\"Deep learning models are also widely used in medical image classification.\" inserted into a paragraph about students using GenAI for writing is mainly a problem of:",
+"o": [
+"Concision",
+"Clarity",
+"Citation",
+"Coherence"
+],
+"a": 3,
+"e": "跟主題無關、打斷論證 → coherence 問題。"
+},
+{
+"id": "J-12",
+"g": "J",
+"n": 12,
+"q": "【單選】Which metric provides field-normalised citation impact in Web of Science?",
+"o": [
+"SJR",
+"JCI",
+"CiteScore",
+"JIF"
+],
+"a": 1,
+"e": "JCI = Journal Citation Indicator（WoS，field-normalised）。"
+},
+{
+"id": "J-13",
+"g": "J",
+"n": 13,
+"q": "【單選】CiteScore measures citation impact using a ___ window.",
+"o": [
+"5-year",
+"4-year",
+"2-year",
+"1-year"
+],
+"a": 1,
+"e": "CiteScore 4 年；JIF 2 年。"
+},
+{
+"id": "J-14",
+"g": "J",
+"n": 14,
+"q": "【單選】Which metric weights citations by source prestige?",
+"o": [
+"SNIP",
+"JIF",
+"SJR",
+"JCI"
+],
+"a": 2,
+"e": "SJR = SCImago Journal Rank：weighted by source prestige。"
+},
+{
+"id": "J-15",
+"g": "J",
+"n": 15,
+"q": "【單選】Which metric adjusts citation impact for field differences in Scopus?",
+"o": [
+"JIF",
+"CiteScore",
+"SNIP",
+"SJR"
+],
+"a": 2,
+"e": "SNIP = Source Normalized Impact per Paper。"
+},
+{
+"id": "J-16",
+"g": "J",
+"n": 16,
+"q": "【單選】Which database provides JIF?",
+"o": [
+"ORCID",
+"Web of Science",
+"Scopus",
+"Google Scholar"
+],
+"a": 1,
+"e": "JIF、JCI → Web of Science。"
+},
+{
+"id": "J-17",
+"g": "J",
+"n": 17,
+"q": "【單選】According to the course data, which region produced about 49% of scientific articles in 2024?",
+"o": [
+"North America",
+"Europe",
+"South America",
+"Asia"
+],
+"a": 3,
+"e": "Asia 23% → 49%。"
+},
+{
+"id": "J-18",
+"g": "J",
+"n": 18,
+"q": "【單選】North America's share of scientific articles in 2024 was about:",
+"o": [
+"32%",
+"26%",
+"16%",
+"49%"
+],
+"a": 2,
+"e": "North America 32% → 16%。"
+},
+{
+"id": "J-19",
+"g": "J",
+"n": 19,
+"q": "【單選】The two major trends in scientific publishing are globalization and ___.",
+"o": [
+"privatization",
+"rationalization",
+"digitalization",
+"localization"
+],
+"a": 1,
+"e": "Globalization of Scientific Publishing／Rationalization in Standardization and Research Evaluation。"
+},
+{
+"id": "J-20",
+"g": "J",
+"n": 20,
+"q": "【單選】In the class activity, why should Journal B (JIF 4.5, high topic fit) be chosen over Journal A (JIF 8.2, low topic fit)?",
+"o": [
+"Journal A is not Q1",
+"Journal B is cheaper",
+"Fit first, metrics second",
+"Lower JIF journals are easier"
+],
+"a": 2,
+"e": "兩本都是 Q1，B 的 topic fit 高、類似論文多、讀者對 → fit first。"
+},
+{
+"id": "J-21",
+"g": "J",
+"n": 21,
+"q": "【單選】Journals seek research that is rigorous, relevant, ethical, and ___.",
+"o": [
+"clearly communicated",
+"very long",
+"highly cited by the author",
+"novel in every sentence"
+],
+"a": 0,
+"e": "Journals seek rigorous, relevant, ethical, and clearly communicated research."
+},
+{
+"id": "J-22",
+"g": "J",
+"n": 22,
+"q": "【單選】Which of the following is NOT wanted by journals?",
+"o": [
+"Rigorous methods",
+"Unnecessary duplication without clear added value",
+"Fit with the journal's scope",
+"Research integrity"
+],
+"a": 1,
+"e": "Not wanted：duplication、limited relevance、outdated、unsupported conclusions、insufficient evidence。"
+},
+{
+"id": "J-23",
+"g": "J",
+"n": 23,
+"q": "【單選】\"Write for the field. Format for the ___.\"",
+"o": [
+"journal",
+"reader",
+"conference",
+"supervisor"
+],
+"a": 0,
+"e": "Guide for Authors 的結論句。"
+},
+{
+"id": "J-24",
+"g": "J",
+"n": 24,
+"q": "【單選】\"Metrics describe journals. They do not replace ___.\"",
+"o": [
+"critical judgement",
+"citations",
+"peer review",
+"authors"
+],
+"a": 0,
+"e": "Metrics describe journals. They do not replace critical judgement."
+},
+{
+"id": "R-11",
+"g": "R",
+"n": 11,
+"q": "【單選】Use figures for ___ and tables for ___.",
+"o": [
+"methods / results",
+"trends / exact values",
+"results / methods",
+"exact values / trends"
+],
+"a": 1,
+"e": "Figures for trends, tables for exact values。"
+},
+{
+"id": "R-12",
+"g": "R",
+"n": 12,
+"q": "【單選】Accuracy, precision, recall, F1-score, and latency belong to which part of Methods?",
+"o": [
+"Experimental setup",
+"Evaluation metrics",
+"Software and versions",
+"Datasets and preprocessing"
+],
+"a": 1,
+"e": "CIFAR-10 等是 datasets；PyTorch 是 software；hardware/hyperparameters 是 experimental setup。"
+},
+{
+"id": "R-13",
+"g": "R",
+"n": 13,
+"q": "【單選】Hardware, hyperparameters, and simulation environment belong to:",
+"o": [
+"Evaluation metrics",
+"Algorithms or models",
+"Statistical analysis",
+"Experimental setup"
+],
+"a": 3,
+"e": "Experimental setup。"
+},
+{
+"id": "R-14",
+"g": "R",
+"n": 14,
+"q": "【單選】The main goal of the Methods section is to provide enough detail for others to understand, evaluate, and ___ the study.",
+"o": [
+"cite",
+"reproduce",
+"review",
+"publish"
+],
+"a": 1,
+"e": "understand, evaluate, and reproduce。"
+},
+{
+"id": "R-15",
+"g": "R",
+"n": 15,
+"q": "【單選】\"The proposed model achieved an F1-score of 0.91, compared with 0.84 for the baseline.\" belongs to:",
+"o": [
+"Conclusion",
+"Introduction",
+"Discussion",
+"Results"
+],
+"a": 3,
+"e": "報告數據 → Results。"
+},
+{
+"id": "R-16",
+"g": "R",
+"n": 16,
+"q": "【單選】\"This improvement suggests that the attention mechanism helps the model…\" belongs to:",
+"o": [
+"Discussion",
+"Methods",
+"Abstract keywords",
+"Results"
+],
+"a": 0,
+"e": "suggests = 解釋原因 → Discussion。"
+},
+{
+"id": "R-17",
+"g": "R",
+"n": 17,
+"q": "【單選】Which is the correct Discussion structure?",
+"o": [
+"Limitation → Finding → Method → Result",
+"Interpretation → Finding → Limitation → Comparison",
+"Finding → Interpretation → Comparison → Implication → Limitation",
+"Background → Purpose → Method → Result"
+],
+"a": 2,
+"e": "Finding → Interpretation → Comparison with previous research → Implication → Limitation。"
+},
+{
+"id": "R-18",
+"g": "R",
+"n": 18,
+"q": "【單選】\"However, the model was evaluated on a single benchmark dataset, so further testing on real-world network traffic is needed…\" plays which role in the Discussion?",
+"o": [
+"Comparison",
+"Finding",
+"Limitation",
+"Implication"
+],
+"a": 2,
+"e": "single dataset → generalizability 受限 → limitation。"
+},
+{
+"id": "R-19",
+"g": "R",
+"n": 19,
+"q": "【單選】Which sentence should be avoided in the Discussion?",
+"o": [
+"This finding is consistent with previous studies.",
+"One possible explanation is its ability to capture nonlinear relationships.",
+"This algorithm will revolutionize cloud computing.",
+"However, the model was evaluated on a single dataset."
+],
+"a": 2,
+"e": "沒有證據的誇大主張。"
+},
+{
+"id": "R-20",
+"g": "R",
+"n": 20,
+"q": "【單選】\"Conclusion = What did we learn, why does it matter, and ___?\"",
+"o": [
+"which journal",
+"what did we do",
+"who funded it",
+"what comes next"
+],
+"a": 3,
+"e": "Conclusion = What did we learn, why does it matter, and what comes next?"
+},
+{
+"id": "R-21",
+"g": "R",
+"n": 21,
+"q": "【單選】Which is the best example of future work in a Conclusion?",
+"o": [
+"Future research should explore model compression techniques to reduce computational cost.",
+"We will do more experiments someday.",
+"More research is needed.",
+"Future work is important."
+],
+"a": 0,
+"e": "Future work 要具體。"
+},
+{
+"id": "R-22",
+"g": "R",
+"n": 22,
+"q": "【單選】A graph legend shows only \"1-2, 2-2, 1-1, 2-1\". What is the main problem?",
+"o": [
+"Readers must decode labels to understand the trend",
+"It lacks a title page",
+"It should be a table of exact values",
+"The graph uses too few colors"
+],
+"a": 0,
+"e": "用 descriptive labels（例如 method1.dual），讓讀者不用解碼。"
+},
+{
+"id": "R-23",
+"g": "R",
+"n": 23,
+"q": "【單選】When comparisons in a figure are too complex, the slides recommend:",
+"o": [
+"Removing the legend",
+"Using 3D effects",
+"Adding more categories",
+"Grouping related data so the main trend is visible"
+],
+"a": 3,
+"e": "Simplify complex comparisons by grouping related data。"
+},
+{
+"id": "R-24",
+"g": "R",
+"n": 24,
+"q": "【單選】Which section typically has HIGH passive voice and LOW citations?",
+"o": [
+"Methods",
+"Conclusion",
+"Discussion",
+"Introduction"
+],
+"a": 0,
+"e": "Methods 被動最多、引用最少。"
+},
+{
+"id": "R-25",
+"g": "R",
+"n": 25,
+"q": "【單選】Which sections typically have HIGH present tense and HIGH citations?",
+"o": [
+"Methods and Results",
+"Results only",
+"Methods only",
+"Introduction and Discussion"
+],
+"a": 3,
+"e": "I 和 D 長得像；M 和 R 長得像（過去式多）。"
+},
+{
+"id": "A-6",
+"g": "A",
+"n": 6,
+"q": "【單選】A technician who only set up the GPU cluster (did not design the study or revise the manuscript) should be:",
+"o": [
+"Acknowledged",
+"Listed as first author",
+"Cited in the references",
+"Listed as corresponding author"
+],
+"a": 0,
+"e": "不符合 authorship → Acknowledgement。"
+},
+{
+"id": "A-7",
+"g": "A",
+"n": 7,
+"q": "【單選】When acknowledging funding, you should state the funding agency and the:",
+"o": [
+"impact factor",
+"ORCID iD",
+"grant number",
+"DOI"
+],
+"a": 2,
+"e": "funding agency and grant number。"
+},
+{
+"id": "A-8",
+"g": "A",
+"n": 8,
+"q": "【單選】Which is an example of IEEE in-text citation?",
+"o": [
+"…potential application in smart medication, Smith says.",
+"…potential application in smart medication¹⁹⁹⁸.",
+"…potential application in smart medication [1].",
+"…potential application in smart medication (Smith, 2021)."
+],
+"a": 2,
+"e": "IEEE 用方括號數字 [1]。"
+},
+{
+"id": "A-9",
+"g": "A",
+"n": 9,
+"q": "【單選】A blog post summarizes an original study you want to use. What should you cite?",
+"o": [
+"The original study",
+"The blog post",
+"Neither",
+"Both, but the blog first"
+],
+"a": 0,
+"e": "Cite the original research it summarizes。"
+},
+{
+"id": "A-10",
+"g": "A",
+"n": 10,
+"q": "【單選】Which is NOT one of the decision rules for citing a source?",
+"o": [
+"Is it the best available source for that claim?",
+"Is this source directly relevant to a claim I am making?",
+"Will this source increase my citation count?",
+"Have I actually checked the source?"
+],
+"a": 2,
+"e": "三個 decision rules：relevant? checked? best available?"
+},
+{
+"id": "A-11",
+"g": "A",
+"n": 11,
+"q": "【單選】\"Always check Originality, Readability, and ___.\"",
+"o": [
+"Citations",
+"Creativity",
+"Coherence",
+"Conciseness"
+],
+"a": 2,
+"e": "Be original in contribution, clear in expression, and coherent in argument."
+},
+{
+"id": "A-12",
+"g": "A",
+"n": 12,
+"q": "【單選】Swales & Feak's Academic Writing for Graduate Students links \"Summary writing (U5)\" to which section?",
+"o": [
+"Discussion",
+"Results",
+"Methods",
+"Abstract"
+],
+"a": 3,
+"e": "Abstract → Summary writing (U5)；Methods → Process descriptions (U3)。"
+},
+{
+"id": "A-13",
+"g": "A",
+"n": 13,
+"q": "【單選】\"Process descriptions\" are the writing skill associated with:",
+"o": [
+"Discussion",
+"Methods",
+"Abstract",
+"Introduction"
+],
+"a": 1,
+"e": "Methods → Process descriptions (U3)。"
+},
+{
+"id": "M0-9",
+"g": "M0",
+"n": 9,
+"q": "【單選】Which AI use is normally NOT acceptable?",
+"o": [
+"Writing a complete literature review",
+"Suggesting search keywords",
+"Checking spelling",
+"Suggesting transition words"
+],
+"a": 0,
+"e": "寫完整文獻回顧屬於 Uses That Are Normally Not Acceptable。"
+},
+{
+"id": "M0-10",
+"g": "M0",
+"n": 10,
+"q": "【單選】The recommended process for summarising research is:",
+"o": [
+"Read the abstract only → Cite",
+"Read → Interpret → Summarise → Use AI to Check → Return to the Source",
+"Ask AI → Summarise → Cite",
+"Upload Paper → Ask AI for a Summary → Cite the Paper"
+],
+"a": 1,
+"e": "8. Summarising Research。"
+},
+{
+"id": "M0-11",
+"g": "M0",
+"n": 11,
+"q": "【單選】Which prompt is an appropriate paraphrasing request?",
+"o": [
+"Paraphrase this so Turnitin cannot detect it.",
+"Paraphrase this whole article for me.",
+"Rewrite this paragraph so it looks like mine.",
+"Compare my paraphrase with the original. Is it too close to the source?"
+],
+"a": 3,
+"e": "先自己寫 paraphrase，再請 AI 比較。"
+},
+{
+"id": "M0-12",
+"g": "M0",
+"n": 12,
+"q": "【單選】In acceptable use, AI plays the role of Tutor → Language Adviser → ___.",
+"o": [
+"Ghost Writer",
+"Translator",
+"Feedback Provider",
+"Co-author"
+],
+"a": 2,
+"e": "Tutor → Language Adviser → Feedback Provider。"
+},
+{
+"id": "M0-13",
+"g": "M0",
+"n": 13,
+"q": "【單選】Which is acceptable for translation?",
+"o": [
+"Translating a classmate's paper",
+"Checking the meaning of a word or phrase",
+"Asking AI to translate and submit it directly",
+"Writing the whole paper in Chinese and translating it all with AI"
+],
+"a": 1,
+"e": "查單字、比較說法、理解難句、比較自己的版本 → 可以。"
+},
+{
+"id": "M0-14",
+"g": "M0",
+"n": 14,
+"q": "【單選】\"Generate five references that support my argument.\" is:",
+"o": [
+"Allowed with acknowledgement",
+"Normally acceptable",
+"Not acceptable",
+"Required"
+],
+"a": 2,
+"e": "捏造參考文獻 → not acceptable。"
+},
+{
+"id": "M0-15",
+"g": "M0",
+"n": 15,
+"q": "【單選】Presenting someone else's words or ideas as your own without proper citation is:",
+"o": [
+"Contract cheating",
+"Fabrication",
+"Paraphrasing",
+"Plagiarism"
+],
+"a": 3,
+"e": "Plagiarism。"
+},
+{
+"id": "M0-16",
+"g": "M0",
+"n": 16,
+"q": "【單選】Inventing data, results, or references is called:",
+"o": [
+"Plagiarism",
+"Fabrication",
+"Contract cheating",
+"Synthesis"
+],
+"a": 1,
+"e": "Fabrication。"
+},
+{
+"id": "M0-17",
+"g": "M0",
+"n": 17,
+"q": "【單選】Paying someone else to complete your assignment is:",
+"o": [
+"Fabrication",
+"Contract cheating",
+"Paraphrasing",
+"Proofreading"
+],
+"a": 1,
+"e": "Contract cheating。"
+},
+{
+"id": "M0-18",
+"g": "M0",
+"n": 18,
+"q": "【單選】\"Overuse of 'novel'\" should be solved by:",
+"o": [
+"Using precise claims",
+"Balancing references",
+"Using summary charts",
+"Applying the 3C principle"
+],
+"a": 0,
+"e": "Rambling → 3C；Overloaded tables → summary charts；Overuse of novel → precise claims；Self-citation → balance references。"
+},
+{
+"id": "M0-19",
+"g": "M0",
+"n": 19,
+"q": "【單選】\"Excessive self-citation\" should be solved by:",
+"o": [
+"Deleting all citations",
+"Balancing references",
+"Using precise claims",
+"Using summary charts"
+],
+"a": 1,
+"e": "Excessive self-citation → Balance references。"
+},
+{
+"id": "M0-20",
+"g": "M0",
+"n": 20,
+"q": "【單選】Which is the key message of the GAI guidelines?",
+"o": [
+"AI is responsible for errors in its output.",
+"Never use AI for anything.",
+"Use AI to write as much as possible.",
+"Use AI to support the writing process, not to outsource the writing process."
+],
+"a": 3,
+"e": "Use AI to support…, not to outsource…"
+},
+{
+"id": "M0-21",
+"g": "M0",
+"n": 21,
+"q": "【單選】For the Self-Introduction (p47), which is NOT one of the items?",
+"o": [
+"Favourite journal",
+"Principal supervisor",
+"Potential research topic",
+"Previous study"
+],
+"a": 0,
+"e": "① previous study ② principal supervisor ③ potential research topic。"
+},
+{
+"id": "B-8",
+"g": "B",
+"n": 8,
+"q": "【單選】The correct order of abstract elements is:",
+"o": [
+"P→B→M→C→R",
+"B→P→M→R→C",
+"B→M→P→R→C",
+"M→R→B→P→C"
+],
+"a": 1,
+"e": "Background → Purpose → Methods → Results → Conclusion。"
+},
+{
+"id": "B-9",
+"g": "B",
+"n": 9,
+"q": "【單選】\"Three models ___ on the dataset.\" (Methods, procedure performed)",
+"o": [
+"were trained",
+"have been training",
+"are trained",
+"will train"
+],
+"a": 0,
+"e": "做過的步驟 → 過去式。"
+},
+{
+"id": "B-10",
+"g": "B",
+"n": 10,
+"q": "【單選】\"The findings ___ that the proposed method is effective.\" (Conclusion, interpretation)",
+"o": [
+"suggested",
+"suggesting",
+"suggest",
+"had suggested"
+],
+"a": 2,
+"e": "C：現在式表解讀。"
+},
+{
+"id": "B-11",
+"g": "B",
+"n": 11,
+"q": "【單選】\"Several studies ___ AI-based scheduling.\" (Background, previous research still relevant)",
+"o": [
+"will investigate",
+"investigate",
+"investigating",
+"have investigated"
+],
+"a": 3,
+"e": "B：present perfect。"
+},
+{
+"id": "B-12",
+"g": "B",
+"n": 12,
+"q": "【單選】\"The proposed model ___ an F1-score of 0.92.\" (Results, specific finding)",
+"o": [
+"has been achieving",
+"achieve",
+"achieved",
+"achieves"
+],
+"a": 2,
+"e": "R：具體發現用過去式。"
+},
+{
+"id": "B-13",
+"g": "B",
+"n": 13,
+"q": "【單選】\"The method ___ improve real-time detection.\" (Conclusion, cautious implication)",
+"o": [
+"was",
+"did",
+"has",
+"may"
+],
+"a": 3,
+"e": "Modal verbs 表保留語氣。"
+},
+{
+"id": "B-14",
+"g": "B",
+"n": 14,
+"q": "【單選】Which element answers \"Why is the study needed?\"",
+"o": [
+"Purpose",
+"Methods",
+"Background",
+"Conclusion"
+],
+"a": 2,
+"e": "B = why?；P = what?；M = how?；R = what happened；C = so what?"
+},
+{
+"id": "B-15",
+"g": "B",
+"n": 15,
+"q": "【單選】Which element answers \"so what?\"",
+"o": [
+"Conclusion / Implications",
+"Background",
+"Results",
+"Purpose"
+],
+"a": 0,
+"e": "C：What do the findings mean? Why do they matter?"
+},
+{
+"id": "B-16",
+"g": "B",
+"n": 16,
+"q": "【單選】\"The aim of this study was to determine whether a lightweight model could improve…\" is which element?",
+"o": [
+"Methods",
+"Background",
+"Purpose",
+"Results"
+],
+"a": 2,
+"e": "P：已完成研究的目的，用過去式。"
+},
+{
+"id": "B-17",
+"g": "B",
+"n": 17,
+"q": "【單選】\"Phishing attacks remain a major cybersecurity threat.\" uses present tense because it:",
+"o": [
+"Is a cautious implication",
+"Describes the current situation / established knowledge",
+"Reports a specific finding",
+"Describes a procedure performed"
+],
+"a": 1,
+"e": "B：現在式描述目前的狀況。"
+},
+{
+"id": "B-18",
+"g": "B",
+"n": 18,
+"q": "【單選】\"These findings suggesting practical applications.\" What is wrong?",
+"o": [
+"It should use future tense",
+"\"findings\" should be singular",
+"\"suggesting\" is not a finite verb, so the sentence is incomplete",
+"Nothing is wrong"
+],
+"a": 2,
+"e": "改成 These findings suggest practical applications."
+},
+{
+"id": "B-19",
+"g": "B",
+"n": 19,
+"q": "【單選】\"This paper investigates three scheduling algorithms.\" Why is present tense acceptable here?",
+"o": [
+"It describes what the paper does",
+"It describes a past procedure",
+"It is background knowledge",
+"It reports a specific result"
+],
+"a": 0,
+"e": "P 的現在式：describing what the paper does。"
+},
+{
+"id": "B-20",
+"g": "B",
+"n": 20,
+"q": "【單選】Which is an example of cautious language?",
+"o": [
+"always",
+"definitely",
+"indicate",
+"prove"
+],
+"a": 2,
+"e": "Cautious language：suggest, indicate, may, can。"
+},
+{
+"id": "B-21",
+"g": "B",
+"n": 21,
+"q": "【單選】In very short abstracts, which element may be reduced or omitted?",
+"o": [
+"Conclusion",
+"Background",
+"Results",
+"Methods"
+],
+"a": 1,
+"e": "Abstract Reduction：縮減或省略 Background，合併 P+M。"
+},
+{
+"id": "M0-22",
+"g": "M0",
+"n": 22,
+"q": "【複選】Key signs of a rambling sentence include:（複選：選出全部正確的組合）\n(1) Too many \"and\"s or conjunctions\n(2) Too much information at once\n(3) Lacks punctuation or logical breaks\n(4) Uses the passive voice\n(5) Feels wandering or unfocused",
+"o": [
+"(1)、(2)、(3)、(5)",
+"(1)、(2)、(5)",
+"(2)、(3)、(4)、(5)",
+"(1)、(2)、(3)、(4)、(5)"
+],
+"a": 0,
+"e": "四個徵兆：太多連接詞、塞太多資訊、缺標點斷句、散漫沒重點。被動語態不是。"
+},
+{
+"id": "M0-23",
+"g": "M0",
+"n": 23,
+"q": "【複選】A transparent AI use disclosure should include:（複選：選出全部正確的組合）\n(1) Tool\n(2) Purpose\n(3) Price of the tool\n(4) Modification\n(5) Verification",
+"o": [
+"(1)、(2)、(4)、(5)",
+"(1)、(2)、(3)、(4)",
+"(2)、(3)、(4)、(5)",
+"(1)、(2)、(3)、(5)"
+],
+"a": 0,
+"e": "五要素：Tool / Purpose / Process / Modification / Verification。"
+},
+{
+"id": "M0-24",
+"g": "M0",
+"n": 24,
+"q": "【複選】Which should NOT be uploaded to a generative AI tool?（複選：選出全部正確的組合）\n(1) Confidential research data\n(2) Participant information\n(3) A single word whose meaning you want to check\n(4) Unpublished manuscripts\n(5) A supervisor's unpublished work",
+"o": [
+"(1)、(2)、(5)",
+"(1)、(2)、(4)、(5)",
+"(1)、(2)、(3)、(4)、(5)",
+"(2)、(4)、(5)"
+],
+"a": 1,
+"e": "查單字屬於可接受的翻譯用法。"
+},
+{
+"id": "M0-25",
+"g": "M0",
+"n": 25,
+"q": "【複選】Academic integrity violations covered in the course include:（複選：選出全部正確的組合）\n(1) Plagiarism\n(2) Fabrication\n(3) Contract cheating\n(4) Proofreading\n(5) Networking",
+"o": [
+"(1)、(2)、(3)、(4)",
+"(2)、(3)、(4)",
+"(1)、(2)、(3)",
+"(1)、(3)"
+],
+"a": 2,
+"e": "Plagiarism / Fabrication / Contract cheating。"
+},
+{
+"id": "M0-26",
+"g": "M0",
+"n": 26,
+"q": "【複選】Which AI uses are normally acceptable (unless the assignment says otherwise)?（複選：選出全部正確的組合）\n(1) Grammar feedback\n(2) Explaining citation formats\n(3) Suggesting keywords for literature searches\n(4) Generating research results or data\n(5) Writing the whole discussion section",
+"o": [
+"(1)、(2)、(3)",
+"(1)、(3)",
+"(1)、(2)、(3)、(4)",
+"(1)、(2)、(5)"
+],
+"a": 0,
+"e": "生成結果、寫整段 discussion → 不可以。"
+},
+{
+"id": "M0-27",
+"g": "M0",
+"n": 27,
+"q": "【複選】Generative AI may produce:（複選：選出全部正確的組合）\n(1) Fabricated references\n(2) Incorrect DOI numbers\n(3) Invented quotations\n(4) Inaccurate statistics\n(5) Guaranteed correct citations",
+"o": [
+"(1)、(2)、(3)、(4)、(5)",
+"(1)、(2)、(3)",
+"(1)、(3)、(4)、(5)",
+"(1)、(2)、(3)、(4)"
+],
+"a": 3,
+"e": "Never trust a reference simply because AI generated it."
+},
+{
+"id": "M0-28",
+"g": "M0",
+"n": 28,
+"q": "【複選】According To Wrap Up 11, which AI-use records should be retained?（複選：選出全部正確的組合）\n(1) The AI tool used\n(2) The date of use\n(3) Relevant prompts\n(4) Relevant outputs\n(5) Your classmates' prompts",
+"o": [
+"(1)、(2)、(3)、(4)",
+"(1)、(2)、(4)",
+"(2)、(3)、(4)",
+"(1)、(2)、(3)、(4)、(5)"
+],
+"a": 0,
+"e": "Retain：tool、date、purpose、prompts、outputs、significant revisions。"
+},
+{
+"id": "M0-29",
+"g": "M0",
+"n": 29,
+"q": "【複選】Before submitting, the student should ask:（複選：選出全部正確的組合）\n(1) Can I explain this?\n(2) Can I verify this?\n(3) Can I identify the source?\n(4) Did I make the final decision?\n(5) Will AI take responsibility?",
+"o": [
+"(1)、(2)、(3)、(4)、(5)",
+"(1)、(2)、(4)",
+"(1)、(2)、(3)、(4)",
+"(1)、(3)、(4)"
+],
+"a": 2,
+"e": "12. The Student Remains Responsible 的四個問題。"
+},
+{
+"id": "J-25",
+"g": "J",
+"n": 25,
+"q": "【複選】Which are things journals WANT in a manuscript?（複選：選出全部正確的組合）\n(1) Fit with the journal's scope and readership\n(2) Unnecessary duplication\n(3) Rigorous methods\n(4) Research integrity and ethical compliance\n(5) Outdated research",
+"o": [
+"(1)、(3)、(5)",
+"(1)、(2)、(3)、(4)",
+"(1)、(3)、(4)、(5)",
+"(1)、(3)、(4)"
+],
+"a": 3,
+"e": "Duplication、outdated 屬於 Not Wanted。"
+},
+{
+"id": "J-26",
+"g": "J",
+"n": 26,
+"q": "【複選】Which are Scopus-based metrics?（複選：選出全部正確的組合）\n(1) CiteScore\n(2) SJR\n(3) SNIP\n(4) JIF\n(5) JCI",
+"o": [
+"(1)、(2)、(3)、(4)",
+"(2)、(3)、(4)",
+"(1)、(2)",
+"(1)、(2)、(3)"
+],
+"a": 3,
+"e": "WoS：JIF、JCI；Scopus：CiteScore、SJR、SNIP。"
+},
+{
+"id": "J-27",
+"g": "J",
+"n": 27,
+"q": "【複選】Using metrics responsibly means you should:（複選：選出全部正確的組合）\n(1) Compare journals in appropriate fields\n(2) Consider more than one metric\n(3) Combine metrics with expert judgement\n(4) Judge a researcher solely by where they publish\n(5) Assume higher JIF = better research",
+"o": [
+"(1)、(3)、(4)",
+"(1)、(2)、(4)",
+"(1)、(2)",
+"(1)、(2)、(3)"
+],
+"a": 3,
+"e": "後兩個是 DO NOT。"
+},
+{
+"id": "J-28",
+"g": "J",
+"n": 28,
+"q": "【複選】Which should you check in a journal's Guide for Authors?（複選：選出全部正確的組合）\n(1) Article type and word limits\n(2) Reference and citation style\n(3) Figures and tables\n(4) Required statements and declarations\n(5) The editor's home address",
+"o": [
+"(1)、(3)、(4)、(5)",
+"(2)、(3)、(4)、(5)",
+"(1)、(2)、(3)、(4)、(5)",
+"(1)、(2)、(3)、(4)"
+],
+"a": 3,
+"e": "Write for the field. Format for the journal."
+},
+{
+"id": "S-29",
+"g": "S",
+"n": 29,
+"q": "【複選】Which should be AVOIDED in a title?（複選：選出全部正確的組合）\n(1) Unnecessary jargon or uncommon abbreviations\n(2) Words that add little value such as \"A Study of…\"\n(3) Important searchable keywords\n(4) Claims broader than the study supports\n(5) Terms familiar to the target readers",
+"o": [
+"(1)、(2)",
+"(1)、(2)、(3)、(4)",
+"(1)、(2)、(4)",
+"(1)、(4)"
+],
+"a": 2,
+"e": "Do：清楚、具體、可搜尋的 keywords、用讀者熟悉的術語。"
+},
+{
+"id": "S-30",
+"g": "S",
+"n": 30,
+"q": "【複選】Which should be AVOIDED when choosing keywords?（複選：選出全部正確的組合）\n(1) Terms that are too broad\n(2) Uncommon abbreviations\n(3) Very long keyword phrases\n(4) Standard terminology\n(5) Specific and searchable terms",
+"o": [
+"(1)、(2)、(3)",
+"(2)、(3)",
+"(1)、(2)",
+"(1)、(2)、(3)、(5)"
+],
+"a": 0,
+"e": "Do：standard terminology、specific and searchable。"
+},
+{
+"id": "S-31",
+"g": "S",
+"n": 31,
+"q": "【複選】Which are filler words that usually should be deleted or replaced?（複選：選出全部正確的組合）\n(1) really\n(2) basically\n(3) actually\n(4) just\n(5) precisely",
+"o": [
+"(1)、(2)、(3)、(4)",
+"(1)、(3)、(4)、(5)",
+"(1)、(2)、(4)、(5)",
+"(1)、(2)、(3)、(4)、(5)"
+],
+"a": 0,
+"e": "Really / Very / Just / Basically / Actually …"
+},
+{
+"id": "R-26",
+"g": "R",
+"n": 26,
+"q": "【複選】In the Discussion, findings can be compared with previous studies to show that they ___ earlier work.（複選：選出全部正確的組合）\n(1) support\n(2) extend\n(3) contradict\n(4) qualify\n(5) repeat",
+"o": [
+"(2)、(3)、(4)、(5)",
+"(1)、(2)、(3)、(4)",
+"(1)、(2)、(3)、(4)、(5)",
+"(1)、(3)、(4)"
+],
+"a": 1,
+"e": "support / extend / contradict / qualify。"
+},
+{
+"id": "R-27",
+"g": "R",
+"n": 27,
+"q": "【複選】Which should be AVOIDED in the Discussion?（複選：選出全部正確的組合）\n(1) Repeating the Results\n(2) Confusing correlation with causation\n(3) Ignoring unexpected findings\n(4) Introducing new datasets or results\n(5) Discussing relevant limitations",
+"o": [
+"(1)、(2)、(3)、(4)",
+"(1)、(3)、(4)",
+"(1)、(3)、(4)、(5)",
+"(1)、(2)、(3)、(4)、(5)"
+],
+"a": 0,
+"e": "Discussing limitations 是 Do。"
+},
+{
+"id": "R-28",
+"g": "R",
+"n": 28,
+"q": "【複選】Which should be AVOIDED in the Conclusion?（複選：選出全部正確的組合）\n(1) Repeating the Abstract or Discussion\n(2) Introducing new data or claims\n(3) Vague future work such as \"More research is needed.\"\n(4) Summarizing the main findings\n(5) Suggesting specific future research",
+"o": [
+"(1)、(2)、(3)",
+"(2)、(3)",
+"(1)、(2)、(3)、(5)",
+"(1)、(2)、(3)、(4)"
+],
+"a": 0,
+"e": "後兩個是 Do。"
+},
+{
+"id": "A-14",
+"g": "A",
+"n": 14,
+"q": "【複選】Which are typically acknowledged (rather than given authorship)?（複選：選出全部正確的組合）\n(1) Programming support\n(2) Data collection assistance\n(3) Language or technical editing\n(4) Funding agencies\n(5) A co-author who designed the study",
+"o": [
+"(1)、(2)、(3)",
+"(1)、(2)、(3)、(4)",
+"(1)、(2)、(4)",
+"(2)、(3)、(4)"
+],
+"a": 1,
+"e": "設計研究的人是作者。"
+},
+{
+"id": "A-15",
+"g": "A",
+"n": 15,
+"q": "【複選】Which reference practices should be AVOIDED?（複選：選出全部正確的組合）\n(1) Citing sources you have not checked\n(2) Excessive self-citation\n(3) Citing secondary sources when the original is available\n(4) Using relevant, accurate, credible sources\n(5) Irrelevant citations to increase citation counts",
+"o": [
+"(2)、(3)、(4)、(5)",
+"(1)、(2)、(3)、(5)",
+"(1)、(2)、(3)",
+"(1)、(2)、(3)、(4)、(5)"
+],
+"a": 1,
+"e": "Use references that are relevant, accurate, credible, current, supportive。"
+},
+{
+"id": "B-22",
+"g": "B",
+"n": 22,
+"q": "【複選】Which are typical tenses for the Conclusion element of an abstract?（複選：選出全部正確的組合）\n(1) Present\n(2) Modal verbs (may, can)\n(3) Past perfect\n(4) Future continuous\n(5) Present continuous",
+"o": [
+"(2)",
+"(1)、(2)、(3)",
+"(1)、(2)",
+"(1)"
+],
+"a": 2,
+"e": "C：Present／Modal verbs。"
+},
+{
+"id": "B-23",
+"g": "B",
+"n": 23,
+"q": "【複選】Which are cautious language words recommended for abstracts?（複選：選出全部正確的組合）\n(1) suggest\n(2) indicate\n(3) may\n(4) can\n(5) prove",
+"o": [
+"(1)、(2)、(3)、(4)",
+"(1)、(2)、(3)、(4)、(5)",
+"(1)、(3)、(4)、(5)",
+"(1)、(2)、(4)"
+],
+"a": 0,
+"e": "suggest, indicate, may, can。"
+},
+{
+"id": "S-32",
+"g": "S",
+"n": 32,
+"q": "【填空】The 3C principle: Clear, Concise, and ______.",
+"o": [
+"clarity",
+"coherent",
+"gap",
+"corresponding"
+],
+"a": 1,
+"e": "Clear / Concise / Coherent。"
+},
+{
+"id": "S-33",
+"g": "S",
+"n": 33,
+"q": "【填空】Clear, ______, and Coherent. (\"no unnecessary words\")",
+"o": [
+"to",
+"concise",
+"coherent",
+"gap"
+],
+"a": 1,
+"e": "Concise = no unnecessary words。"
+},
+{
+"id": "S-34",
+"g": "S",
+"n": 34,
+"q": "【填空】\"In order to\" can usually be shortened to \"______\".",
+"o": [
+"to",
+"clarity",
+"concise",
+"coherent"
+],
+"a": 0,
+"e": "In order to → to。"
+},
+{
+"id": "S-35",
+"g": "S",
+"n": 35,
+"q": "【填空】\"Due to the fact that\" → \"______\".",
+"o": [
+"clarity",
+"imrad",
+"gap",
+"because"
+],
+"a": 3,
+"e": "Due to the fact that → because。"
+},
+{
+"id": "S-36",
+"g": "S",
+"n": 36,
+"q": "【填空】Introduction: Context → What we know → What is ______ → What this study does.",
+"o": [
+"corresponding",
+"missing",
+"to",
+"clarity"
+],
+"a": 1,
+"e": "What is missing = gap。"
+},
+{
+"id": "S-37",
+"g": "S",
+"n": 37,
+"q": "【填空】In the Introduction funnel, the step before \"Purpose, question, or hypothesis\" is the research ______.",
+"o": [
+"clarity",
+"imrad",
+"coherent",
+"gap"
+],
+"a": 3,
+"e": "…Problem → Research gap → Purpose → Contribution。"
+},
+{
+"id": "S-38",
+"g": "S",
+"n": 38,
+"q": "【填空】A good title = maximum ______ with no unnecessary words.",
+"o": [
+"concise",
+"indexing",
+"clarity",
+"to"
+],
+"a": 2,
+"e": "Maximum clarity with no unnecessary words."
+},
+{
+"id": "S-39",
+"g": "S",
+"n": 39,
+"q": "【填空】A unique persistent identifier for researchers is the ______ iD.",
+"o": [
+"corresponding",
+"imrad",
+"orcid",
+"missing"
+],
+"a": 2,
+"e": "ORCID iD。"
+},
+{
+"id": "S-40",
+"g": "S",
+"n": 40,
+"q": "【填空】The ______ author is responsible for communication with the journal.",
+"o": [
+"indexing",
+"corresponding",
+"gap",
+"to"
+],
+"a": 1,
+"e": "Corresponding author（通訊作者）。"
+},
+{
+"id": "S-41",
+"g": "S",
+"n": 41,
+"q": "【填空】The standard main-text structure of a research paper is abbreviated ______ (Introduction, Methods, Results, and Discussion).",
+"o": [
+"because",
+"coherent",
+"gap",
+"imrad"
+],
+"a": 3,
+"e": "IMRaD。"
+},
+{
+"id": "S-42",
+"g": "S",
+"n": 42,
+"q": "【填空】Title, Abstract, and Keywords affect discoverability and ______.",
+"o": [
+"indexing",
+"imrad",
+"coherent",
+"concise"
+],
+"a": 0,
+"e": "discoverability and indexing。"
+},
+{
+"id": "J-29",
+"g": "J",
+"n": 29,
+"q": "【填空】JIF and JCI come from the ______ database.",
+"o": [
+"fit",
+"web of science",
+"globalization",
+"paper"
+],
+"a": 1,
+"e": "Web of Science。"
+},
+{
+"id": "J-30",
+"g": "J",
+"n": 30,
+"q": "【填空】CiteScore, SJR, and SNIP come from the ______ database.",
+"o": [
+"scopus",
+"web of science",
+"2",
+"impact"
+],
+"a": 0,
+"e": "Scopus。"
+},
+{
+"id": "J-31",
+"g": "J",
+"n": 31,
+"q": "【填空】SNIP stands for Source Normalized Impact per ______.",
+"o": [
+"4",
+"paper",
+"indicator",
+"2"
+],
+"a": 1,
+"e": "Source Normalized Impact per Paper。"
+},
+{
+"id": "J-32",
+"g": "J",
+"n": 32,
+"q": "【填空】JIF stands for Journal ______ Factor.",
+"o": [
+"paper",
+"web of science",
+"impact",
+"globalization"
+],
+"a": 2,
+"e": "Journal Impact Factor。"
+},
+{
+"id": "J-33",
+"g": "J",
+"n": 33,
+"q": "【填空】JCI stands for Journal Citation ______.",
+"o": [
+"globalization",
+"paper",
+"impact",
+"indicator"
+],
+"a": 3,
+"e": "Journal Citation Indicator。"
+},
+{
+"id": "J-34",
+"g": "J",
+"n": 34,
+"q": "【填空】JIF uses a ______-year publication window. (number)",
+"o": [
+"scopus",
+"4",
+"2",
+"fit"
+],
+"a": 2,
+"e": "JIF 2 年。"
+},
+{
+"id": "J-35",
+"g": "J",
+"n": 35,
+"q": "【填空】CiteScore uses a ______-year window. (number)",
+"o": [
+"paper",
+"scopus",
+"web of science",
+"4"
+],
+"a": 3,
+"e": "CiteScore 4 年。"
+},
+{
+"id": "J-36",
+"g": "J",
+"n": 36,
+"q": "【填空】Best journal = strong ______ between your paper, the journal, and its readers.",
+"o": [
+"globalization",
+"paper",
+"fit",
+"web of science"
+],
+"a": 2,
+"e": "Fit first. Metrics second."
+},
+{
+"id": "J-37",
+"g": "J",
+"n": 37,
+"q": "【填空】Journals are ranked into four groups called ______ (Q1–Q4).",
+"o": [
+"paper",
+"2",
+"quartiles",
+"scopus"
+],
+"a": 2,
+"e": "Quartile and percentile ranking。"
+},
+{
+"id": "J-38",
+"g": "J",
+"n": 38,
+"q": "【填空】Two trends: ______ of scientific publishing, and Rationalization in standardization and research evaluation.",
+"o": [
+"globalization",
+"paper",
+"fit",
+"2"
+],
+"a": 0,
+"e": "Globalization。"
+},
+{
+"id": "R-29",
+"g": "R",
+"n": 29,
+"q": "【填空】Discussion: Finding → Interpretation → Comparison with previous research → ______ → Limitation.",
+"o": [
+"trends",
+"methods",
+"causation",
+"implication"
+],
+"a": 3,
+"e": "Implication。"
+},
+{
+"id": "R-30",
+"g": "R",
+"n": 30,
+"q": "【填空】Use figures for ______ and tables for exact values.",
+"o": [
+"baseline",
+"causation",
+"trends",
+"methods"
+],
+"a": 2,
+"e": "figures for trends。"
+},
+{
+"id": "R-31",
+"g": "R",
+"n": 31,
+"q": "【填空】Removing parts of a model to test each part's contribution is called an ______ study.",
+"o": [
+"ablation",
+"mean",
+"generalizability",
+"baseline"
+],
+"a": 0,
+"e": "Ablation study（消融實驗）。"
+},
+{
+"id": "R-32",
+"g": "R",
+"n": 32,
+"q": "【填空】A standard method used for comparison with the proposed method is a ______.",
+"o": [
+"methods",
+"generalizability",
+"ablation",
+"baseline"
+],
+"a": 3,
+"e": "Baseline。"
+},
+{
+"id": "R-33",
+"g": "R",
+"n": 33,
+"q": "【填空】Methods must give enough detail for others to understand, evaluate, and ______ the study.",
+"o": [
+"implication",
+"generalizability",
+"baseline",
+"reproduce"
+],
+"a": 3,
+"e": "reproduce → reproducibility。"
+},
+{
+"id": "R-34",
+"g": "R",
+"n": 34,
+"q": "【填空】Two variables changing together does not prove causation; this is the difference between correlation and ______.",
+"o": [
+"methods",
+"trends",
+"generalizability",
+"causation"
+],
+"a": 3,
+"e": "Don't confuse correlation with causation。"
+},
+{
+"id": "R-35",
+"g": "R",
+"n": 35,
+"q": "【填空】The extent to which results apply beyond the tested data is called ______.",
+"o": [
+"generalizability",
+"ablation",
+"causation",
+"methods"
+],
+"a": 0,
+"e": "Generalizability。"
+},
+{
+"id": "R-36",
+"g": "R",
+"n": 36,
+"q": "【填空】Results = What did we find? Discussion = What do the findings ______?",
+"o": [
+"implication",
+"reproduce",
+"mean",
+"causation"
+],
+"a": 2,
+"e": "Discussion = What do the findings mean, why do they matter…"
+},
+{
+"id": "R-37",
+"g": "R",
+"n": 37,
+"q": "【填空】The ______ section has the highest use of passive voice and the fewest citations.",
+"o": [
+"baseline",
+"methods",
+"mean",
+"implication"
+],
+"a": 1,
+"e": "Methods：passive high、citations low。"
+},
+{
+"id": "A-16",
+"g": "A",
+"n": 16,
+"q": "【填空】When acknowledging funding, include the funding agency and ______ number.",
+"o": [
+"grant",
+"self-citation",
+"readability",
+"doi"
+],
+"a": 0,
+"e": "funding agency and grant number。"
+},
+{
+"id": "A-17",
+"g": "A",
+"n": 17,
+"q": "【填空】A permanent link to a publication is its ______ (Digital Object Identifier).",
+"o": [
+"doi",
+"grant",
+"readability",
+"self-citation"
+],
+"a": 0,
+"e": "DOI。"
+},
+{
+"id": "A-18",
+"g": "A",
+"n": 18,
+"q": "【填空】Citing one's own previous work too often is called excessive ______.",
+"o": [
+"doi",
+"self-citation",
+"readability",
+"grant"
+],
+"a": 1,
+"e": "Excessive self-citation → balance references。"
+},
+{
+"id": "A-19",
+"g": "A",
+"n": 19,
+"q": "【填空】Always check Originality, ______, and Coherence.",
+"o": [
+"self-citation",
+"doi",
+"readability",
+"grant"
+],
+"a": 2,
+"e": "Originality, Readability, Coherence。"
+},
+{
+"id": "M0-30",
+"g": "M0",
+"n": 30,
+"q": "【填空】Academic integrity violations: Plagiarism, ______, and Contract cheating.",
+"o": [
+"outsource",
+"fabrication",
+"verification",
+"process"
+],
+"a": 1,
+"e": "Fabrication = 捏造。"
+},
+{
+"id": "M0-31",
+"g": "M0",
+"n": 31,
+"q": "【填空】AI use disclosure: Tool, Purpose, ______, Modification, Verification.",
+"o": [
+"outsource",
+"process",
+"source",
+"fabrication"
+],
+"a": 1,
+"e": "五要素第三個是 Process。"
+},
+{
+"id": "M0-32",
+"g": "M0",
+"n": 32,
+"q": "【填空】AI use disclosure: Tool, Purpose, Process, Modification, ______.",
+"o": [
+"outsource",
+"verification",
+"summary",
+"source"
+],
+"a": 1,
+"e": "Verification：你怎麼查證。"
+},
+{
+"id": "M0-33",
+"g": "M0",
+"n": 33,
+"q": "【填空】Summarising: Read → Interpret → Summarise → Use AI to Check → Return to the ______.",
+"o": [
+"fabrication",
+"summary",
+"source",
+"critical"
+],
+"a": 2,
+"e": "Return to the Source。"
+},
+{
+"id": "M0-34",
+"g": "M0",
+"n": 34,
+"q": "【填空】Use AI to support the writing process, not to ______ the writing process.",
+"o": [
+"outsource",
+"verification",
+"3c",
+"fabrication"
+],
+"a": 0,
+"e": "not to outsource。"
+},
+{
+"id": "M0-35",
+"g": "M0",
+"n": 35,
+"q": "【填空】Rambling sentences → Apply the ______ principle.",
+"o": [
+"3c",
+"process",
+"verification",
+"source"
+],
+"a": 0,
+"e": "Rambling → 3C。"
+},
+{
+"id": "M0-36",
+"g": "M0",
+"n": 36,
+"q": "【填空】Overloaded tables/figures → Use ______ charts.",
+"o": [
+"source",
+"process",
+"summary",
+"critical"
+],
+"a": 2,
+"e": "Use summary charts。"
+},
+{
+"id": "M0-37",
+"g": "M0",
+"n": 37,
+"q": "【填空】GenAI should be used in a responsible, transparent, and ______ way.",
+"o": [
+"process",
+"fabrication",
+"3c",
+"critical"
+],
+"a": 3,
+"e": "responsible, transparent, and critical。"
+},
+{
+"id": "B-24",
+"g": "B",
+"n": 24,
+"q": "【填空】Present ______ tense is used for previous research that remains relevant (\"Several studies have investigated…\").",
+"o": [
+"perfect",
+"stand",
+"showed",
+"function"
+],
+"a": 0,
+"e": "Present perfect。"
+},
+{
+"id": "B-25",
+"g": "B",
+"n": 25,
+"q": "【填空】______ verbs (e.g., may) are used for cautious implications in the conclusion.",
+"o": [
+"m",
+"suggest",
+"modal",
+"function"
+],
+"a": 2,
+"e": "Modal verbs。"
+},
+{
+"id": "B-26",
+"g": "B",
+"n": 26,
+"q": "【填空】A good abstract must be able to ______ alone.",
+"o": [
+"function",
+"stand",
+"modal",
+"m"
+],
+"a": 1,
+"e": "stand alone。"
+},
+{
+"id": "B-27",
+"g": "B",
+"n": 27,
+"q": "【填空】Abstract element order: B → P → ______ → R → C. (letter)",
+"o": [
+"m",
+"modal",
+"suggest",
+"stand"
+],
+"a": 0,
+"e": "M = Methods。"
+},
+{
+"id": "B-28",
+"g": "B",
+"n": 28,
+"q": "【填空】Choose tense according to ______ and level of generality, not section alone.",
+"o": [
+"showed",
+"m",
+"stand",
+"function"
+],
+"a": 3,
+"e": "function and level of generality。"
+},
+{
+"id": "B-29",
+"g": "B",
+"n": 29,
+"q": "【填空】Fix the verb: \"The results ______ improved efficiency.\" (shows → ?, past tense)",
+"o": [
+"tested",
+"showed",
+"suggest",
+"stand"
+],
+"a": 1,
+"e": "results 複數＋R 用過去式 → showed。"
+},
+{
+"id": "B-30",
+"g": "B",
+"n": 30,
+"q": "【填空】Fix the verb: \"Participants ______ to the system under different conditions.\" (speak → past)",
+"o": [
+"spoke",
+"perfect",
+"suggest",
+"m"
+],
+"a": 0,
+"e": "M：做過的步驟用過去式。"
+},
+{
+"id": "B-31",
+"g": "B",
+"n": 31,
+"q": "【填空】Fix the verb: \"This study ______ whether an imperfect system was useful.\" (tests → past)",
+"o": [
+"spoke",
+"tested",
+"modal",
+"suggest"
+],
+"a": 1,
+"e": "P：已完成研究的目的用過去式。"
+},
+{
+"id": "B-32",
+"g": "B",
+"n": 32,
+"q": "【填空】Fix the verb: \"These findings ______ practical applications.\" (suggesting → ?)",
+"o": [
+"stand",
+"perfect",
+"suggest",
+"function"
+],
+"a": 2,
+"e": "C：現在式 suggest。"
+}
+]
+}

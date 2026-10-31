@@ -8,6 +8,7 @@ let ctx = null; // { openSheet, closeSheet, toast, render }
 export function initQuiz(c) { ctx = c; }
 
 const BANKS = [
+  { id: 'rwst', file: 'js/quiz-rwst.json', short: '科技論文寫作', exam: 50, mins: 80 },   // 期中 11/4：50 題 80 分鐘
   { id: 'iot', file: 'js/quiz-iot.json', short: 'IoT 物聯網', exam: 50, mins: 60 },
   { id: 'rfid', file: 'js/quiz-rfid.json', short: 'RFID／EPC', exam: 40, mins: 60 },   // GS1 認證考試 40 題、60 分鐘
   { id: 'dc', file: 'js/quiz-dc.json', short: '資料壓縮', exam: 30, mins: 45 },   // 期中 11/5 練習題（Ch1＋Ch5）
