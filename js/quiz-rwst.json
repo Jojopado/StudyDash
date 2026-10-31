@@ -38,6 +38,18 @@
 "name": "M2 Abstract 時態",
 "ref": false,
 "count": 32
+},
+{
+"id": "V1",
+"name": "單字：看定義選英文術語",
+"ref": false,
+"count": 60
+},
+{
+"id": "V2",
+"name": "單字：看英文選中文",
+"ref": false,
+"count": 60
 }
 ],
 "questions": [
@@ -2812,6 +2824,1686 @@
 ],
 "a": 2,
 "e": "C：現在式 suggest。"
+},
+{
+"id": "V1-1",
+"g": "V1",
+"n": 1,
+"q": "【單字】Which term matches this definition?\nHonest and responsible conduct in research and writing, avoiding plagiarism, fabrication, and cheating.",
+"o": [
+"Self-citation",
+"Academic integrity",
+"ORCID iD",
+"Supplementary material"
+],
+"a": 1,
+"e": "Academic integrity（學術誠信）：Honest and responsible conduct in research and writing, avoiding plagiarism, fabrication, and cheating."
+},
+{
+"id": "V2-1",
+"g": "V2",
+"n": 1,
+"q": "【單字】Academic integrity 的意思是？",
+"o": [
+"致謝",
+"學術誠信",
+"評估指標",
+"合理化"
+],
+"a": 1,
+"e": "Academic integrity（學術誠信）：Honest and responsible conduct in research and writing, avoiding plagiarism, fabrication, and cheating."
+},
+{
+"id": "V1-2",
+"g": "V1",
+"n": 2,
+"q": "【單字】Which term matches this definition?\nPresenting someone else's words or ideas as your own without proper citation.",
+"o": [
+"Paraphrasing",
+"Peer review",
+"Plagiarism",
+"Present perfect"
+],
+"a": 2,
+"e": "Plagiarism（抄襲）：Presenting someone else's words or ideas as your own without proper citation."
+},
+{
+"id": "V2-2",
+"g": "V2",
+"n": 2,
+"q": "【單字】Plagiarism 的意思是？",
+"o": [
+"抄襲",
+"文獻管理工具",
+"超參數",
+"服務單位"
+],
+"a": 0,
+"e": "Plagiarism（抄襲）：Presenting someone else's words or ideas as your own without proper citation."
+},
+{
+"id": "V1-3",
+"g": "V1",
+"n": 3,
+"q": "【單字】Which term matches this definition?\nInventing data, results, quotations, or references that do not exist.",
+"o": [
+"Limitation",
+"Fabrication",
+"Cognitive offloading / outsourcing",
+"AI use declaration"
+],
+"a": 1,
+"e": "Fabrication（捏造）：Inventing data, results, quotations, or references that do not exist."
+},
+{
+"id": "V2-3",
+"g": "V2",
+"n": 3,
+"q": "【單字】Fabrication 的意思是？",
+"o": [
+"簡潔",
+"捏造",
+"可重現性",
+"代寫作弊"
+],
+"a": 1,
+"e": "Fabrication（捏造）：Inventing data, results, quotations, or references that do not exist."
+},
+{
+"id": "V1-4",
+"g": "V1",
+"n": 4,
+"q": "【單字】Which term matches this definition?\nHaving another person or service complete academic work that is then submitted as one's own.",
+"o": [
+"Contract cheating",
+"Limitation",
+"Journal Citation Indicator (JCI)",
+"Rambling sentence"
+],
+"a": 0,
+"e": "Contract cheating（代寫作弊）：Having another person or service complete academic work that is then submitted as one's own."
+},
+{
+"id": "V2-4",
+"g": "V2",
+"n": 4,
+"q": "【單字】Contract cheating 的意思是？",
+"o": [
+"簡潔",
+"研究缺口",
+"代寫作弊",
+"補充資料"
+],
+"a": 2,
+"e": "Contract cheating（代寫作弊）：Having another person or service complete academic work that is then submitted as one's own."
+},
+{
+"id": "V1-5",
+"g": "V1",
+"n": 5,
+"q": "【單字】Which term matches this definition?\nHanding the thinking work that students should do themselves over to generative AI.",
+"o": [
+"Quartile",
+"Cognitive offloading / outsourcing",
+"Introduction funnel",
+"Plagiarism"
+],
+"a": 1,
+"e": "Cognitive offloading / outsourcing（認知外包）：Handing the thinking work that students should do themselves over to generative AI."
+},
+{
+"id": "V2-5",
+"g": "V2",
+"n": 5,
+"q": "【單字】Cognitive offloading / outsourcing 的意思是？",
+"o": [
+"代寫作弊",
+"學術誠信",
+"認知外包",
+"AI 使用聲明"
+],
+"a": 2,
+"e": "Cognitive offloading / outsourcing（認知外包）：Handing the thinking work that students should do themselves over to generative AI."
+},
+{
+"id": "V1-6",
+"g": "V1",
+"n": 6,
+"q": "【單字】Which term matches this definition?\nChecking a text for errors in grammar, spelling, and formatting before submission.",
+"o": [
+"Proofreading",
+"AI use declaration",
+"Fabrication",
+"Affiliation"
+],
+"a": 0,
+"e": "Proofreading（校對）：Checking a text for errors in grammar, spelling, and formatting before submission."
+},
+{
+"id": "V2-6",
+"g": "V2",
+"n": 6,
+"q": "【單字】Proofreading 的意思是？",
+"o": [
+"校對",
+"投稿",
+"全球化",
+"清楚"
+],
+"a": 0,
+"e": "Proofreading（校對）：Checking a text for errors in grammar, spelling, and formatting before submission."
+},
+{
+"id": "V1-7",
+"g": "V1",
+"n": 7,
+"q": "【單字】Which term matches this definition?\nAcademic writing should be Clear, Concise, and Coherent.",
+"o": [
+"3C principle",
+"Limitation",
+"Synthesis",
+"Academic integrity"
+],
+"a": 0,
+"e": "3C principle（3C 原則）：Academic writing should be Clear, Concise, and Coherent."
+},
+{
+"id": "V2-7",
+"g": "V2",
+"n": 7,
+"q": "【單字】3C principle 的意思是？",
+"o": [
+"相關 vs 因果",
+"二手來源",
+"可推廣性",
+"3C 原則"
+],
+"a": 3,
+"e": "3C principle（3C 原則）：Academic writing should be Clear, Concise, and Coherent."
+},
+{
+"id": "V1-8",
+"g": "V1",
+"n": 8,
+"q": "【單字】Which term matches this definition?\nEasy to understand; uses precise, direct, reader-friendly language.",
+"o": [
+"CiteScore",
+"Academic integrity",
+"Implication",
+"Clear"
+],
+"a": 3,
+"e": "Clear（清楚）：Easy to understand; uses precise, direct, reader-friendly language."
+},
+{
+"id": "V2-8",
+"g": "V2",
+"n": 8,
+"q": "【單字】Clear 的意思是？",
+"o": [
+"致謝",
+"AI 使用聲明",
+"清楚",
+"認知外包"
+],
+"a": 2,
+"e": "Clear（清楚）：Easy to understand; uses precise, direct, reader-friendly language."
+},
+{
+"id": "V1-9",
+"g": "V1",
+"n": 9,
+"q": "【單字】Which term matches this definition?\nNo unnecessary words; only words that contribute meaning.",
+"o": [
+"Concise",
+"Intellectual property (IP)",
+"Contract cheating",
+"Baseline"
+],
+"a": 0,
+"e": "Concise（簡潔）：No unnecessary words; only words that contribute meaning."
+},
+{
+"id": "V2-9",
+"g": "V2",
+"n": 9,
+"q": "【單字】Concise 的意思是？",
+"o": [
+"簡潔",
+"致謝",
+"冗長雜亂句",
+"可推廣性"
+],
+"a": 0,
+"e": "Concise（簡潔）：No unnecessary words; only words that contribute meaning."
+},
+{
+"id": "V1-10",
+"g": "V1",
+"n": 10,
+"q": "【單字】Which term matches this definition?\nEasy to follow; ideas are logically connected, one main idea per paragraph.",
+"o": [
+"Corresponding author",
+"Plagiarism",
+"Originality",
+"Coherent"
+],
+"a": 3,
+"e": "Coherent（連貫）：Easy to follow; ideas are logically connected, one main idea per paragraph."
+},
+{
+"id": "V2-10",
+"g": "V2",
+"n": 10,
+"q": "【單字】Coherent 的意思是？",
+"o": [
+"致謝",
+"連貫",
+"同儕審查",
+"清楚"
+],
+"a": 1,
+"e": "Coherent（連貫）：Easy to follow; ideas are logically connected, one main idea per paragraph."
+},
+{
+"id": "V1-11",
+"g": "V1",
+"n": 11,
+"q": "【單字】Which term matches this definition?\nAn overly long, unfocused sentence with too many conjunctions and too much information.",
+"o": [
+"Introduction funnel",
+"Plagiarism",
+"SJR (SCImago Journal Rank)",
+"Rambling sentence"
+],
+"a": 3,
+"e": "Rambling sentence（冗長雜亂句）：An overly long, unfocused sentence with too many conjunctions and too much information."
+},
+{
+"id": "V2-11",
+"g": "V2",
+"n": 11,
+"q": "【單字】Rambling sentence 的意思是？",
+"o": [
+"智慧財產",
+"補充資料",
+"改述",
+"冗長雜亂句"
+],
+"a": 3,
+"e": "Rambling sentence（冗長雜亂句）：An overly long, unfocused sentence with too many conjunctions and too much information."
+},
+{
+"id": "V1-12",
+"g": "V1",
+"n": 12,
+"q": "【單字】Which term matches this definition?\nWords that add no meaning, e.g., really, very, actually, basically.",
+"o": [
+"Cautious language (hedging)",
+"Implication",
+"Corresponding author",
+"Filler words"
+],
+"a": 3,
+"e": "Filler words（贅字）：Words that add no meaning, e.g., really, very, actually, basically."
+},
+{
+"id": "V2-12",
+"g": "V2",
+"n": 12,
+"q": "【單字】Filler words 的意思是？",
+"o": [
+"贅字",
+"認知外包",
+"自我引用",
+"情態動詞"
+],
+"a": 0,
+"e": "Filler words（贅字）：Words that add no meaning, e.g., really, very, actually, basically."
+},
+{
+"id": "V1-13",
+"g": "V1",
+"n": 13,
+"q": "【單字】Which term matches this definition?\nRestating a source's ideas in your own words, with a citation.",
+"o": [
+"Evaluation metrics",
+"Reproducibility",
+"Paraphrasing",
+"Abstract"
+],
+"a": 2,
+"e": "Paraphrasing（改述）：Restating a source's ideas in your own words, with a citation."
+},
+{
+"id": "V2-13",
+"g": "V2",
+"n": 13,
+"q": "【單字】Paraphrasing 的意思是？",
+"o": [
+"情態動詞",
+"改述",
+"分區",
+"研究限制"
+],
+"a": 1,
+"e": "Paraphrasing（改述）：Restating a source's ideas in your own words, with a citation."
+},
+{
+"id": "V1-14",
+"g": "V1",
+"n": 14,
+"q": "【單字】Which term matches this definition?\nCombining ideas from several sources into a new, integrated understanding.",
+"o": [
+"Reproducibility",
+"AI use declaration",
+"Manuscript",
+"Synthesis"
+],
+"a": 3,
+"e": "Synthesis（綜合）：Combining ideas from several sources into a new, integrated understanding."
+},
+{
+"id": "V2-14",
+"g": "V2",
+"n": 14,
+"q": "【單字】Synthesis 的意思是？",
+"o": [
+"智慧財產",
+"認知外包",
+"相關 vs 因果",
+"綜合"
+],
+"a": 3,
+"e": "Synthesis（綜合）：Combining ideas from several sources into a new, integrated understanding."
+},
+{
+"id": "V1-15",
+"g": "V1",
+"n": 15,
+"q": "【單字】Which term matches this definition?\nA statement disclosing the tool, purpose, process, modification, and verification of AI use.",
+"o": [
+"Filler words",
+"Generalizability",
+"Keywords",
+"AI use declaration"
+],
+"a": 3,
+"e": "AI use declaration（AI 使用聲明）：A statement disclosing the tool, purpose, process, modification, and verification of AI use."
+},
+{
+"id": "V2-15",
+"g": "V2",
+"n": 15,
+"q": "【單字】AI use declaration 的意思是？",
+"o": [
+"綜合",
+"AI 使用聲明",
+"情態動詞",
+"抄襲"
+],
+"a": 1,
+"e": "AI use declaration（AI 使用聲明）：A statement disclosing the tool, purpose, process, modification, and verification of AI use."
+},
+{
+"id": "V1-16",
+"g": "V1",
+"n": 16,
+"q": "【單字】Which term matches this definition?\nProtected creations such as unpublished work, data, inventions, and copyrighted material.",
+"o": [
+"Baseline",
+"Intellectual property (IP)",
+"Reproducibility",
+"Aims and scope"
+],
+"a": 1,
+"e": "Intellectual property (IP)（智慧財產）：Protected creations such as unpublished work, data, inventions, and copyrighted material."
+},
+{
+"id": "V2-16",
+"g": "V2",
+"n": 16,
+"q": "【單字】Intellectual property (IP) 的意思是？",
+"o": [
+"改述",
+"贅字",
+"智慧財產",
+"簡潔"
+],
+"a": 2,
+"e": "Intellectual property (IP)（智慧財產）：Protected creations such as unpublished work, data, inventions, and copyrighted material."
+},
+{
+"id": "V1-17",
+"g": "V1",
+"n": 17,
+"q": "【單字】Which term matches this definition?\nSending a manuscript to a journal for consideration.",
+"o": [
+"3C principle",
+"Submission",
+"Keywords",
+"Cautious language (hedging)"
+],
+"a": 1,
+"e": "Submission（投稿）：Sending a manuscript to a journal for consideration."
+},
+{
+"id": "V2-17",
+"g": "V2",
+"n": 17,
+"q": "【單字】Submission 的意思是？",
+"o": [
+"摘要",
+"自我引用",
+"AI 使用聲明",
+"投稿"
+],
+"a": 3,
+"e": "Submission（投稿）：Sending a manuscript to a journal for consideration."
+},
+{
+"id": "V1-18",
+"g": "V1",
+"n": 18,
+"q": "【單字】Which term matches this definition?\nThe author's version of a paper submitted for publication.",
+"o": [
+"Academic integrity",
+"Plagiarism",
+"Manuscript",
+"Coherent"
+],
+"a": 2,
+"e": "Manuscript（稿件）：The author's version of a paper submitted for publication."
+},
+{
+"id": "V2-18",
+"g": "V2",
+"n": 18,
+"q": "【單字】Manuscript 的意思是？",
+"o": [
+"期刊宗旨與範圍",
+"投稿",
+"相關 vs 因果",
+"稿件"
+],
+"a": 3,
+"e": "Manuscript（稿件）：The author's version of a paper submitted for publication."
+},
+{
+"id": "V1-19",
+"g": "V1",
+"n": 19,
+"q": "【單字】Which term matches this definition?\nThe quality of offering new ideas, data, or contributions not previously published.",
+"o": [
+"Limitation",
+"Originality",
+"DOI",
+"Journal Impact Factor (JIF)"
+],
+"a": 1,
+"e": "Originality（原創性）：The quality of offering new ideas, data, or contributions not previously published."
+},
+{
+"id": "V2-19",
+"g": "V2",
+"n": 19,
+"q": "【單字】Originality 的意思是？",
+"o": [
+"情態動詞",
+"致謝",
+"超參數",
+"原創性"
+],
+"a": 3,
+"e": "Originality（原創性）：The quality of offering new ideas, data, or contributions not previously published."
+},
+{
+"id": "V1-20",
+"g": "V1",
+"n": 20,
+"q": "【單字】Which term matches this definition?\nA reference in the text to a source that was used.",
+"o": [
+"Citation",
+"Baseline",
+"DOI",
+"Secondary source"
+],
+"a": 0,
+"e": "Citation（引用）：A reference in the text to a source that was used."
+},
+{
+"id": "V2-20",
+"g": "V2",
+"n": 20,
+"q": "【單字】Citation 的意思是？",
+"o": [
+"稿件",
+"研究者識別碼",
+"引用",
+"清楚"
+],
+"a": 2,
+"e": "Citation（引用）：A reference in the text to a source that was used."
+},
+{
+"id": "V1-21",
+"g": "V1",
+"n": 21,
+"q": "【單字】Which term matches this definition?\nScientific publishing becoming international; Asia now produces nearly half of publications.",
+"o": [
+"Supplementary material",
+"Concise",
+"Proofreading",
+"Globalization (of publishing)"
+],
+"a": 3,
+"e": "Globalization (of publishing)（全球化）：Scientific publishing becoming international; Asia now produces nearly half of publications."
+},
+{
+"id": "V2-21",
+"g": "V2",
+"n": 21,
+"q": "【單字】Globalization (of publishing) 的意思是？",
+"o": [
+"致謝",
+"代寫作弊",
+"全球化",
+"連貫"
+],
+"a": 2,
+"e": "Globalization (of publishing)（全球化）：Scientific publishing becoming international; Asia now produces nearly half of publications."
+},
+{
+"id": "V1-22",
+"g": "V1",
+"n": 22,
+"q": "【單字】Which term matches this definition?\nStandardized, metric-based evaluation of research focusing on quality and impact.",
+"o": [
+"Ablation study",
+"Quartile",
+"Correlation vs. causation",
+"Rationalization"
+],
+"a": 3,
+"e": "Rationalization（合理化）：Standardized, metric-based evaluation of research focusing on quality and impact."
+},
+{
+"id": "V2-22",
+"g": "V2",
+"n": 22,
+"q": "【單字】Rationalization 的意思是？",
+"o": [
+"稿件",
+"關鍵字",
+"抄襲",
+"合理化"
+],
+"a": 3,
+"e": "Rationalization（合理化）：Standardized, metric-based evaluation of research focusing on quality and impact."
+},
+{
+"id": "V1-23",
+"g": "V1",
+"n": 23,
+"q": "【單字】Which term matches this definition?\nEvaluation of a manuscript by experts in the same field before publication.",
+"o": [
+"Journal metrics",
+"Affiliation",
+"Peer review",
+"IMRaD"
+],
+"a": 2,
+"e": "Peer review（同儕審查）：Evaluation of a manuscript by experts in the same field before publication."
+},
+{
+"id": "V2-23",
+"g": "V2",
+"n": 23,
+"q": "【單字】Peer review 的意思是？",
+"o": [
+"抄襲",
+"投稿",
+"贅字",
+"同儕審查"
+],
+"a": 3,
+"e": "Peer review（同儕審查）：Evaluation of a manuscript by experts in the same field before publication."
+},
+{
+"id": "V1-24",
+"g": "V1",
+"n": 24,
+"q": "【單字】Which term matches this definition?\nThe topics and article types a journal publishes.",
+"o": [
+"Originality",
+"Cognitive offloading / outsourcing",
+"Aims and scope",
+"CiteScore"
+],
+"a": 2,
+"e": "Aims and scope（期刊宗旨與範圍）：The topics and article types a journal publishes."
+},
+{
+"id": "V2-24",
+"g": "V2",
+"n": 24,
+"q": "【單字】Aims and scope 的意思是？",
+"o": [
+"通訊作者",
+"可被搜尋／收錄",
+"情態動詞",
+"期刊宗旨與範圍"
+],
+"a": 3,
+"e": "Aims and scope（期刊宗旨與範圍）：The topics and article types a journal publishes."
+},
+{
+"id": "V1-25",
+"g": "V1",
+"n": 25,
+"q": "【單字】Which term matches this definition?\nQuantitative indicators of a journal's citation influence, visibility, and position in a field.",
+"o": [
+"Contract cheating",
+"Journal metrics",
+"Rationalization",
+"Reproducibility"
+],
+"a": 1,
+"e": "Journal metrics（期刊指標）：Quantitative indicators of a journal's citation influence, visibility, and position in a field."
+},
+{
+"id": "V2-25",
+"g": "V2",
+"n": 25,
+"q": "【單字】Journal metrics 的意思是？",
+"o": [
+"校對",
+"保留語氣",
+"期刊指標",
+"意涵"
+],
+"a": 2,
+"e": "Journal metrics（期刊指標）：Quantitative indicators of a journal's citation influence, visibility, and position in a field."
+},
+{
+"id": "V1-26",
+"g": "V1",
+"n": 26,
+"q": "【單字】Which term matches this definition?\nWeb of Science metric: citation rate over a 2-year publication window.",
+"o": [
+"Quartile",
+"ORCID iD",
+"Concise",
+"Journal Impact Factor (JIF)"
+],
+"a": 3,
+"e": "Journal Impact Factor (JIF)（影響係數）：Web of Science metric: citation rate over a 2-year publication window."
+},
+{
+"id": "V2-26",
+"g": "V2",
+"n": 26,
+"q": "【單字】Journal Impact Factor (JIF) 的意思是？",
+"o": [
+"同儕審查",
+"研究限制",
+"影響係數",
+"可推廣性"
+],
+"a": 2,
+"e": "Journal Impact Factor (JIF)（影響係數）：Web of Science metric: citation rate over a 2-year publication window."
+},
+{
+"id": "V1-27",
+"g": "V1",
+"n": 27,
+"q": "【單字】Which term matches this definition?\nWeb of Science metric: field-normalised citation impact.",
+"o": [
+"Research gap",
+"Affiliation",
+"Evaluation metrics",
+"Journal Citation Indicator (JCI)"
+],
+"a": 3,
+"e": "Journal Citation Indicator (JCI)（—）：Web of Science metric: field-normalised citation impact."
+},
+{
+"id": "V2-27",
+"g": "V2",
+"n": 27,
+"q": "【單字】Journal Citation Indicator (JCI) 的意思是？",
+"o": [
+"Scopus metric: citation impact using a 4-year window.",
+"Web of Science metric: field-normalised citation impact.",
+"Introduction, Methods, Results, and Discussion: the standard structure of a research paper.",
+"Scopus metric: citation impact weighted by source prestige."
+],
+"a": 1,
+"e": "Journal Citation Indicator (JCI)（—）：Web of Science metric: field-normalised citation impact."
+},
+{
+"id": "V1-28",
+"g": "V1",
+"n": 28,
+"q": "【單字】Which term matches this definition?\nScopus metric: citation impact using a 4-year window.",
+"o": [
+"CiteScore",
+"Concise",
+"Evaluation metrics",
+"Research gap"
+],
+"a": 0,
+"e": "CiteScore（—）：Scopus metric: citation impact using a 4-year window."
+},
+{
+"id": "V2-28",
+"g": "V2",
+"n": 28,
+"q": "【單字】CiteScore 的意思是？",
+"o": [
+"Scopus metric: citation impact weighted by source prestige.",
+"Scopus metric: citation impact using a 4-year window.",
+"Scopus metric: citation impact adjusted for field differences.",
+"Introduction, Methods, Results, and Discussion: the standard structure of a research paper."
+],
+"a": 1,
+"e": "CiteScore（—）：Scopus metric: citation impact using a 4-year window."
+},
+{
+"id": "V1-29",
+"g": "V1",
+"n": 29,
+"q": "【單字】Which term matches this definition?\nScopus metric: citation impact weighted by source prestige.",
+"o": [
+"Synthesis",
+"Cognitive offloading / outsourcing",
+"SJR (SCImago Journal Rank)",
+"Research gap"
+],
+"a": 2,
+"e": "SJR (SCImago Journal Rank)（—）：Scopus metric: citation impact weighted by source prestige."
+},
+{
+"id": "V2-29",
+"g": "V2",
+"n": 29,
+"q": "【單字】SJR (SCImago Journal Rank) 的意思是？",
+"o": [
+"Scopus metric: citation impact adjusted for field differences.",
+"Scopus metric: citation impact weighted by source prestige.",
+"Scopus metric: citation impact using a 4-year window.",
+"Introduction, Methods, Results, and Discussion: the standard structure of a research paper."
+],
+"a": 1,
+"e": "SJR (SCImago Journal Rank)（—）：Scopus metric: citation impact weighted by source prestige."
+},
+{
+"id": "V1-30",
+"g": "V1",
+"n": 30,
+"q": "【單字】Which term matches this definition?\nScopus metric: citation impact adjusted for field differences.",
+"o": [
+"SNIP (Source Normalized Impact per Paper)",
+"Plagiarism",
+"Hypothesis",
+"3C principle"
+],
+"a": 0,
+"e": "SNIP (Source Normalized Impact per Paper)（—）：Scopus metric: citation impact adjusted for field differences."
+},
+{
+"id": "V2-30",
+"g": "V2",
+"n": 30,
+"q": "【單字】SNIP (Source Normalized Impact per Paper) 的意思是？",
+"o": [
+"Scopus metric: citation impact adjusted for field differences.",
+"Introduction, Methods, Results, and Discussion: the standard structure of a research paper.",
+"Scopus metric: citation impact weighted by source prestige.",
+"Web of Science metric: field-normalised citation impact."
+],
+"a": 0,
+"e": "SNIP (Source Normalized Impact per Paper)（—）：Scopus metric: citation impact adjusted for field differences."
+},
+{
+"id": "V1-31",
+"g": "V1",
+"n": 31,
+"q": "【單字】Which term matches this definition?\nRanking of journals in a field into four groups (Q1 = top 25%).",
+"o": [
+"Self-citation",
+"Introduction funnel",
+"Evaluation metrics",
+"Quartile"
+],
+"a": 3,
+"e": "Quartile（分區）：Ranking of journals in a field into four groups (Q1 = top 25%)."
+},
+{
+"id": "V2-31",
+"g": "V2",
+"n": 31,
+"q": "【單字】Quartile 的意思是？",
+"o": [
+"文獻管理工具",
+"合理化",
+"二手來源",
+"分區"
+],
+"a": 3,
+"e": "Quartile（分區）：Ranking of journals in a field into four groups (Q1 = top 25%)."
+},
+{
+"id": "V1-32",
+"g": "V1",
+"n": 32,
+"q": "【單字】Which term matches this definition?\nA journal's rules on structure, length, style, references, figures, and declarations.",
+"o": [
+"Guide for Authors",
+"Keywords",
+"Filler words",
+"Generalizability"
+],
+"a": 0,
+"e": "Guide for Authors（作者須知）：A journal's rules on structure, length, style, references, figures, and declarations."
+},
+{
+"id": "V2-32",
+"g": "V2",
+"n": 32,
+"q": "【單字】Guide for Authors 的意思是？",
+"o": [
+"作者須知",
+"3C 原則",
+"智慧財產",
+"可被搜尋／收錄"
+],
+"a": 0,
+"e": "Guide for Authors（作者須知）：A journal's rules on structure, length, style, references, figures, and declarations."
+},
+{
+"id": "V1-33",
+"g": "V1",
+"n": 33,
+"q": "【單字】Which term matches this definition?\nHow easily a paper can be found by readers and included in databases.",
+"o": [
+"Corresponding author",
+"Paraphrasing",
+"Discoverability / Indexing",
+"Research gap"
+],
+"a": 2,
+"e": "Discoverability / Indexing（可被搜尋／收錄）：How easily a paper can be found by readers and included in databases."
+},
+{
+"id": "V2-33",
+"g": "V2",
+"n": 33,
+"q": "【單字】Discoverability / Indexing 的意思是？",
+"o": [
+"意涵",
+"可被搜尋／收錄",
+"超參數",
+"期刊宗旨與範圍"
+],
+"a": 1,
+"e": "Discoverability / Indexing（可被搜尋／收錄）：How easily a paper can be found by readers and included in databases."
+},
+{
+"id": "V1-34",
+"g": "V1",
+"n": 34,
+"q": "【單字】Which term matches this definition?\nThe institution an author belongs to, written with its official name.",
+"o": [
+"Affiliation",
+"Cautious language (hedging)",
+"Concise",
+"Evaluation metrics"
+],
+"a": 0,
+"e": "Affiliation（服務單位）：The institution an author belongs to, written with its official name."
+},
+{
+"id": "V2-34",
+"g": "V2",
+"n": 34,
+"q": "【單字】Affiliation 的意思是？",
+"o": [
+"全球化",
+"補充資料",
+"贅字",
+"服務單位"
+],
+"a": 3,
+"e": "Affiliation（服務單位）：The institution an author belongs to, written with its official name."
+},
+{
+"id": "V1-35",
+"g": "V1",
+"n": 35,
+"q": "【單字】Which term matches this definition?\nA unique, persistent identifier that distinguishes researchers and links their publications.",
+"o": [
+"Ablation study",
+"ORCID iD",
+"Originality",
+"IMRaD"
+],
+"a": 1,
+"e": "ORCID iD（研究者識別碼）：A unique, persistent identifier that distinguishes researchers and links their publications."
+},
+{
+"id": "V2-35",
+"g": "V2",
+"n": 35,
+"q": "【單字】ORCID iD 的意思是？",
+"o": [
+"研究者識別碼",
+"漏斗結構",
+"自我引用",
+"期刊宗旨與範圍"
+],
+"a": 0,
+"e": "ORCID iD（研究者識別碼）：A unique, persistent identifier that distinguishes researchers and links their publications."
+},
+{
+"id": "V1-36",
+"g": "V1",
+"n": 36,
+"q": "【單字】Which term matches this definition?\nThe author responsible for communication with the journal and readers.",
+"o": [
+"Contract cheating",
+"DOI",
+"Corresponding author",
+"Manuscript"
+],
+"a": 2,
+"e": "Corresponding author（通訊作者）：The author responsible for communication with the journal and readers."
+},
+{
+"id": "V2-36",
+"g": "V2",
+"n": 36,
+"q": "【單字】Corresponding author 的意思是？",
+"o": [
+"意涵",
+"合理化",
+"學術誠信",
+"通訊作者"
+],
+"a": 3,
+"e": "Corresponding author（通訊作者）：The author responsible for communication with the journal and readers."
+},
+{
+"id": "V1-37",
+"g": "V1",
+"n": 37,
+"q": "【單字】Which term matches this definition?\nA concise stand-alone summary of the paper's background, purpose, methods, results, and conclusion.",
+"o": [
+"Filler words",
+"Abstract",
+"Discoverability / Indexing",
+"AI use declaration"
+],
+"a": 1,
+"e": "Abstract（摘要）：A concise stand-alone summary of the paper's background, purpose, methods, results, and conclusion."
+},
+{
+"id": "V2-37",
+"g": "V2",
+"n": 37,
+"q": "【單字】Abstract 的意思是？",
+"o": [
+"合理化",
+"摘要",
+"原創性",
+"保留語氣"
+],
+"a": 1,
+"e": "Abstract（摘要）：A concise stand-alone summary of the paper's background, purpose, methods, results, and conclusion."
+},
+{
+"id": "V1-38",
+"g": "V1",
+"n": 38,
+"q": "【單字】Which term matches this definition?\nSpecific, searchable terms that represent the main concepts of a paper.",
+"o": [
+"Limitation",
+"Keywords",
+"Implication",
+"3C principle"
+],
+"a": 1,
+"e": "Keywords（關鍵字）：Specific, searchable terms that represent the main concepts of a paper."
+},
+{
+"id": "V2-38",
+"g": "V2",
+"n": 38,
+"q": "【單字】Keywords 的意思是？",
+"o": [
+"摘要",
+"作者須知",
+"AI 使用聲明",
+"關鍵字"
+],
+"a": 3,
+"e": "Keywords（關鍵字）：Specific, searchable terms that represent the main concepts of a paper."
+},
+{
+"id": "V1-39",
+"g": "V1",
+"n": 39,
+"q": "【單字】Which term matches this definition?\nIntroduction, Methods, Results, and Discussion: the standard structure of a research paper.",
+"o": [
+"IMRaD",
+"Cognitive offloading / outsourcing",
+"Self-citation",
+"Peer review"
+],
+"a": 0,
+"e": "IMRaD（—）：Introduction, Methods, Results, and Discussion: the standard structure of a research paper."
+},
+{
+"id": "V2-39",
+"g": "V2",
+"n": 39,
+"q": "【單字】IMRaD 的意思是？",
+"o": [
+"Scopus metric: citation impact adjusted for field differences.",
+"Web of Science metric: field-normalised citation impact.",
+"Scopus metric: citation impact using a 4-year window.",
+"Introduction, Methods, Results, and Discussion: the standard structure of a research paper."
+],
+"a": 3,
+"e": "IMRaD（—）：Introduction, Methods, Results, and Discussion: the standard structure of a research paper."
+},
+{
+"id": "V1-40",
+"g": "V1",
+"n": 40,
+"q": "【單字】Which term matches this definition?\nWhat previous research has not yet addressed and the current study aims to fill.",
+"o": [
+"Evaluation metrics",
+"Research gap",
+"Discoverability / Indexing",
+"Citation"
+],
+"a": 1,
+"e": "Research gap（研究缺口）：What previous research has not yet addressed and the current study aims to fill."
+},
+{
+"id": "V2-40",
+"g": "V2",
+"n": 40,
+"q": "【單字】Research gap 的意思是？",
+"o": [
+"研究缺口",
+"保留語氣",
+"超參數",
+"稿件"
+],
+"a": 0,
+"e": "Research gap（研究缺口）：What previous research has not yet addressed and the current study aims to fill."
+},
+{
+"id": "V1-41",
+"g": "V1",
+"n": 41,
+"q": "【單字】Which term matches this definition?\nA testable prediction about the relationship between variables.",
+"o": [
+"Peer review",
+"Citation",
+"Affiliation",
+"Hypothesis"
+],
+"a": 3,
+"e": "Hypothesis（假設）：A testable prediction about the relationship between variables."
+},
+{
+"id": "V2-41",
+"g": "V2",
+"n": 41,
+"q": "【單字】Hypothesis 的意思是？",
+"o": [
+"可被搜尋／收錄",
+"全球化",
+"服務單位",
+"假設"
+],
+"a": 3,
+"e": "Hypothesis（假設）：A testable prediction about the relationship between variables."
+},
+{
+"id": "V1-42",
+"g": "V1",
+"n": 42,
+"q": "【單字】Which term matches this definition?\nMoving from broad context to previous research, gap, purpose, and contribution.",
+"o": [
+"Guide for Authors",
+"Introduction funnel",
+"Manuscript",
+"Peer review"
+],
+"a": 1,
+"e": "Introduction funnel（漏斗結構）：Moving from broad context to previous research, gap, purpose, and contribution."
+},
+{
+"id": "V2-42",
+"g": "V2",
+"n": 42,
+"q": "【單字】Introduction funnel 的意思是？",
+"o": [
+"漏斗結構",
+"影響係數",
+"現在完成式",
+"合理化"
+],
+"a": 0,
+"e": "Introduction funnel（漏斗結構）：Moving from broad context to previous research, gap, purpose, and contribution."
+},
+{
+"id": "V1-43",
+"g": "V1",
+"n": 43,
+"q": "【單字】Which term matches this definition?\nOthers can repeat the study with the same methods and obtain similar results.",
+"o": [
+"Citation",
+"Academic integrity",
+"Rambling sentence",
+"Reproducibility"
+],
+"a": 3,
+"e": "Reproducibility（可重現性）：Others can repeat the study with the same methods and obtain similar results."
+},
+{
+"id": "V2-43",
+"g": "V2",
+"n": 43,
+"q": "【單字】Reproducibility 的意思是？",
+"o": [
+"3C 原則",
+"相關 vs 因果",
+"可重現性",
+"贅字"
+],
+"a": 2,
+"e": "Reproducibility（可重現性）：Others can repeat the study with the same methods and obtain similar results."
+},
+{
+"id": "V1-44",
+"g": "V1",
+"n": 44,
+"q": "【單字】Which term matches this definition?\nA standard method used for comparison with the proposed method.",
+"o": [
+"Citation",
+"Corresponding author",
+"Baseline",
+"Globalization (of publishing)"
+],
+"a": 2,
+"e": "Baseline（基準方法）：A standard method used for comparison with the proposed method."
+},
+{
+"id": "V2-44",
+"g": "V2",
+"n": 44,
+"q": "【單字】Baseline 的意思是？",
+"o": [
+"清楚",
+"消融實驗",
+"簡潔",
+"基準方法"
+],
+"a": 3,
+"e": "Baseline（基準方法）：A standard method used for comparison with the proposed method."
+},
+{
+"id": "V1-45",
+"g": "V1",
+"n": 45,
+"q": "【單字】Which term matches this definition?\nRemoving parts of a model to test each part's contribution.",
+"o": [
+"SNIP (Source Normalized Impact per Paper)",
+"Ablation study",
+"Abstract",
+"CiteScore"
+],
+"a": 1,
+"e": "Ablation study（消融實驗）：Removing parts of a model to test each part's contribution."
+},
+{
+"id": "V2-45",
+"g": "V2",
+"n": 45,
+"q": "【單字】Ablation study 的意思是？",
+"o": [
+"致謝",
+"冗長雜亂句",
+"捏造",
+"消融實驗"
+],
+"a": 3,
+"e": "Ablation study（消融實驗）：Removing parts of a model to test each part's contribution."
+},
+{
+"id": "V1-46",
+"g": "V1",
+"n": 46,
+"q": "【單字】Which term matches this definition?\nA setting chosen before training, e.g., learning rate or number of epochs.",
+"o": [
+"Concise",
+"Baseline",
+"Cautious language (hedging)",
+"Hyperparameter"
+],
+"a": 3,
+"e": "Hyperparameter（超參數）：A setting chosen before training, e.g., learning rate or number of epochs."
+},
+{
+"id": "V2-46",
+"g": "V2",
+"n": 46,
+"q": "【單字】Hyperparameter 的意思是？",
+"o": [
+"稿件",
+"情態動詞",
+"超參數",
+"假設"
+],
+"a": 2,
+"e": "Hyperparameter（超參數）：A setting chosen before training, e.g., learning rate or number of epochs."
+},
+{
+"id": "V1-47",
+"g": "V1",
+"n": 47,
+"q": "【單字】Which term matches this definition?\nMeasures of performance, e.g., accuracy, precision, recall, F1-score, latency.",
+"o": [
+"Evaluation metrics",
+"3C principle",
+"Citation",
+"Quartile"
+],
+"a": 0,
+"e": "Evaluation metrics（評估指標）：Measures of performance, e.g., accuracy, precision, recall, F1-score, latency."
+},
+{
+"id": "V2-47",
+"g": "V2",
+"n": 47,
+"q": "【單字】Evaluation metrics 的意思是？",
+"o": [
+"基準方法",
+"通訊作者",
+"捏造",
+"評估指標"
+],
+"a": 3,
+"e": "Evaluation metrics（評估指標）：Measures of performance, e.g., accuracy, precision, recall, F1-score, latency."
+},
+{
+"id": "V1-48",
+"g": "V1",
+"n": 48,
+"q": "【單字】Which term matches this definition?\nAdditional data or analyses provided outside the main paper.",
+"o": [
+"ORCID iD",
+"Supplementary material",
+"Implication",
+"3C principle"
+],
+"a": 1,
+"e": "Supplementary material（補充資料）：Additional data or analyses provided outside the main paper."
+},
+{
+"id": "V2-48",
+"g": "V2",
+"n": 48,
+"q": "【單字】Supplementary material 的意思是？",
+"o": [
+"捏造",
+"全球化",
+"影響係數",
+"補充資料"
+],
+"a": 3,
+"e": "Supplementary material（補充資料）：Additional data or analyses provided outside the main paper."
+},
+{
+"id": "V1-49",
+"g": "V1",
+"n": 49,
+"q": "【單字】Which term matches this definition?\nThe extent to which results apply beyond the tested data or conditions.",
+"o": [
+"Generalizability",
+"Modal verbs",
+"3C principle",
+"Originality"
+],
+"a": 0,
+"e": "Generalizability（可推廣性）：The extent to which results apply beyond the tested data or conditions."
+},
+{
+"id": "V2-49",
+"g": "V2",
+"n": 49,
+"q": "【單字】Generalizability 的意思是？",
+"o": [
+"綜合",
+"可推廣性",
+"3C 原則",
+"通訊作者"
+],
+"a": 1,
+"e": "Generalizability（可推廣性）：The extent to which results apply beyond the tested data or conditions."
+},
+{
+"id": "V1-50",
+"g": "V1",
+"n": 50,
+"q": "【單字】Which term matches this definition?\nA weakness of the study that affects interpretation or generalizability.",
+"o": [
+"Introduction funnel",
+"Peer review",
+"Limitation",
+"CiteScore"
+],
+"a": 2,
+"e": "Limitation（研究限制）：A weakness of the study that affects interpretation or generalizability."
+},
+{
+"id": "V2-50",
+"g": "V2",
+"n": 50,
+"q": "【單字】Limitation 的意思是？",
+"o": [
+"關鍵字",
+"文獻管理工具",
+"研究限制",
+"連貫"
+],
+"a": 2,
+"e": "Limitation（研究限制）：A weakness of the study that affects interpretation or generalizability."
+},
+{
+"id": "V1-51",
+"g": "V1",
+"n": 51,
+"q": "【單字】Which term matches this definition?\nTwo variables changing together does not prove that one causes the other.",
+"o": [
+"Correlation vs. causation",
+"Filler words",
+"Journal Citation Indicator (JCI)",
+"Affiliation"
+],
+"a": 0,
+"e": "Correlation vs. causation（相關 vs 因果）：Two variables changing together does not prove that one causes the other."
+},
+{
+"id": "V2-51",
+"g": "V2",
+"n": 51,
+"q": "【單字】Correlation vs. causation 的意思是？",
+"o": [
+"相關 vs 因果",
+"消融實驗",
+"自我引用",
+"引用"
+],
+"a": 0,
+"e": "Correlation vs. causation（相關 vs 因果）：Two variables changing together does not prove that one causes the other."
+},
+{
+"id": "V1-52",
+"g": "V1",
+"n": 52,
+"q": "【單字】Which term matches this definition?\nWhat the findings mean in technical, practical, or theoretical terms.",
+"o": [
+"IMRaD",
+"Acknowledgements",
+"Implication",
+"Reproducibility"
+],
+"a": 2,
+"e": "Implication（意涵）：What the findings mean in technical, practical, or theoretical terms."
+},
+{
+"id": "V2-52",
+"g": "V2",
+"n": 52,
+"q": "【單字】Implication 的意思是？",
+"o": [
+"可重現性",
+"研究缺口",
+"意涵",
+"自我引用"
+],
+"a": 2,
+"e": "Implication（意涵）：What the findings mean in technical, practical, or theoretical terms."
+},
+{
+"id": "V1-53",
+"g": "V1",
+"n": 53,
+"q": "【單字】Which term matches this definition?\nCredit for support that does not qualify for authorship, including funding.",
+"o": [
+"Coherent",
+"Acknowledgements",
+"Manuscript",
+"CiteScore"
+],
+"a": 1,
+"e": "Acknowledgements（致謝）：Credit for support that does not qualify for authorship, including funding."
+},
+{
+"id": "V2-53",
+"g": "V2",
+"n": 53,
+"q": "【單字】Acknowledgements 的意思是？",
+"o": [
+"致謝",
+"期刊指標",
+"校對",
+"認知外包"
+],
+"a": 0,
+"e": "Acknowledgements（致謝）：Credit for support that does not qualify for authorship, including funding."
+},
+{
+"id": "V1-54",
+"g": "V1",
+"n": 54,
+"q": "【單字】Which term matches this definition?\nCiting one's own previous work; excessive self-citation should be avoided.",
+"o": [
+"Globalization (of publishing)",
+"Hypothesis",
+"Peer review",
+"Self-citation"
+],
+"a": 3,
+"e": "Self-citation（自我引用）：Citing one's own previous work; excessive self-citation should be avoided."
+},
+{
+"id": "V2-54",
+"g": "V2",
+"n": 54,
+"q": "【單字】Self-citation 的意思是？",
+"o": [
+"可被搜尋／收錄",
+"抄襲",
+"自我引用",
+"意涵"
+],
+"a": 2,
+"e": "Self-citation（自我引用）：Citing one's own previous work; excessive self-citation should be avoided."
+},
+{
+"id": "V1-55",
+"g": "V1",
+"n": 55,
+"q": "【單字】Which term matches this definition?\nA source that reports on original research, e.g., a blog or review summary.",
+"o": [
+"Evaluation metrics",
+"Secondary source",
+"Guide for Authors",
+"Originality"
+],
+"a": 1,
+"e": "Secondary source（二手來源）：A source that reports on original research, e.g., a blog or review summary."
+},
+{
+"id": "V2-55",
+"g": "V2",
+"n": 55,
+"q": "【單字】Secondary source 的意思是？",
+"o": [
+"投稿",
+"假設",
+"引用",
+"二手來源"
+],
+"a": 3,
+"e": "Secondary source（二手來源）：A source that reports on original research, e.g., a blog or review summary."
+},
+{
+"id": "V1-56",
+"g": "V1",
+"n": 56,
+"q": "【單字】Which term matches this definition?\nSoftware that formats references; its output must still be checked manually.",
+"o": [
+"Research gap",
+"Hypothesis",
+"Fabrication",
+"Reference manager"
+],
+"a": 3,
+"e": "Reference manager（文獻管理工具）：Software that formats references; its output must still be checked manually."
+},
+{
+"id": "V2-56",
+"g": "V2",
+"n": 56,
+"q": "【單字】Reference manager 的意思是？",
+"o": [
+"文獻管理工具",
+"分區",
+"引用",
+"保留語氣"
+],
+"a": 0,
+"e": "Reference manager（文獻管理工具）：Software that formats references; its output must still be checked manually."
+},
+{
+"id": "V1-57",
+"g": "V1",
+"n": 57,
+"q": "【單字】Which term matches this definition?\nDigital Object Identifier: a permanent link to a publication.",
+"o": [
+"Introduction funnel",
+"Supplementary material",
+"DOI",
+"Proofreading"
+],
+"a": 2,
+"e": "DOI（數位物件識別碼）：Digital Object Identifier: a permanent link to a publication."
+},
+{
+"id": "V2-57",
+"g": "V2",
+"n": 57,
+"q": "【單字】DOI 的意思是？",
+"o": [
+"數位物件識別碼",
+"抄襲",
+"可重現性",
+"校對"
+],
+"a": 0,
+"e": "DOI（數位物件識別碼）：Digital Object Identifier: a permanent link to a publication."
+},
+{
+"id": "V1-58",
+"g": "V1",
+"n": 58,
+"q": "【單字】Which term matches this definition?\nWords like suggest, indicate, may, can that avoid overstating claims.",
+"o": [
+"Academic integrity",
+"Citation",
+"AI use declaration",
+"Cautious language (hedging)"
+],
+"a": 3,
+"e": "Cautious language (hedging)（保留語氣）：Words like suggest, indicate, may, can that avoid overstating claims."
+},
+{
+"id": "V2-58",
+"g": "V2",
+"n": 58,
+"q": "【單字】Cautious language (hedging) 的意思是？",
+"o": [
+"消融實驗",
+"評估指標",
+"保留語氣",
+"分區"
+],
+"a": 2,
+"e": "Cautious language (hedging)（保留語氣）：Words like suggest, indicate, may, can that avoid overstating claims."
+},
+{
+"id": "V1-59",
+"g": "V1",
+"n": 59,
+"q": "【單字】Which term matches this definition?\nVerbs such as may, might, can, could used for cautious implications.",
+"o": [
+"Manuscript",
+"Research gap",
+"Modal verbs",
+"Affiliation"
+],
+"a": 2,
+"e": "Modal verbs（情態動詞）：Verbs such as may, might, can, could used for cautious implications."
+},
+{
+"id": "V2-59",
+"g": "V2",
+"n": 59,
+"q": "【單字】Modal verbs 的意思是？",
+"o": [
+"相關 vs 因果",
+"全球化",
+"消融實驗",
+"情態動詞"
+],
+"a": 3,
+"e": "Modal verbs（情態動詞）：Verbs such as may, might, can, could used for cautious implications."
+},
+{
+"id": "V1-60",
+"g": "V1",
+"n": 60,
+"q": "【單字】Which term matches this definition?\nUsed for previous research still relevant (Several studies have investigated…).",
+"o": [
+"Generalizability",
+"CiteScore",
+"Secondary source",
+"Present perfect"
+],
+"a": 3,
+"e": "Present perfect（現在完成式）：Used for previous research still relevant (Several studies have investigated…)."
+},
+{
+"id": "V2-60",
+"g": "V2",
+"n": 60,
+"q": "【單字】Present perfect 的意思是？",
+"o": [
+"影響係數",
+"現在完成式",
+"通訊作者",
+"消融實驗"
+],
+"a": 1,
+"e": "Present perfect（現在完成式）：Used for previous research still relevant (Several studies have investigated…)."
 }
 ]
 }
