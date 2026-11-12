@@ -71,7 +71,7 @@ function addPreset(id) {
   let d = store.state.decks.find(x => x.preset === id);
   const t = Date.now();
   if (!d) {
-    d = { id: newId(), name: p.name, color: p.color, preset: id, createdAt: t };
+    d = { id: newId(), name: p.name, color: p.color, preset: id, createdAt: t, ...(p.lang ? { lang: p.lang } : {}) };
     saveDoc('decks', d);
   }
   // 舊的內建卡組被拆開（例如 DSP 1013 → CH8、CH9）：舊卡組裡同 pid 的卡直接搬過來，保留複習進度

@@ -1,6 +1,1455 @@
 {
 "decks": [
 {
+"preset": "tsmc-vocab",
+"name": "台積電常用英文單字 288",
+"color": "#e11d48",
+"lang": "en-US",
+"desc": "台積電官方單字表（面試線上英文測驗會抽考）。正面英文、背面中文；按「⇄ 反著考」練中翻英",
+"cards": [
+{
+"pid": "w1",
+"front": "ability",
+"back": "(n.) 能力\n#1"
+},
+{
+"pid": "w2",
+"front": "abnormal",
+"back": "(a.) 異常的\n#2"
+},
+{
+"pid": "w3",
+"front": "abort",
+"back": "(v.) 中止\n#3"
+},
+{
+"pid": "w4",
+"front": "absence",
+"back": "(n.) 缺席\n#4"
+},
+{
+"pid": "w5",
+"front": "acid",
+"back": "(n.) 酸\n#5"
+},
+{
+"pid": "w6",
+"front": "active",
+"back": "(a.) 主動的\n#6"
+},
+{
+"pid": "w7",
+"front": "actual",
+"back": "(a.) 真實的\n#7"
+},
+{
+"pid": "w8",
+"front": "add",
+"back": "(v.) 增加\n#8"
+},
+{
+"pid": "w9",
+"front": "adjust",
+"back": "(v.) 調整\n#9"
+},
+{
+"pid": "w10",
+"front": "AI",
+"back": "(n.) 人工智慧\n#10"
+},
+{
+"pid": "w11",
+"front": "air shower",
+"back": "(n.) 潔淨通道\n#11"
+},
+{
+"pid": "w12",
+"front": "alarm",
+"back": "(n.) 警報\n#12"
+},
+{
+"pid": "w13",
+"front": "alert",
+"back": "(n.) 警報\n#13"
+},
+{
+"pid": "w14",
+"front": "align",
+"back": "(v.) 對焦\n#14"
+},
+{
+"pid": "w15",
+"front": "annually",
+"back": "(a.) 每年的\n#15"
+},
+{
+"pid": "w16",
+"front": "area",
+"back": "(n.) 區域\n#16"
+},
+{
+"pid": "w17",
+"front": "attach",
+"back": "(v.) 附上\n#17"
+},
+{
+"pid": "w18",
+"front": "audit",
+"back": "(v.) 稽核、查核\n#18"
+},
+{
+"pid": "w19",
+"front": "automatic",
+"back": "(a.) 自動的\n#19"
+},
+{
+"pid": "w20",
+"front": "automotive",
+"back": "(adj.) 汽車的\n#20"
+},
+{
+"pid": "w21",
+"front": "available",
+"back": "(a.) 可使用的\n#21"
+},
+{
+"pid": "w22",
+"front": "average",
+"back": "(n.) 平均\n#22"
+},
+{
+"pid": "w23",
+"front": "backup",
+"back": "(n.) 支援\n#23"
+},
+{
+"pid": "w24",
+"front": "bank",
+"back": "(n.) 銀行 (v.) 暫存\n#24"
+},
+{
+"pid": "w25",
+"front": "basic",
+"back": "(a.) 基礎的\n#25"
+},
+{
+"pid": "w26",
+"front": "beam",
+"back": "(n.) 光束\n#26"
+},
+{
+"pid": "w27",
+"front": "benchmark",
+"back": "(n.) 標竿學習\n#27"
+},
+{
+"pid": "w28",
+"front": "bottle",
+"back": "(n.) 瓶子\n#28"
+},
+{
+"pid": "w29",
+"front": "bottom",
+"back": "(n.) 底部\n#29"
+},
+{
+"pid": "w30",
+"front": "broken",
+"back": "(a.) 破掉的\n#30"
+},
+{
+"pid": "w31",
+"front": "cancel",
+"back": "(v.) 取消\n#31"
+},
+{
+"pid": "w32",
+"front": "card",
+"back": "(n.) 卡片\n#32"
+},
+{
+"pid": "w33",
+"front": "cart",
+"back": "(n.) 手推車\n#33"
+},
+{
+"pid": "w34",
+"front": "cassette",
+"back": "(n.) 晶片專用盒\n#34"
+},
+{
+"pid": "w35",
+"front": "center",
+"back": "(n.) 中心\n#35"
+},
+{
+"pid": "w36",
+"front": "certify",
+"back": "(v.) 證實、認證\n#36"
+},
+{
+"pid": "w37",
+"front": "change",
+"back": "(v.) 更換\n#37"
+},
+{
+"pid": "w38",
+"front": "chart",
+"back": "(n.) 圖表\n#38"
+},
+{
+"pid": "w39",
+"front": "check",
+"back": "(v.) 檢查\n#39"
+},
+{
+"pid": "w40",
+"front": "chemical",
+"back": "(n.) 化學、化學品\n#40"
+},
+{
+"pid": "w41",
+"front": "chip",
+"back": "(n.) 晶片\n#41"
+},
+{
+"pid": "w42",
+"front": "choose",
+"back": "(v.) 挑選\n#42"
+},
+{
+"pid": "w43",
+"front": "clean",
+"back": "(v.) 清潔\n#43"
+},
+{
+"pid": "w44",
+"front": "clean chamber",
+"back": "(n.) 潔淨室\n#44"
+},
+{
+"pid": "w45",
+"front": "clear",
+"back": "(v.) 清除\n#45"
+},
+{
+"pid": "w46",
+"front": "collect",
+"back": "(v.) 蒐集\n#46"
+},
+{
+"pid": "w47",
+"front": "color",
+"back": "(n.) 顏色\n#47"
+},
+{
+"pid": "w48",
+"front": "comment",
+"back": "(n.) 評論\n#48"
+},
+{
+"pid": "w49",
+"front": "company",
+"back": "(n.) 公司\n#49"
+},
+{
+"pid": "w50",
+"front": "complete",
+"back": "(v.) 完成\n#50"
+},
+{
+"pid": "w51",
+"front": "computer",
+"back": "(n.) 電腦\n#51"
+},
+{
+"pid": "w52",
+"front": "concern",
+"back": "(v.) 擔憂\n#52"
+},
+{
+"pid": "w53",
+"front": "confidential",
+"back": "(a.) 機密的\n#53"
+},
+{
+"pid": "w54",
+"front": "confirm",
+"back": "(v.) 確認\n#54"
+},
+{
+"pid": "w55",
+"front": "contamination",
+"back": "(n.) 污染\n#55"
+},
+{
+"pid": "w56",
+"front": "continue",
+"back": "(v.) 繼續\n#56"
+},
+{
+"pid": "w57",
+"front": "control",
+"back": "(n.) 控制\n#57"
+},
+{
+"pid": "w58",
+"front": "copy",
+"back": "(n.) 拷貝\n#58"
+},
+{
+"pid": "w59",
+"front": "count",
+"back": "(v.) 計算\n#59"
+},
+{
+"pid": "w60",
+"front": "customer",
+"back": "(n.) 客戶\n#60"
+},
+{
+"pid": "w61",
+"front": "cycle",
+"back": "(n.) 週期\n#61"
+},
+{
+"pid": "w62",
+"front": "cycle time",
+"back": "(n.) 生產週期\n#62"
+},
+{
+"pid": "w63",
+"front": "daily",
+"back": "(a.) 每日的\n#63"
+},
+{
+"pid": "w64",
+"front": "data",
+"back": "(n.) 資料\n#64"
+},
+{
+"pid": "w65",
+"front": "date",
+"back": "(n.) 日期\n#65"
+},
+{
+"pid": "w66",
+"front": "decline",
+"back": "(v.) 減少\n#66"
+},
+{
+"pid": "w67",
+"front": "defect",
+"back": "(n.) 缺陷\n#67"
+},
+{
+"pid": "w68",
+"front": "delay",
+"back": "(v.) 延遲\n#68"
+},
+{
+"pid": "w69",
+"front": "delete",
+"back": "(v.) 刪除\n#69"
+},
+{
+"pid": "w70",
+"front": "diffusion",
+"back": "(n.) 擴散製程\n#70"
+},
+{
+"pid": "w71",
+"front": "document",
+"back": "(n.) 文件\n#71"
+},
+{
+"pid": "w72",
+"front": "dry",
+"back": "(a.) 乾的\n#72"
+},
+{
+"pid": "w73",
+"front": "emergency",
+"back": "(n.) 緊急情況\n#73"
+},
+{
+"pid": "w74",
+"front": "emergency stop",
+"back": "(n.) 緊急停止\n#74"
+},
+{
+"pid": "w75",
+"front": "engineer",
+"back": "(n.) 工程師\n#75"
+},
+{
+"pid": "w76",
+"front": "enhance",
+"back": "(v.) 增進\n#76"
+},
+{
+"pid": "w77",
+"front": "enter",
+"back": "(v.) 進入\n#77"
+},
+{
+"pid": "w78",
+"front": "environment",
+"back": "(n.) 環境\n#78"
+},
+{
+"pid": "w79",
+"front": "equipment",
+"back": "(n.) 設備\n#79"
+},
+{
+"pid": "w80",
+"front": "error",
+"back": "(n.) 錯誤\n#80"
+},
+{
+"pid": "w81",
+"front": "etching",
+"back": "(n.) 蝕刻製程\n#81"
+},
+{
+"pid": "w82",
+"front": "EUV / extreme ultraviolet",
+"back": "(n.) 極紫外光\n#82"
+},
+{
+"pid": "w83",
+"front": "event",
+"back": "(n.) 事件\n#83"
+},
+{
+"pid": "w84",
+"front": "execute",
+"back": "(v.) 執行\n#84"
+},
+{
+"pid": "w85",
+"front": "exit",
+"back": "(n.) 退出\n#85"
+},
+{
+"pid": "w86",
+"front": "fault",
+"back": "(n.) 錯誤\n#86"
+},
+{
+"pid": "w87",
+"front": "find",
+"back": "(v.) 發現\n#87"
+},
+{
+"pid": "w88",
+"front": "floor",
+"back": "(n.) 地板\n#88"
+},
+{
+"pid": "w89",
+"front": "focus",
+"back": "(n.) 焦點\n#89"
+},
+{
+"pid": "w90",
+"front": "follow",
+"back": "(v.) 照做、跟隨\n#90"
+},
+{
+"pid": "w91",
+"front": "freeze",
+"back": "(v.) 凍結\n#91"
+},
+{
+"pid": "w92",
+"front": "full",
+"back": "(a.) 滿的\n#92"
+},
+{
+"pid": "w93",
+"front": "function",
+"back": "(n.) 功能\n#93"
+},
+{
+"pid": "w94",
+"front": "gas",
+"back": "(n.) 氣體\n#94"
+},
+{
+"pid": "w95",
+"front": "glass",
+"back": "(n.) 玻璃、鏡片\n#95"
+},
+{
+"pid": "w96",
+"front": "gloves",
+"back": "(n.) 手套\n#96"
+},
+{
+"pid": "w97",
+"front": "grade",
+"back": "(n.) 等級\n#97"
+},
+{
+"pid": "w98",
+"front": "green",
+"back": "(n.) 綠色\n#98"
+},
+{
+"pid": "w99",
+"front": "group",
+"back": "(n.) 群組\n#99"
+},
+{
+"pid": "w100",
+"front": "handle",
+"back": "(v.) 處理\n#100"
+},
+{
+"pid": "w101",
+"front": "hard-disk",
+"back": "(n.) 硬盤\n#101"
+},
+{
+"pid": "w102",
+"front": "heavy",
+"back": "(a.) 重的\n#102"
+},
+{
+"pid": "w103",
+"front": "helmet",
+"back": "(n.) 安全帽\n#103"
+},
+{
+"pid": "w104",
+"front": "help",
+"back": "(v.) 幫助\n#104"
+},
+{
+"pid": "w105",
+"front": "hold",
+"back": "(v.) 暫停\n#105"
+},
+{
+"pid": "w106",
+"front": "hole",
+"back": "(n.) 孔、洞\n#106"
+},
+{
+"pid": "w107",
+"front": "hot",
+"back": "(a.) 熱的\n#107"
+},
+{
+"pid": "w108",
+"front": "impact",
+"back": "(n.) 影響\n#108"
+},
+{
+"pid": "w109",
+"front": "improve",
+"back": "(v.) 改善\n#109"
+},
+{
+"pid": "w110",
+"front": "inform",
+"back": "(v.) 通知\n#110"
+},
+{
+"pid": "w111",
+"front": "information",
+"back": "(n.) 資訊\n#111"
+},
+{
+"pid": "w112",
+"front": "inhibition",
+"back": "(n.) 禁止禁用\n#112"
+},
+{
+"pid": "w113",
+"front": "input",
+"back": "(n.) 輸入\n#113"
+},
+{
+"pid": "w114",
+"front": "inspect",
+"back": "(v.) 檢查\n#114"
+},
+{
+"pid": "w115",
+"front": "inspection",
+"back": "(n.) 檢驗\n#115"
+},
+{
+"pid": "w116",
+"front": "instruction",
+"back": "(n.) 指令\n#116"
+},
+{
+"pid": "w117",
+"front": "internet",
+"back": "(n.) 網際網路\n#117"
+},
+{
+"pid": "w118",
+"front": "interview",
+"back": "(n.) 面試\n#118"
+},
+{
+"pid": "w119",
+"front": "issue",
+"back": "(v.) 發行 (n.) 議題\n#119"
+},
+{
+"pid": "w120",
+"front": "job",
+"back": "(n.) 工作\n#120"
+},
+{
+"pid": "w121",
+"front": "keep",
+"back": "(v.) 保持\n#121"
+},
+{
+"pid": "w122",
+"front": "keyboard",
+"back": "(n.) 鍵盤\n#122"
+},
+{
+"pid": "w123",
+"front": "label",
+"back": "(n.) 標籤\n#123"
+},
+{
+"pid": "w124",
+"front": "laboratory",
+"back": "(n.) 實驗室\n#124"
+},
+{
+"pid": "w125",
+"front": "leader",
+"back": "(n.) 組長\n#125"
+},
+{
+"pid": "w126",
+"front": "learn",
+"back": "(v.) 學習\n#126"
+},
+{
+"pid": "w127",
+"front": "level",
+"back": "(n.) 程度\n#127"
+},
+{
+"pid": "w128",
+"front": "lift",
+"back": "(v.) 抬起、舉起\n#128"
+},
+{
+"pid": "w129",
+"front": "light",
+"back": "(n.) 光\n#129"
+},
+{
+"pid": "w130",
+"front": "line",
+"back": "(n.) 直線\n#130"
+},
+{
+"pid": "w131",
+"front": "link",
+"back": "(n.) 連結\n#131"
+},
+{
+"pid": "w132",
+"front": "liquid",
+"back": "(n.) 液體\n#132"
+},
+{
+"pid": "w133",
+"front": "list",
+"back": "(n.) 清單\n#133"
+},
+{
+"pid": "w134",
+"front": "lithography",
+"back": "(n.) 黃光／微影製程\n#134"
+},
+{
+"pid": "w135",
+"front": "load",
+"back": "(v.) 上貨、裝載\n#135"
+},
+{
+"pid": "w136",
+"front": "loading",
+"back": "(n.) 負荷\n#136"
+},
+{
+"pid": "w137",
+"front": "lobby",
+"back": "(n.) 大廳\n#137"
+},
+{
+"pid": "w138",
+"front": "location",
+"back": "(n.) 位置\n#138"
+},
+{
+"pid": "w139",
+"front": "lock",
+"back": "(v.) 鎖住\n#139"
+},
+{
+"pid": "w140",
+"front": "log sheet",
+"back": "(n.) 工作紀錄\n#140"
+},
+{
+"pid": "w141",
+"front": "lose",
+"back": "(v.) 遺失\n#141"
+},
+{
+"pid": "w142",
+"front": "lot",
+"back": "(n.) 批貨\n#142"
+},
+{
+"pid": "w143",
+"front": "machine",
+"back": "(n.) 機器\n#143"
+},
+{
+"pid": "w144",
+"front": "maintain",
+"back": "(v.) 維護\n#144"
+},
+{
+"pid": "w145",
+"front": "manual",
+"back": "(a.) 手動的\n#145"
+},
+{
+"pid": "w146",
+"front": "manufacture",
+"back": "(v.) 製造\n#146"
+},
+{
+"pid": "w147",
+"front": "mark",
+"back": "(n.) 記號\n#147"
+},
+{
+"pid": "w148",
+"front": "mask",
+"back": "(n.) 光罩、口罩\n#148"
+},
+{
+"pid": "w149",
+"front": "material",
+"back": "(n.) 原料\n#149"
+},
+{
+"pid": "w150",
+"front": "measure",
+"back": "(v.) 量測\n#150"
+},
+{
+"pid": "w151",
+"front": "mechanical",
+"back": "(a.) 機械的\n#151"
+},
+{
+"pid": "w152",
+"front": "merge",
+"back": "(v.) 合併\n#152"
+},
+{
+"pid": "w153",
+"front": "message",
+"back": "(n.) 訊息\n#153"
+},
+{
+"pid": "w154",
+"front": "metal",
+"back": "(n.) 金屬\n#154"
+},
+{
+"pid": "w155",
+"front": "miss-operation",
+"back": "(n.) 錯誤動作\n#155"
+},
+{
+"pid": "w156",
+"front": "monitor",
+"back": "(n.) 監視器、測機\n#156"
+},
+{
+"pid": "w157",
+"front": "monthly",
+"back": "(a.) 每月的\n#157"
+},
+{
+"pid": "w158",
+"front": "more",
+"back": "(a.) 更多的\n#158"
+},
+{
+"pid": "w159",
+"front": "move",
+"back": "(v.) 移動 (n.) 產出\n#159"
+},
+{
+"pid": "w160",
+"front": "new",
+"back": "(a.) 新的\n#160"
+},
+{
+"pid": "w161",
+"front": "normal",
+"back": "(a.) 正常的\n#161"
+},
+{
+"pid": "w162",
+"front": "note",
+"back": "(n.) 註解\n#162"
+},
+{
+"pid": "w163",
+"front": "notice",
+"back": "(n.) 通知\n#163"
+},
+{
+"pid": "w164",
+"front": "number",
+"back": "(n.) 號碼\n#164"
+},
+{
+"pid": "w165",
+"front": "office",
+"back": "(n.) 辦公室\n#165"
+},
+{
+"pid": "w166",
+"front": "off-line",
+"back": "(a.) 離線的\n#166"
+},
+{
+"pid": "w167",
+"front": "on time",
+"back": "(ph.) 準時\n#167"
+},
+{
+"pid": "w168",
+"front": "on-line",
+"back": "(a.) 在線的\n#168"
+},
+{
+"pid": "w169",
+"front": "operation",
+"back": "(n.) 操作\n#169"
+},
+{
+"pid": "w170",
+"front": "output",
+"back": "(n.) 輸出\n#170"
+},
+{
+"pid": "w171",
+"front": "oven",
+"back": "(n.) 烤箱\n#171"
+},
+{
+"pid": "w172",
+"front": "over time",
+"back": "(ph.) 加班\n#172"
+},
+{
+"pid": "w173",
+"front": "page",
+"back": "(n.) 頁數\n#173"
+},
+{
+"pid": "w174",
+"front": "paper",
+"back": "(n.) 紙張\n#174"
+},
+{
+"pid": "w175",
+"front": "parameter",
+"back": "(n.) 參數\n#175"
+},
+{
+"pid": "w176",
+"front": "part",
+"back": "(n.) 零件\n#176"
+},
+{
+"pid": "w177",
+"front": "particle",
+"back": "(n.) 微粒\n#177"
+},
+{
+"pid": "w178",
+"front": "pass",
+"back": "(v.) 合格\n#178"
+},
+{
+"pid": "w179",
+"front": "password",
+"back": "(n.) 密碼\n#179"
+},
+{
+"pid": "w180",
+"front": "perfect",
+"back": "(a.) 完美的\n#180"
+},
+{
+"pid": "w181",
+"front": "personal",
+"back": "(a.) 個人的\n#181"
+},
+{
+"pid": "w182",
+"front": "phase",
+"back": "(n.) 階段\n#182"
+},
+{
+"pid": "w183",
+"front": "photo",
+"back": "(n.) 相片\n#183"
+},
+{
+"pid": "w184",
+"front": "plan",
+"back": "(n.) 計劃\n#184"
+},
+{
+"pid": "w185",
+"front": "plus",
+"back": "(prep.) 加上\n#185"
+},
+{
+"pid": "w186",
+"front": "pod",
+"back": "(n.) 晶片傳送盒\n#186"
+},
+{
+"pid": "w187",
+"front": "point",
+"back": "(n.) 點\n#187"
+},
+{
+"pid": "w188",
+"front": "position",
+"back": "(n.) 位置\n#188"
+},
+{
+"pid": "w189",
+"front": "positive",
+"back": "(a.) 正向的\n#189"
+},
+{
+"pid": "w190",
+"front": "postpone",
+"back": "(v.) 延期\n#190"
+},
+{
+"pid": "w191",
+"front": "power",
+"back": "(n.) 力量\n#191"
+},
+{
+"pid": "w192",
+"front": "practice",
+"back": "(v.) 練習\n#192"
+},
+{
+"pid": "w193",
+"front": "prepare",
+"back": "(v.) 準備\n#193"
+},
+{
+"pid": "w194",
+"front": "press",
+"back": "(v.) 按下\n#194"
+},
+{
+"pid": "w195",
+"front": "pressure",
+"back": "(n.) 壓力\n#195"
+},
+{
+"pid": "w196",
+"front": "preview",
+"back": "(n.) 預覽\n#196"
+},
+{
+"pid": "w197",
+"front": "price",
+"back": "(n.) 價格\n#197"
+},
+{
+"pid": "w198",
+"front": "print",
+"back": "(n.) 列印\n#198"
+},
+{
+"pid": "w199",
+"front": "priority",
+"back": "(n.) 優先順序\n#199"
+},
+{
+"pid": "w200",
+"front": "process",
+"back": "(n.) 過程、流程\n#200"
+},
+{
+"pid": "w201",
+"front": "product",
+"back": "(n.) 產品\n#201"
+},
+{
+"pid": "w202",
+"front": "protect",
+"back": "(v.) 保護\n#202"
+},
+{
+"pid": "w203",
+"front": "purge",
+"back": "(v.) 清除\n#203"
+},
+{
+"pid": "w204",
+"front": "push",
+"back": "(v.) 推進\n#204"
+},
+{
+"pid": "w205",
+"front": "quality",
+"back": "(n.) 品質\n#205"
+},
+{
+"pid": "w206",
+"front": "quantity",
+"back": "(n.) 數量\n#206"
+},
+{
+"pid": "w207",
+"front": "rate",
+"back": "(n.) 比率\n#207"
+},
+{
+"pid": "w208",
+"front": "re-certify",
+"back": "(v.) 重新認證\n#208"
+},
+{
+"pid": "w209",
+"front": "recipe",
+"back": "(n.) 食譜、處方程式\n#209"
+},
+{
+"pid": "w210",
+"front": "record",
+"back": "(n.) 記錄\n#210"
+},
+{
+"pid": "w211",
+"front": "recover",
+"back": "(v.) 復機\n#211"
+},
+{
+"pid": "w212",
+"front": "release",
+"back": "(v.) 釋放\n#212"
+},
+{
+"pid": "w213",
+"front": "remark",
+"back": "(n.) 註記\n#213"
+},
+{
+"pid": "w214",
+"front": "remind",
+"back": "(v.) 提醒\n#214"
+},
+{
+"pid": "w215",
+"front": "remove",
+"back": "(v.) 移開\n#215"
+},
+{
+"pid": "w216",
+"front": "repair",
+"back": "(v.) 修理\n#216"
+},
+{
+"pid": "w217",
+"front": "report",
+"back": "(n.) 報告\n#217"
+},
+{
+"pid": "w218",
+"front": "reset",
+"back": "(v.) 重設\n#218"
+},
+{
+"pid": "w219",
+"front": "rework",
+"back": "(v.) 重做\n#219"
+},
+{
+"pid": "w220",
+"front": "route",
+"back": "(n.) 路線\n#220"
+},
+{
+"pid": "w221",
+"front": "rule",
+"back": "(n.) 規則\n#221"
+},
+{
+"pid": "w222",
+"front": "run",
+"back": "(v.) 運轉、跑\n#222"
+},
+{
+"pid": "w223",
+"front": "run-card",
+"back": "(n.) 流程卡\n#223"
+},
+{
+"pid": "w224",
+"front": "S.O.P / Standard Operating Procedures",
+"back": "(n.) 標準作業程序\n#224"
+},
+{
+"pid": "w225",
+"front": "safe",
+"back": "(a.) 安全的\n#225"
+},
+{
+"pid": "w226",
+"front": "same",
+"back": "(a.) 相同的\n#226"
+},
+{
+"pid": "w227",
+"front": "save",
+"back": "(v.) 儲存\n#227"
+},
+{
+"pid": "w228",
+"front": "scrap",
+"back": "(n.) 報廢\n#228"
+},
+{
+"pid": "w229",
+"front": "scratch",
+"back": "(v.) 刮傷\n#229"
+},
+{
+"pid": "w230",
+"front": "screen",
+"back": "(n.) 螢幕\n#230"
+},
+{
+"pid": "w231",
+"front": "select",
+"back": "(v.) 選擇\n#231"
+},
+{
+"pid": "w232",
+"front": "semiconductor",
+"back": "(n.) 半導體\n#232"
+},
+{
+"pid": "w233",
+"front": "service",
+"back": "(n.) 服務\n#233"
+},
+{
+"pid": "w234",
+"front": "sheet",
+"back": "(n.) 表單\n#234"
+},
+{
+"pid": "w235",
+"front": "shift",
+"back": "(n.) 班次\n#235"
+},
+{
+"pid": "w236",
+"front": "show",
+"back": "(v.) 顯示\n#236"
+},
+{
+"pid": "w237",
+"front": "shuttle",
+"back": "(n.) 接駁車\n#237"
+},
+{
+"pid": "w238",
+"front": "skip",
+"back": "(v.) 跳過\n#238"
+},
+{
+"pid": "w239",
+"front": "sorter",
+"back": "(n.) 排序機、分類機\n#239"
+},
+{
+"pid": "w240",
+"front": "source",
+"back": "(n.) 來源\n#240"
+},
+{
+"pid": "w241",
+"front": "Spec. / specification",
+"back": "(n.) 規格\n#241"
+},
+{
+"pid": "w242",
+"front": "speed",
+"back": "(n.) 速度\n#242"
+},
+{
+"pid": "w243",
+"front": "split",
+"back": "(n.) 分帳、分批\n#243"
+},
+{
+"pid": "w244",
+"front": "stage",
+"back": "(n.) 站別、階段\n#244"
+},
+{
+"pid": "w245",
+"front": "standard",
+"back": "(n.) 標準\n#245"
+},
+{
+"pid": "w246",
+"front": "standby",
+"back": "(n.) 等待\n#246"
+},
+{
+"pid": "w247",
+"front": "start",
+"back": "(n.) 啟動\n#247"
+},
+{
+"pid": "w248",
+"front": "station",
+"back": "(n.) 站\n#248"
+},
+{
+"pid": "w249",
+"front": "status",
+"back": "(n.) 狀況\n#249"
+},
+{
+"pid": "w250",
+"front": "step",
+"back": "(n.) 步驟\n#250"
+},
+{
+"pid": "w251",
+"front": "stocker",
+"back": "(n.) 儲存櫃\n#251"
+},
+{
+"pid": "w252",
+"front": "success",
+"back": "(n.) 成功\n#252"
+},
+{
+"pid": "w253",
+"front": "super",
+"back": "(a.) 超級的\n#253"
+},
+{
+"pid": "w254",
+"front": "super hot run",
+"back": "(n.) 超級急件\n#254"
+},
+{
+"pid": "w255",
+"front": "supervisor",
+"back": "(n.) 監督者\n#255"
+},
+{
+"pid": "w256",
+"front": "support",
+"back": "(n.) 支援\n#256"
+},
+{
+"pid": "w257",
+"front": "switch",
+"back": "(n.) 開關\n#257"
+},
+{
+"pid": "w258",
+"front": "system",
+"back": "(n.) 系統\n#258"
+},
+{
+"pid": "w259",
+"front": "tag",
+"back": "(n.) 標籤 (v.) 標註\n#259"
+},
+{
+"pid": "w260",
+"front": "take leave",
+"back": "(ph.) 請假\n#260"
+},
+{
+"pid": "w261",
+"front": "tape",
+"back": "(n.) 膠帶\n#261"
+},
+{
+"pid": "w262",
+"front": "target",
+"back": "(n.) 目標\n#262"
+},
+{
+"pid": "w263",
+"front": "technician",
+"back": "(n.) 技術員\n#263"
+},
+{
+"pid": "w264",
+"front": "telephone",
+"back": "(n.) 電話\n#264"
+},
+{
+"pid": "w265",
+"front": "temperature",
+"back": "(n.) 溫度\n#265"
+},
+{
+"pid": "w266",
+"front": "thickness",
+"back": "(n.) 厚度\n#266"
+},
+{
+"pid": "w267",
+"front": "thin film",
+"back": "(n.) 薄膜製程\n#267"
+},
+{
+"pid": "w268",
+"front": "time",
+"back": "(n.) 時間\n#268"
+},
+{
+"pid": "w269",
+"front": "title",
+"back": "(n.) 標題\n#269"
+},
+{
+"pid": "w270",
+"front": "top",
+"back": "(n.) 頂端\n#270"
+},
+{
+"pid": "w271",
+"front": "track",
+"back": "(v.) 追蹤\n#271"
+},
+{
+"pid": "w272",
+"front": "training",
+"back": "(n.) 訓練\n#272"
+},
+{
+"pid": "w273",
+"front": "trend",
+"back": "(n.) 趨勢\n#273"
+},
+{
+"pid": "w274",
+"front": "tune",
+"back": "(v.) 調整\n#274"
+},
+{
+"pid": "w275",
+"front": "turn rate",
+"back": "(n.) 週轉率\n#275"
+},
+{
+"pid": "w276",
+"front": "unload",
+"back": "(v.) 下貨、卸載\n#276"
+},
+{
+"pid": "w277",
+"front": "use",
+"back": "(v.) 使用\n#277"
+},
+{
+"pid": "w278",
+"front": "username",
+"back": "(n.) 使用者名稱\n#278"
+},
+{
+"pid": "w279",
+"front": "vendor",
+"back": "(n.) 廠商\n#279"
+},
+{
+"pid": "w280",
+"front": "view",
+"back": "(v.) 查看\n#280"
+},
+{
+"pid": "w281",
+"front": "wafer",
+"back": "(n.) 晶圓\n#281"
+},
+{
+"pid": "w282",
+"front": "waiting",
+"back": "(n.) 等待\n#282"
+},
+{
+"pid": "w283",
+"front": "warning",
+"back": "(n.) 警告\n#283"
+},
+{
+"pid": "w284",
+"front": "weekly",
+"back": "(adv.) 每週地\n#284"
+},
+{
+"pid": "w285",
+"front": "wet",
+"back": "(a.) 濕的\n#285"
+},
+{
+"pid": "w286",
+"front": "window",
+"back": "(n.) 視窗\n#286"
+},
+{
+"pid": "w287",
+"front": "yield",
+"back": "(n.) 良率\n#287"
+},
+{
+"pid": "w288",
+"front": "zero",
+"back": "(n.) 零\n#288"
+}
+]
+},
+{
 "preset": "dsp-ch8",
 "from": "dsp-1013",
 "name": "DSP CH8 相關（1013 meeting）",
