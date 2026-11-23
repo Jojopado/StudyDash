@@ -10,7 +10,9 @@ let ctx = null; // { openSheet, closeSheet, toast, render, sheetData }
 export function initDocs(c) { ctx = c; }
 
 // folder: 目前所在的資料夾 id（'' = 最上層）；filter: 'all'（照資料夾瀏覽）| 'recent' | 'c:課程id'
-export const docUi = { folder: '', filter: 'all', q: '' };
+// sel: 選取模式 Set(檔案 id)，null = 沒在選；換資料夾／篩選時保留，離開文件頁就清掉
+export const docUi = { folder: '', filter: 'all', q: '', sel: null };
+window.addEventListener('hashchange', () => { docUi.sel = null; });
 const uploads = new Map(); // 暫時 id → { name, done, total }
 
 const MB = 1024 * 1024;
@@ -121,13 +123,34 @@ function crumbs() {
     path.map((f, i) => `<span class="sep">›</span>${crumb(f.id, esc(f.name), i === path.length - 1)}`).join('')}</div>`;
 }
 
+// 選取模式：資料夾裡（含子資料夾）已選幾個
+function folderPicked(id) {
+  const ids = descendants(id);
+  const n = docs().filter(d => docUi.sel.has(d.id) && ids.has(folderOf(d))).length;
+  return n ? `<span class="badge">已選 ${n}</span>` : '';
+}
+
+function selBar(shown) {
+  const picked = docs().filter(d => docUi.sel.has(d.id));
+  const size = picked.reduce((s, d) => s + (d.size || 0), 0);
+  const allOn = shown.length && shown.every(d => docUi.sel.has(d.id));
+  return `<div class="sel-bar">
+      <b>已選 ${picked.length} 個</b>${picked.length ? `<span class="sub">${fmtSize(size)}</span>` : ''}
+      <button type="button" class="btn small" data-action="doc-sel-all" ${shown.length ? '' : 'disabled'}>${allOn ? '全不選' : '全選這頁'}</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn small danger" data-action="doc-sel-delete" ${picked.length ? '' : 'disabled'}>🗑 刪除</button>
+      <button type="button" class="btn small" data-action="doc-sel-exit">取消</button>
+    </div>`;
+}
+
 function folderRow(f) {
   const subs = subFolders(f.id).length, n = countIn(f.id);
   const meta = [subs ? `${subs} 個資料夾` : '', `${n} 個檔案`].filter(Boolean).join('、');
-  return `<div class="doc-row folder" data-action="doc-folder" data-id="${f.id}" draggable="true" data-drag-doc="folder:${f.id}" data-drop-folder="${f.id}">
+  return `<div class="doc-row folder" data-action="doc-folder" data-id="${f.id}" ${docUi.sel ? '' : `draggable="true" data-drag-doc="folder:${f.id}" data-drop-folder="${f.id}"`}>
     <div class="doc-ico">📁</div>
     <div class="doc-main"><div class="doc-name">${esc(f.name)}</div><div class="doc-meta sub"><span>${meta}</span></div></div>
-    <button type="button" class="btn ghost small" data-action="doc-folder-edit" data-id="${f.id}" aria-label="編輯資料夾">⋯</button>
+    ${docUi.sel ? `${folderPicked(f.id)}<span class="sub">›</span>`
+      : `<button type="button" class="btn ghost small" data-action="doc-folder-edit" data-id="${f.id}" aria-label="編輯資料夾">⋯</button>`}
   </div>`;
 }
 
@@ -144,10 +167,12 @@ function docRow(d, { showPath = false } = {}) {
     isCached(d.id) ? '<span title="已存在這台裝置，沒網路也能看">✓ 離線可看</span>' : '',
     !d.chunks ? '<span class="warn" title="加入時沒登入，只存在當初那台裝置">⚠ 沒上傳雲端</span>' : '',
   ].filter(Boolean).join('');
-  return `<div class="doc-row" data-action="doc-open" data-id="${d.id}" draggable="true" data-drag-doc="file:${d.id}">
+  const sel = docUi.sel, on = sel?.has(d.id);
+  return `<div class="doc-row ${on ? 'sel' : ''}" data-action="${sel ? 'doc-pick' : 'doc-open'}" data-id="${d.id}" ${sel ? '' : `draggable="true" data-drag-doc="file:${d.id}"`}>
+    ${sel ? `<span class="pick-box">${on ? '✓' : ''}</span>` : ''}
     <div class="doc-ico">${k.ico}</div>
     <div class="doc-main"><div class="doc-name">${esc(d.name)}</div><div class="doc-meta sub">${bits}</div></div>
-    <button type="button" class="btn ghost small" data-action="doc-edit" data-id="${d.id}" aria-label="編輯">⋯</button>
+    ${sel ? '' : `<button type="button" class="btn ghost small" data-action="doc-edit" data-id="${d.id}" aria-label="編輯">⋯</button>`}
   </div>`;
 }
 
@@ -165,14 +190,17 @@ export function renderDocs() {
   const q = docUi.q.trim().toLowerCase();
   const browsing = docUi.filter === 'all' && !q;
 
-  let body;
+  const sel = docUi.sel;
+  if (sel) for (const id of [...sel]) if (!findDoc(id)) sel.delete(id); // 別台刪掉的
+  let body, shown;
   if (browsing) {
     const subs = subFolders(docUi.folder), files = filesIn(docUi.folder);
+    shown = files;
     body = subs.map(folderRow).join('') + files.map(d => docRow(d)).join('')
       || `<div class="empty">${all.length || folderList().length ? '這個資料夾是空的。按「＋ 加入檔案」，或把檔案拖進來。'
         : '還沒有文件。按右上「＋ 加入檔案」（PDF、Word、PPT 都可以），電腦也可以直接把檔案拖進這個頁面。'}</div>`;
   } else {
-    let shown = all.filter(d => (docUi.filter !== 'recent' || d.openedAt)
+    shown = all.filter(d => (docUi.filter !== 'recent' || d.openedAt)
       && (!docUi.filter.startsWith('c:') || d.courseId === docUi.filter.slice(2))
       && (!q || d.name.toLowerCase().includes(q) || pathText(folderOf(d)).toLowerCase().includes(q)));
     shown = docUi.filter === 'recent' ? shown.sort((a, b) => b.openedAt - a.openedAt).slice(0, 15) : shown.sort(byName);
@@ -183,17 +211,20 @@ export function renderDocs() {
   }
 
   const local = Object.values(FC.index()).reduce((s, n) => s + n, 0);
+  const addBtn = sel ? '' : `<label class="btn small primary doc-add">＋ 加入檔案<input type="file" accept="${ACCEPT}" multiple data-doc-upload class="vh"></label>`;
+  const selBtn = !sel && all.length ? '<button type="button" class="btn small" data-action="doc-sel-start">☑ 選取</button>' : '';
   return `<div class="page-head"><h1>文件</h1>
       <div class="row">
         <form data-form="doc-search" class="memo-search"><input type="text" name="q" value="${esc(docUi.q)}" placeholder="🔍 搜尋" autocomplete="off"></form>
       </div></div>
     ${all.length || folderList().length ? `<div class="chips doc-filters">${filterChips()}</div>` : ''}
+    ${sel ? selBar(shown) : ''}
     <section class="card doc-list">
       ${browsing ? `<div class="doc-head">${crumbs()}<span class="spacer"></span>
-        <button type="button" class="btn small" data-action="doc-folder-new">＋ 資料夾</button>
-        <label class="btn small primary doc-add">＋ 加入檔案<input type="file" accept="${ACCEPT}" multiple data-doc-upload class="vh"></label></div>`
+        ${selBtn}${sel ? '' : '<button type="button" class="btn small" data-action="doc-folder-new">＋ 資料夾</button>'}
+        ${addBtn}</div>`
         : `<div class="doc-head"><span class="sub">${q ? `搜尋「${esc(docUi.q)}」` : docUi.filter === 'recent' ? '最近打開的' : `${esc(courseOf(docUi.filter.slice(2))?.name || '')} 的所有檔案`}</span><span class="spacer"></span>
-        <label class="btn small primary doc-add">＋ 加入檔案<input type="file" accept="${ACCEPT}" multiple data-doc-upload class="vh"></label></div>`}
+        ${selBtn}${addBtn}</div>`}
       ${uploads.size ? `<div class="doc-ups">${uploadRows()}</div>` : ''}
       ${body}
     </section>
@@ -464,6 +495,36 @@ export const docActions = {
     ctx.toast('資料夾已刪除');
   },
   'doc-open': el => { const d = findDoc(el.dataset.id); if (d) openReader(d); },
+  'doc-sel-start': () => { docUi.sel = new Set(); ctx.render(); },
+  'doc-sel-exit': () => { docUi.sel = null; ctx.render(); },
+  'doc-pick': el => {
+    const id = el.dataset.id;
+    if (!docUi.sel.delete(id)) docUi.sel.add(id);
+    ctx.render();
+  },
+  // 只算目前畫面上看得到的檔案
+  'doc-sel-all': () => {
+    const ids = [...document.querySelectorAll('[data-action="doc-pick"]')].map(e => e.dataset.id);
+    const allOn = ids.every(id => docUi.sel.has(id));
+    for (const id of ids) allOn ? docUi.sel.delete(id) : docUi.sel.add(id);
+    ctx.render();
+  },
+  'doc-sel-delete': async () => {
+    const list = docs().filter(d => docUi.sel.has(d.id)).sort(byName);
+    if (!list.length) return;
+    const names = list.slice(0, 8).map(d => `・${d.name}`).join('\n') + (list.length > 8 ? `\n…還有 ${list.length - 8} 個` : '');
+    if (!confirm(`刪除這 ${list.length} 個檔案？手機和電腦都會刪掉，救不回來。\n\n${names}`)) return;
+    docUi.sel = null;
+    for (const d of list) removeDoc('docs', d.id);
+    ctx.render();
+    ctx.toast(`已刪除 ${list.length} 個檔案`);
+    // 檔案內容一個一個清，不要一次送出太多請求；某個失敗不影響其他
+    for (const d of list) {
+      await FC.delIndexed(d.id).catch(() => {});
+      await deleteChunks(d.id, d.chunks).catch(e => console.error(e));
+    }
+    ctx.render(); // 更新「這台裝置存了多少」
+  },
   'doc-edit': el => { const d = findDoc(el.dataset.id); if (d) openEdit(d); },
   'doc-del': async () => {
     const d = ctx.sheetData();
